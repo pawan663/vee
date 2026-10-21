@@ -1175,11 +1175,16 @@ export async function aggregateAllLiveData() {
 
   const allFreshJobs = deduplicateJobs(rawJobs);
 
-  // Ensure 100% of jobs have auto-generated video guidance links
+  // Ensure 100% of jobs have auto-generated video guidance links directly to your official channel (@vacancyeraeducation)
   allFreshJobs.forEach((job) => {
-    if (!job.videoUrl) {
-      job.videoUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(job.title + ' vacancy form kaise bhare syllabus')}`;
-      job.videoTitle = `${job.title} - पूरी जानकारी व आवेदन प्रक्रिया`;
+    if (!job.videoUrl || job.videoUrl.includes('youtube.com/results')) {
+      const cleanSearch = (job.title || '')
+        .replace(/2026|Recruitment|Bharti|Online Form|\d+[\s,]*Posts|\d+[\s,]*Vacanc(y|ies)/gi, '')
+        .replace(/[^\w\s\u0900-\u097F]/gi, ' ')
+        .trim();
+      job.videoUrl = `https://www.youtube.com/@vacancyeraeducation/search?query=${encodeURIComponent(cleanSearch || job.title)}`;
+      job.videoTitle = `${job.title} - Vacancy Era Education Analysis`;
+      job.channel = '@vacancyeraeducation';
     }
   });
 
