@@ -85,16 +85,71 @@ export function enrichJobDetails(title, qualType) {
     videoId = "yLXb10KOm6c";
     videoUrl = "https://youtu.be/yLXb10KOm6c";
     videoTitle = "Oil India नई भर्ती 2026🚨Executive Vacancy | Full Details";
-  } else if (/railway|rrb|rrc|\bntpc\b|group d/i.test(t)) dept = "Ministry of Railways (RRB / RRC)";
-  else if (/\bssc\b|\bcgl\b|\bchsl\b|\bmts\b|havaldar|\bgd\b/i.test(t)) dept = "Staff Selection Commission (SSC)";
-  else if (/\bupsc\b|\bnda\b|\bcds\b|civil service/i.test(t)) dept = "Union Public Service Commission (UPSC)";
-  else if (/bank|ibps|\bsbi\b|\brbi\b|\bpnb\b|canara|uco/i.test(t)) dept = "Banking Recruitment Board (IBPS / SBI)";
-  else if (/police|constable|\bsi\b|daroga|sub[\s-]?inspector|सिपाही|दरोगा/i.test(t)) dept = "State Police Recruitment Board";
-  else if (/army|navy|airforce|defence|crpf|bsf|cisf|assam rifles/i.test(t)) dept = "Indian Armed & Paramilitary Forces";
-  else if (/teacher|\btet\b|\bprt\b|\btgt\b|\bpgt\b|upessc/i.test(t)) dept = "Education Dept / School Selection Board";
-  else if (/post office|\bgds\b|\bdak\b/i.test(t)) dept = "Department of Posts (India Post)";
-  else if (/bhel|ongc|sail|isro|drdo|mpesb/i.test(t)) dept = "Govt PSU / Engineering Board";
-  else {
+  } else if (/itbp|indo[\s-]?tibetan/i.test(t)) {
+    dept = "Indo-Tibetan Border Police (ITBP, MHA)";
+  } else if (/\bbsf\b|border security/i.test(t)) {
+    dept = "Border Security Force (BSF, MHA)";
+  } else if (/\bcrpf\b|central reserve police/i.test(t)) {
+    dept = "Central Reserve Police Force (CRPF, MHA)";
+  } else if (/\bcisf\b|central industrial security/i.test(t)) {
+    dept = "Central Industrial Security Force (CISF, MHA)";
+  } else if (/\bssb\b|sashastra seema/i.test(t)) {
+    dept = "Sashastra Seema Bal (SSB, MHA)";
+  } else if (/assam rifles/i.test(t)) {
+    dept = "Assam Rifles (Paramilitary)";
+  } else if (/\brpf\b|railway protection force/i.test(t)) {
+    dept = "Railway Protection Force (RPF)";
+  } else if (/delhi police/i.test(t)) {
+    dept = "Delhi Police";
+  } else if (/coast guard|icg/i.test(t)) {
+    dept = "Indian Coast Guard";
+  } else if (/indian army|\barmy\b/i.test(t)) {
+    dept = "Indian Army (Defence Forces)";
+  } else if (/indian navy|\bnavy\b/i.test(t)) {
+    dept = "Indian Navy (Defence Forces)";
+  } else if (/air force|iaf|airforce/i.test(t)) {
+    dept = "Indian Air Force (IAF)";
+  } else if (/\blic\b|life insurance/i.test(t)) {
+    dept = "Life Insurance Corporation of India (LIC)";
+  } else if (/\bntpc\b/i.test(t)) {
+    dept = "NTPC Limited (Govt PSU)";
+  } else if (/\bbhel\b/i.test(t)) {
+    dept = "Bharat Heavy Electricals Limited (BHEL)";
+  } else if (/\bongc\b/i.test(t)) {
+    dept = "Oil and Natural Gas Corporation (ONGC)";
+  } else if (/coal india|\bcil\b/i.test(t)) {
+    dept = "Coal India Limited (Govt PSU)";
+  } else if (/\bdrdo\b/i.test(t)) {
+    dept = "Defence Research & Development Organisation (DRDO)";
+  } else if (/\bisro\b/i.test(t)) {
+    dept = "Indian Space Research Organisation (ISRO)";
+  } else if (/\bdmrc\b|delhi metro/i.test(t)) {
+    dept = "Delhi Metro Rail Corporation (DMRC)";
+  } else if (/\bnmdc\b/i.test(t)) {
+    dept = "National Mineral Development Corp (NMDC)";
+  } else if (/\bncl\b/i.test(t)) {
+    dept = "Northern Coalfields Limited (NCL)";
+  } else if (/\bnhai\b/i.test(t)) {
+    dept = "National Highways Authority of India (NHAI)";
+  } else if (/\bcwc\b|warehousing/i.test(t)) {
+    dept = "Central Warehousing Corporation (CWC)";
+  } else if (/\birel\b/i.test(t)) {
+    dept = "IREL (India) Limited (Govt PSU)";
+  } else if (/railway|rrb|rrc|group d/i.test(t)) {
+    dept = "Ministry of Railways (RRB / RRC)";
+  } else if (/\bssc\b|\bcgl\b|\bchsl\b|\bmts\b|havaldar|\bgd\b/i.test(t)) {
+    dept = "Staff Selection Commission (SSC)";
+  } else if (/\bupsc\b|\bnda\b|\bcds\b|civil service/i.test(t)) {
+    dept = "Union Public Service Commission (UPSC)";
+  } else if (/bank|ibps|\bsbi\b|\brbi\b|\bpnb\b|canara|uco/i.test(t)) {
+    dept = "Banking Recruitment Board (IBPS / SBI)";
+  } else if (/police|constable|\bsi\b|daroga|sub[\s-]?inspector|सिपाही|दरोगा/i.test(t)) {
+    dept = "State Police Recruitment Board";
+  } else if (/teacher|\btet\b|\bprt\b|\btgt\b|\bpgt\b|upessc/i.test(t)) {
+    dept = "Education Dept / School Selection Board";
+  } else if (/post office|\bgds\b|\bdak\b/i.test(t)) {
+    dept = "Department of Posts (India Post)";
+  } else {
     const firstWord = title.trim().split(/\s+/)[0];
     if (firstWord && firstWord.length > 2 && !/हादसा|सड़क|गोली|घायल|अस्पताल|hospital|joint|road|brother|sister|agra/i.test(firstWord)) {
       dept = `${firstWord} Board / Dept`;
@@ -203,9 +258,28 @@ function getOfficialPortalUrl(dept, title, articleLink) {
   if (/crpf/i.test(d) || /crpf/i.test(t)) return "https://rect.crpf.gov.in/";
   if (/bsf/i.test(d) || /bsf/i.test(t)) return "https://rectt.bsf.gov.in/";
   if (/itbp/i.test(d) || /itbp/i.test(t)) return "https://recruitment.itbpolice.nic.in/";
+  if (/ssb/i.test(d) || /ssb/i.test(t)) return "https://ssbrectt.gov.in/";
+  if (/assam rifles/i.test(d) || /assam rifles/i.test(t)) return "https://www.assamrifles.gov.in/";
+  if (/rpf/i.test(d) || /rpf/i.test(t)) return "https://rpf.indianrailways.gov.in/";
   if (/army/i.test(d) || /army/i.test(t)) return "https://joinindianarmy.nic.in/";
   if (/navy/i.test(d) || /navy/i.test(t)) return "https://www.joinindiannavy.gov.in/";
   if (/air force|iaf/i.test(d) || /air force|iaf/i.test(t)) return "https://agnipathvayu.cdac.in/";
+  if (/coast guard|icg/i.test(d) || /coast guard|icg/i.test(t)) return "https://joinindiancoastguard.cdac.in/";
+  if (/delhi police/i.test(d) || /delhi police/i.test(t)) return "https://delhipolice.gov.in/";
+  if (/up police|upprpb/i.test(d) || /up police/i.test(t)) return "https://uppbpb.gov.in/";
+  if (/bihar police|csbc/i.test(d) || /bihar police/i.test(t)) return "https://csbc.bih.nic.in/";
+  if (/rajasthan police/i.test(d) || /rajasthan police/i.test(t)) return "https://police.rajasthan.gov.in/";
+  if (/mp police|mpesb/i.test(d) || /mp police/i.test(t)) return "https://esb.mp.gov.in/";
+  if (/haryana police|hssc/i.test(d) || /haryana police/i.test(t)) return "https://hssc.gov.in/";
+  if (/lic\b|life insurance/i.test(d) || /\blic\b|life insurance/i.test(t)) return "https://licindia.in/careers";
+  if (/ntpc/i.test(d) || /ntpc/i.test(t)) return "https://careers.ntpc.co.in/";
+  if (/coal india/i.test(d) || /coal india/i.test(t)) return "https://www.coalindia.in/";
+  if (/dmrc|delhi metro/i.test(d) || /dmrc|delhi metro/i.test(t)) return "https://www.delhimetrorail.com/corporate/careers";
+  if (/nmdc/i.test(d) || /nmdc/i.test(t)) return "https://www.nmdc.co.in/careers";
+  if (/ncl/i.test(d) || /ncl/i.test(t)) return "https://nclcil.in/";
+  if (/nhai/i.test(d) || /nhai/i.test(t)) return "https://nhai.gov.in/";
+  if (/rites/i.test(d) || /rites/i.test(t)) return "https://www.rites.com/Career";
+  if (/post office|india post|gds/i.test(d) || /post office|india post|gds/i.test(t)) return "https://indiapostgdsonline.gov.in/";
   if (/ibps/i.test(d) || /ibps/i.test(t)) return "https://www.ibps.in/";
   if (/sbi/i.test(d) || /sbi/i.test(t)) return "https://sbi.co.in/web/careers";
   if (/cwc/i.test(d) || /warehousing/i.test(t)) return "https://cewacor.nic.in/";
@@ -1218,25 +1292,57 @@ export async function aggregateAllLiveData() {
   const allFreshJobs = deduplicateJobs(rawJobs);
 
   // Automatically match jobs with real videos from your channel (@vacancyeraeducation)
+  // STRICT: Only assign videoId if the channel video is a 100% verified match for that organization/topic
+  const orgVideoRules = [
+    { name: 'NTPC', re: /\bntpc\b/i },
+    { name: 'ISRO', re: /\bisro\b|\bvssc\b|\bursc\b/i },
+    { name: 'EIL', re: /\beil\b|engineers india/i },
+    { name: 'Coal India', re: /coal india/i },
+    { name: 'ONGC', re: /\bongc\b/i },
+    { name: 'Hero', re: /hero motocorp|hero company/i },
+    { name: 'DMRC', re: /\bdmrc\b|delhi metro/i },
+    { name: 'Oil India', re: /oil india/i },
+    { name: 'NMDC', re: /\bnmdc\b/i },
+    { name: 'LIC', re: /\blic\b|life insurance/i },
+    { name: 'NCL', re: /\bncl\b|northern coalfields/i },
+    { name: 'DRDO', re: /\bdrdo\b/i },
+    { name: 'BHEL', re: /\bbhel\b/i },
+    { name: 'NHAI', re: /\bnhai\b/i },
+    { name: 'RITES', re: /\brites\b/i }
+  ];
+
   const allVideos = Array.isArray(channelVideos) ? channelVideos : [];
   allFreshJobs.forEach((job) => {
-    const jobText = `${job.title || ''} ${job.dept || ''}`.toLowerCase();
-    const matchedVid = allVideos.find((v) => {
-      const vTitle = (v.title || '').toLowerCase();
-      const keywords = ['isro', 'ntpc', 'bhel', 'ongc', 'coal india', 'hero', 'dmrc', 'oil india', 'lic', 'drdo', 'nmdc', 'ncl', 'nhai', 'railway', 'ssc', 'police'];
-      return keywords.some(k => jobText.includes(k) && vTitle.includes(k));
-    });
+    const jobText = `${job.title || ''} ${job.dept || ''}`;
+
+    // Ensure official website portal link is populated for all jobs
+    if (!job.website) {
+      job.website = getOfficialPortalUrl(job.dept, job.title, job.pdfUrl || job.applyUrl);
+    }
+
+    let matchedVid = null;
+    for (const rule of orgVideoRules) {
+      if (rule.re.test(jobText)) {
+        matchedVid = allVideos.find(v => rule.re.test(v.title || ''));
+        if (matchedVid) break;
+      }
+    }
 
     if (matchedVid) {
       job.videoId = matchedVid.videoId;
       job.videoUrl = `https://youtu.be/${matchedVid.videoId}`;
       job.videoTitle = matchedVid.title;
       job.channel = '@vacancyeraeducation';
-    } else if (!job.videoUrl || job.videoUrl.includes('youtube.com/results')) {
+    } else {
+      // NEVER assign an unrelated video! Set videoId to null so official channel search card renders
+      job.videoId = null;
       const cleanSearch = (job.title || '')
         .replace(/2026|Recruitment|Bharti|Online Form|\d+[\s,]*Posts|\d+[\s,]*Vacanc(y|ies)/gi, '')
         .replace(/[^\w\s\u0900-\u097F]/gi, ' ')
-        .trim();
+        .trim()
+        .split(/\s+/)
+        .slice(0, 4)
+        .join(' ');
       job.videoUrl = `https://www.youtube.com/@vacancyeraeducation/search?query=${encodeURIComponent(cleanSearch || job.title)}`;
       job.videoTitle = `${job.title} - Vacancy Era Education Analysis`;
       job.channel = '@vacancyeraeducation';

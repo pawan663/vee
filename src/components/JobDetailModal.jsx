@@ -7,6 +7,18 @@ export default function JobDetailModal({ isOpen, job, onClose, onOpenApply, onOp
 
   const isDirectPdf = job.pdfUrl && job.pdfUrl.toLowerCase().includes('.pdf');
 
+  const formatQualification = (q) => {
+    if (!q) return '10th / 12th / ITI / Graduate (As per Official Notification)';
+    const clean = String(q).trim();
+    if (/^12th$/i.test(clean)) return '12th Pass (Intermediate / 10+2) in any stream from a recognized Board';
+    if (/^10th$/i.test(clean)) return '10th Pass (Matriculation) from a recognized Board';
+    if (/^iti$/i.test(clean)) return 'ITI Pass in relevant Trade (NCVT / SCVT recognized)';
+    if (/^diploma$/i.test(clean)) return 'Polytechnic Diploma in relevant Engineering / Technical branch';
+    if (/^graduate$/i.test(clean)) return 'Graduation / Bachelor\'s Degree in any discipline from a recognized University';
+    if (/^b\.?tech$/i.test(clean)) return 'B.Tech / B.E Degree in relevant Engineering discipline';
+    return clean;
+  };
+
   // Valid official apply URL fallback logic
   const validApplyUrl = (job.applyUrl && job.applyUrl.startsWith('http'))
     ? job.applyUrl
@@ -51,12 +63,10 @@ export default function JobDetailModal({ isOpen, job, onClose, onOpenApply, onOp
 
   const matchedVideo = getJobVideo(job);
 
-  // Channel video link logic: specific video or direct Vacancy Era Education channel search
+  // Channel video link logic: verified video or direct Vacancy Era Education channel search
   const getYoutubeUrl = () => {
     if (matchedVideo?.videoUrl) return matchedVideo.videoUrl;
     if (matchedVideo?.videoId) return `https://youtu.be/${matchedVideo.videoId}`;
-    if (job.videoUrl) return job.videoUrl;
-    if (job.videoId) return `https://youtu.be/${job.videoId}`;
     const cleanTopic = (job.title || '')
       .replace(/2026|Recruitment|Bharti|Online Form|\d+[\s,]*Posts|\d+[\s,]*Vacanc(y|ies)/gi, '')
       .replace(/[^\w\s\u0900-\u097F]/gi, ' ')
@@ -64,7 +74,7 @@ export default function JobDetailModal({ isOpen, job, onClose, onOpenApply, onOp
       .split(/\s+/)
       .slice(0, 4)
       .join(' ');
-    return `https://www.youtube.com/@vacancyeraeducation/search?query=${encodeURIComponent(cleanTopic || 'job notification')}`;
+    return `https://www.youtube.com/@vacancyeraeducation/search?query=${encodeURIComponent(cleanTopic || job.title)}`;
   };
 
   const handleShareWhatsApp = () => {
@@ -148,9 +158,18 @@ export default function JobDetailModal({ isOpen, job, onClose, onOpenApply, onOp
 
           {/* Section: Eligibility / Qualification */}
           <div className="detail-section mb-3">
-            <h4 className="detail-heading">🎓 {t.eduQualification || 'Educational Qualification'}</h4>
-            <div className="detail-box detail-box-qual">
-              <p className="text-sm font-semibold">{job.qualification || '10th / 12th / ITI / Graduate'}</p>
+            <div className="flex-between mb-1.5">
+              <h4 className="detail-heading flex-center gap-1.5" style={{ margin: 0, fontWeight: 700, fontSize: '0.85rem' }}>
+                <span>🎓</span> {t.eduQualification || 'Educational Qualification'}
+              </h4>
+              <span className="badge-live-sm text-3xs font-bold px-2 py-0.5 rounded" style={{ background: '#EDE9FE', color: '#7C3AED' }}>
+                {job.type ? `${job.type} Pass` : 'Eligibility'}
+              </span>
+            </div>
+            <div className="detail-box detail-box-qual p-3 rounded-lg" style={{ background: '#F5F3FF', border: '1px solid #DDD6FE' }}>
+              <p className="text-xs font-semibold m-0 leading-relaxed" style={{ color: '#5B21B6' }}>
+                {formatQualification(job.qualification)}
+              </p>
             </div>
           </div>
 
@@ -230,7 +249,7 @@ export default function JobDetailModal({ isOpen, job, onClose, onOpenApply, onOp
 
               {/* 3. Official Department / Company Website */}
               <a
-                href={job.website || `https://www.google.com/search?q=${encodeURIComponent((job.dept || '') + ' careers jobs')}`}
+                href={job.website || job.fallbackUrl || `https://www.google.com/search?q=${encodeURIComponent((job.dept || '') + ' official portal website')}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="official-link-row flex-between p-2.5 rounded"
