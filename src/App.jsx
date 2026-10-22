@@ -185,10 +185,29 @@ export default function App() {
   const syncLiveData = async (isManual = false) => {
     try {
       if (isManual) setIsSyncing(true);
-      const res = await fetch(`/live_data.json?t=${Date.now()}`);
-      if (res.ok) {
-        const data = await res.json();
-        const currentHash = `${data.timestamp || ''}_${data.jobs?.length || 0}_${data.news?.length || 0}`;
+
+      // Multi-Layer Cloud Live Sync:
+      // 1. First fetch real-time from GitHub raw CDN (updates 0s after GitHub Action runs)
+      // 2. Fallback to Netlify local endpoint
+      let data = null;
+      try {
+        const ghRes = await fetch(`https://raw.githubusercontent.com/pawan663/vee/main/public/live_data.json?t=${Date.now()}`);
+        if (ghRes.ok) {
+          data = await ghRes.json();
+        }
+      } catch (err) {
+        // Fallback to local
+      }
+
+      if (!data) {
+        const localRes = await fetch(`/live_data.json?t=${Date.now()}`);
+        if (localRes.ok) {
+          data = await localRes.json();
+        }
+      }
+
+      if (data && data.jobs && Array.isArray(data.jobs)) {
+        const currentHash = `${data.lastUpdated || ''}_${data.jobs?.length || 0}_${data.news?.length || 0}`;
 
         // Skip heavy deduplication & state updates if data has not changed
         if (currentHash === lastSyncHashRef.current && !isManual) {
@@ -197,20 +216,17 @@ export default function App() {
         lastSyncHashRef.current = currentHash;
 
         const today = new Date().toISOString().split('T')[0];
+        const activeIncoming = data.jobs.filter((j) => !j.lastDate || j.lastDate >= today);
 
-        if (data.jobs && data.jobs.length > 0) {
-          setJobs((prevJobs) => {
-            const activeExisting = prevJobs.filter((j) => !j.lastDate || j.lastDate >= today);
-            const activeIncoming = data.jobs.filter((j) => !j.lastDate || j.lastDate >= today);
-            return deduplicateJobs([...activeIncoming, ...activeExisting]);
-          });
+        if (activeIncoming.length > 0) {
+          setJobs((prevJobs) => deduplicateJobs([...activeIncoming, ...prevJobs]));
         }
 
-        if (data.news && data.news.length > 0) {
+        if (data.news && Array.isArray(data.news) && data.news.length > 0) {
           setLiveNews((prevNews) => deduplicateNews([...data.news, ...prevNews]));
         }
 
-        setLastSyncedTime(new Date());
+        setLastSyncedTime(new Date(data.lastUpdated || Date.now()));
       }
     } catch (e) {
       console.warn("Live sync error", e);

@@ -2,8 +2,8 @@ name: VEE 24x7 Multi-Portal Cloud Auto-Sync
 
 on:
   schedule:
-    # Runs automatically 4 times a day (every 6 hours) in the cloud
-    - cron: '0 */6 * * *'
+    # Runs automatically 6 times a day (every 4 hours) in the cloud
+    - cron: '0 */4 * * *'
   workflow_dispatch: # Allows 1-click manual sync anytime from GitHub UI
 
 permissions:
@@ -36,6 +36,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "No new updates found. Skipping commit."
           else
-            git commit -m "🤖 VEE 24x7 Auto-Sync: $(date +'%d-%b-%Y %H:%M UTC') - FreeJobAlert, SarkariResult & Current Affairs [skip ci]"
+            git commit -m "🤖 VEE 24x7 Auto-Sync: $(date +'%d-%b-%Y %H:%M UTC') - FreeJobAlert, SarkariResult & Current Affairs"
             git push
           fi
