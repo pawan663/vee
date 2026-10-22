@@ -22,7 +22,7 @@ import { initialShorts } from './data/initialShorts';
 import { initialBooks, initialMocks } from './data/initialBooks';
 import liveScrapedData from './data/liveScrapedData.json';
 import { deduplicateJobs, deduplicateNews } from './utils/deduplicate';
-import { isJobExpired } from './utils/dateExpiry';
+import { isJobExpired, isValidRecruitmentJob } from './utils/dateExpiry';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('jobs');
@@ -58,7 +58,7 @@ export default function App() {
   const [jobs, setJobs] = useState(() => {
     const today = new Date().toISOString().split('T')[0];
     const liveJobs = (liveScrapedData && Array.isArray(liveScrapedData.jobs)) ? liveScrapedData.jobs : [];
-    const allCandidates = [...liveJobs, ...initialJobs].filter((j) => !isJobExpired(j.lastDate, today));
+    const allCandidates = [...liveJobs, ...initialJobs].filter((j) => !isJobExpired(j.lastDate, today) && isValidRecruitmentJob(j));
     return deduplicateJobs(allCandidates);
   });
 
@@ -218,11 +218,11 @@ export default function App() {
         lastSyncHashRef.current = currentHash;
 
         const today = new Date().toISOString().split('T')[0];
-        const activeIncoming = data.jobs.filter((j) => !isJobExpired(j.lastDate, today));
+        const activeIncoming = data.jobs.filter((j) => !isJobExpired(j.lastDate, today) && isValidRecruitmentJob(j));
 
         if (activeIncoming.length > 0) {
           setJobs((prevJobs) => {
-            const unexpiredPrev = prevJobs.filter((j) => !isJobExpired(j.lastDate, today));
+            const unexpiredPrev = prevJobs.filter((j) => !isJobExpired(j.lastDate, today) && isValidRecruitmentJob(j));
             return deduplicateJobs([...activeIncoming, ...unexpiredPrev]);
           });
         }

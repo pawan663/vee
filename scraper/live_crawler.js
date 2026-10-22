@@ -4,7 +4,7 @@ import path from 'path';
 import { deduplicateJobs, deduplicateNews } from './deduplicate.js';
 
 const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
-import { isJobExpired } from './dateExpiry.js';
+import { isJobExpired, isValidRecruitmentJob } from './dateExpiry.js';
 
 async function fetchHtml(url) {
   try {
@@ -96,7 +96,11 @@ export function enrichJobDetails(title, qualType) {
   else if (/bhel|ongc|sail|isro|drdo|mpesb/i.test(t)) dept = "Govt PSU / Engineering Board";
   else {
     const firstWord = title.trim().split(/\s+/)[0];
-    if (firstWord && firstWord.length > 2) dept = `${firstWord} Recruitment Cell`;
+    if (firstWord && firstWord.length > 2 && !/हादसा|सड़क|गोली|घायल|अस्पताल|hospital|joint|road|brother|sister|agra/i.test(firstWord)) {
+      dept = `${firstWord} Board / Dept`;
+    } else {
+      dept = "Government Department";
+    }
   }
 
   // 3. Realistic Salary based on type & dept
@@ -439,40 +443,10 @@ export async function scrapeJagranJosh() {
         timeAgo: "Live Update",
         tag: "Jagran Alert"
       });
-
-      // If headline mentions recruitment/posts, also create a Job entry
-      if (jobs.length < 15 && /recruitment|bharti|posts|vacancy|भर्ती|पदों/i.test(headline)) {
-        const q = detectQualification(headline);
-        const details = enrichJobDetails(headline, q.type);
-        jobs.push({
-          id: `jj-job-${Date.now()}-${i}`,
-          title: headline,
-          dept: details.dept,
-          posts: details.posts,
-          qualification: q.qual,
-          state: "All India / State Wise",
-          category: "Govt",
-          type: q.type,
-          lastDate: new Date(Date.now() + 25 * 86400000).toISOString().split('T')[0],
-          ageLimit: details.ageLimit,
-          fee: details.fee,
-          pdfUrl: href,
-          applyUrl: href,
-          source: "Jagran Josh",
-          isNew: true,
-          isClosingSoon: false,
-          isComingSoon: true,
-          status: 'COMING_SOON',
-          isNewsArticle: true,
-          viewsCount: Math.floor(15000 + Math.random() * 20000),
-          salary: details.salary,
-          selectionProcess: details.selectionProcess
-        });
-      }
     }
   });
 
-  return { news, jobs };
+  return { news, jobs: [] };
 }
 
 // 3. Scrape Navbharat Times Jobs
@@ -498,38 +472,9 @@ export async function scrapeNavbharatTimes() {
         timeAgo: "NBT Live",
         tag: "NBT News"
       });
-
-      if (jobs.length < 8 && /भर्ती|पद|नौकरी|वैकेंसी|recruitment|vacancy|posts/i.test(title)) {
-        const q = detectQualification(title);
-        const details = enrichJobDetails(title, q.type);
-        jobs.push({
-          id: `nbt-job-${Date.now()}-${i}`,
-          title: title,
-          dept: details.dept,
-          posts: details.posts,
-          qualification: q.qual,
-          state: "All India / State",
-          category: "Govt",
-          type: q.type,
-          lastDate: new Date(Date.now() + 25 * 86400000).toISOString().split('T')[0],
-          ageLimit: details.ageLimit,
-          fee: details.fee,
-          pdfUrl: href,
-          applyUrl: href,
-          source: "Navbharat Times",
-          isNew: true,
-          isClosingSoon: false,
-          isComingSoon: true,
-          status: 'COMING_SOON',
-          isNewsArticle: true,
-          viewsCount: Math.floor(16000 + Math.random() * 21000),
-          salary: details.salary,
-          selectionProcess: details.selectionProcess
-        });
-      }
     }
   });
-  return { news, jobs };
+  return { news, jobs: [] };
 }
 
 // 4. Scrape Live Hindustan Career
@@ -558,38 +503,9 @@ export async function scrapeLiveHindustan() {
         timeAgo: "Hindustan Alert",
         tag: "Career News"
       });
-
-      if (jobs.length < 8 && /भर्ती|पद|नौकरी|वैकेंसी|recruitment|vacancy|posts/i.test(title)) {
-        const q = detectQualification(title);
-        const details = enrichJobDetails(title, q.type);
-        jobs.push({
-          id: `lh-job-${Date.now()}-${i}`,
-          title: title,
-          dept: details.dept,
-          posts: details.posts,
-          qualification: q.qual,
-          state: "All India / State",
-          category: "Govt",
-          type: q.type,
-          lastDate: new Date(Date.now() + 25 * 86400000).toISOString().split('T')[0],
-          ageLimit: details.ageLimit,
-          fee: details.fee,
-          pdfUrl: href,
-          applyUrl: href,
-          source: "Live Hindustan",
-          isNew: true,
-          isClosingSoon: false,
-          isComingSoon: true,
-          status: 'COMING_SOON',
-          isNewsArticle: true,
-          viewsCount: Math.floor(18000 + Math.random() * 24000),
-          salary: details.salary,
-          selectionProcess: details.selectionProcess
-        });
-      }
     }
   });
-  return { news, jobs };
+  return { news, jobs: [] };
 }
 
 // 5. Scrape Dainik Bhaskar Career RSS
@@ -614,38 +530,9 @@ export async function scrapeDainikBhaskar() {
         timeAgo: "Bhaskar Alert",
         tag: "Dainik Bhaskar"
       });
-
-      if (jobs.length < 10 && /भर्ती|पद|नौकरी|वैकेंसी|recruitment/i.test(title)) {
-        const q = detectQualification(title);
-        const details = enrichJobDetails(title, q.type);
-        jobs.push({
-          id: `db-job-${Date.now()}-${i}`,
-          title: title,
-          dept: details.dept,
-          posts: details.posts,
-          qualification: q.qual,
-          state: "All India / Regional",
-          category: "Govt",
-          type: q.type,
-          lastDate: new Date(Date.now() + 25 * 86400000).toISOString().split('T')[0],
-          ageLimit: details.ageLimit,
-          fee: details.fee,
-          pdfUrl: link,
-          applyUrl: link,
-          source: "Dainik Bhaskar",
-          isNew: true,
-          isClosingSoon: false,
-          isComingSoon: true,
-          status: 'COMING_SOON',
-          isNewsArticle: true,
-          viewsCount: Math.floor(19000 + Math.random() * 22000),
-          salary: details.salary,
-          selectionProcess: details.selectionProcess
-        });
-      }
     }
   });
-  return { news, jobs };
+  return { news, jobs: [] };
 }
 
 // 6. Scrape Amar Ujala Jobs
@@ -670,38 +557,9 @@ export async function scrapeAmarUjala() {
         timeAgo: "Amar Ujala Live",
         tag: "Amar Ujala"
       });
-
-      if (jobs.length < 10 && /भर्ती|पद|नौकरी|vacancy|recruitment/i.test(title)) {
-        const q = detectQualification(title);
-        const details = enrichJobDetails(title, q.type);
-        jobs.push({
-          id: `au-job-${Date.now()}-${i}`,
-          title: title,
-          dept: details.dept,
-          posts: details.posts,
-          qualification: q.qual,
-          state: "All India / State",
-          category: "Govt",
-          type: q.type,
-          lastDate: new Date(Date.now() + 25 * 86400000).toISOString().split('T')[0],
-          ageLimit: details.ageLimit,
-          fee: details.fee,
-          pdfUrl: link,
-          applyUrl: link,
-          source: "Amar Ujala",
-          isNew: true,
-          isClosingSoon: false,
-          isComingSoon: true,
-          status: 'COMING_SOON',
-          isNewsArticle: true,
-          viewsCount: Math.floor(14000 + Math.random() * 19000),
-          salary: details.salary,
-          selectionProcess: details.selectionProcess
-        });
-      }
     }
   });
-  return { news, jobs };
+  return { news, jobs: [] };
 }
 
 // 7. Scrape Times of India Jobs
@@ -726,38 +584,9 @@ export async function scrapeTimesOfIndia() {
         timeAgo: "TOI Alert",
         tag: "National"
       });
-
-      if (jobs.length < 8 && /recruitment|vacancy|posts|jobs|hiring/i.test(title)) {
-        const q = detectQualification(title);
-        const details = enrichJobDetails(title, q.type);
-        jobs.push({
-          id: `toi-job-${Date.now()}-${i}`,
-          title: title,
-          dept: details.dept,
-          posts: details.posts,
-          qualification: q.qual,
-          state: "All India",
-          category: "Govt",
-          type: q.type,
-          lastDate: new Date(Date.now() + 25 * 86400000).toISOString().split('T')[0],
-          ageLimit: details.ageLimit,
-          fee: details.fee,
-          pdfUrl: link,
-          applyUrl: link,
-          source: "Times of India",
-          isNew: true,
-          isClosingSoon: false,
-          isComingSoon: true,
-          status: 'COMING_SOON',
-          isNewsArticle: true,
-          viewsCount: Math.floor(17000 + Math.random() * 20000),
-          salary: details.salary,
-          selectionProcess: details.selectionProcess
-        });
-      }
     }
   });
-  return { news, jobs };
+  return { news, jobs: [] };
 }
 
 // 8. Google News General Real-Time Feed (Broad Fallback)
@@ -1254,10 +1083,53 @@ export async function scrapeJagranJoshGK() {
   }
 }
 
+// 18. Scrape Business, Economy & Market News (Share Market, RBI, IPO, Corporate)
+export async function scrapeBusinessEconomyNews() {
+  console.log("💼 [18/18] Scraping Business & Market News (Google Business RSS)...");
+  try {
+    const [feedA, feedB] = await Promise.all([
+      fetchHtml('https://news.google.com/rss/headlines/section/topic/BUSINESS?hl=hi&gl=IN&ceid=IN:hi'),
+      fetchHtml('https://news.google.com/rss/search?q=%E0%A4%AC%E0%A4%BF%E0%A4%9C%E0%A4%A8%E0%A5%87%E0%A4%B8+OR+%E0%A4%B6%E0%A5%87%E0%A4%AF%E0%A4%B0+%E0%A4%AC%E0%A4%BE%E0%A4%9C%E0%A4%BE%E0%A4%B0+OR+%E0%A4%85%E0%A4%B0%E0%A5%8D%E0%A4%A5%E0%A4%B5%E0%A5%8D%E0%A4%AF%E0%A4%B5%E0%A4%B8%E0%A5%8D%E0%A4%A5%E0%A4%BE+OR+RBI+OR+IPO&hl=hi&gl=IN&ceid=IN:hi')
+    ]);
+
+    const news = [];
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    [feedA, feedB].forEach((xml) => {
+      if (!xml) return;
+      const $ = cheerio.load(xml, { xmlMode: true });
+      $('item').each((i, el) => {
+        if (news.length >= 50) return;
+        const title = cleanTitle($(el).find('title').text());
+        const link = $(el).find('link').text();
+        const source = $(el).find('source').text() || 'Business News';
+        if (title && link && !news.some((n) => n.title.toLowerCase() === title.toLowerCase())) {
+          news.push({
+            id: `biz-${Date.now()}-${news.length}`,
+            title: title,
+            source: source,
+            category: 'Business',
+            url: link,
+            timeAgo: 'Business & Market Live',
+            tag: 'Business',
+            date: todayStr
+          });
+        }
+      });
+    });
+
+    console.log(`💼 Successfully fetched ${news.length} Business & Economy news articles!`);
+    return { news, jobs: [] }; // STRICT: NEVER PUSH TO JOBS!
+  } catch (err) {
+    console.warn("⚠️ Business news scrape issue:", err.message);
+    return { news: [], jobs: [] };
+  }
+}
+
 // Main Aggregator & Multi-Target Publisher
 export async function aggregateAllLiveData() {
   console.log("==================================================");
-  console.log("🚀 STARTING 17-PORTAL REAL-TIME AGGREGATION (GOVT + PRIVATE + DRISHTI + GKTODAY + JAGRAN GK)...");
+  console.log("🚀 STARTING 18-PORTAL REAL-TIME AGGREGATION (GOVT + PRIVATE + BUSINESS + DRISHTI + GKTODAY + JAGRAN GK)...");
   console.log("⏰ Time:", new Date().toLocaleTimeString());
   console.log("==================================================");
 
@@ -1289,7 +1161,8 @@ export async function aggregateAllLiveData() {
     channelVideos,
     drishtiData,
     gkTodayData,
-    jagranGkData
+    jagranGkData,
+    bizData
   ] = await Promise.all([
     safeScrape(scrapeFreeJobAlert, 'FreeJobAlert'),
     safeScrape(scrapeJagranJosh, 'JagranJosh'),
@@ -1307,10 +1180,11 @@ export async function aggregateAllLiveData() {
     safeScrape(scrapeYouTubeChannel, 'YouTubeChannel'),
     safeScrape(scrapeDrishtiHindiCurrentAffairs, 'DrishtiIASHindi'),
     safeScrape(scrapeGKTodayCurrentAffairs, 'GKToday'),
-    safeScrape(scrapeJagranJoshGK, 'JagranJoshGK')
+    safeScrape(scrapeJagranJoshGK, 'JagranJoshGK'),
+    safeScrape(scrapeBusinessEconomyNews, 'BusinessEconomyNews')
   ]);
 
-  // Combine news with intelligent deduplication (including Drishti IAS, GKToday, Jagran GK, FreeJobAlert)
+  // Combine news with intelligent deduplication (including Drishti IAS, GKToday, Jagran GK, FreeJobAlert, Business)
   const rawNews = [
     ...(fjaData?.news || (Array.isArray(fjaData) ? fjaData : [])),
     ...(jjData?.news || []),
@@ -1325,26 +1199,21 @@ export async function aggregateAllLiveData() {
     ...(rrData?.news || []),
     ...(Array.isArray(drishtiData) ? drishtiData : (drishtiData?.news || [])),
     ...(Array.isArray(gkTodayData) ? gkTodayData : (gkTodayData?.news || [])),
-    ...(Array.isArray(jagranGkData) ? jagranGkData : (jagranGkData?.news || []))
+    ...(Array.isArray(jagranGkData) ? jagranGkData : (jagranGkData?.news || [])),
+    ...(bizData?.news || (Array.isArray(bizData) ? bizData : []))
   ];
   const allLiveNews = deduplicateNews(rawNews);
 
-  // Combine fresh jobs with intelligent deduplication + strict auto-expiry removal
+  // Combine fresh jobs with intelligent deduplication + strict auto-expiry removal + strict validity check
   const todayStr = new Date().toISOString().split('T')[0];
   const rawJobs = [
     ...(fjaData?.jobs || []),
-    ...(jjData?.jobs || []),
-    ...(nbtData?.jobs || []),
-    ...(lhData?.jobs || []),
-    ...(dbData?.jobs || []),
-    ...(auData?.jobs || []),
-    ...(toiData?.jobs || []),
     ...(srComData?.jobs || []),
     ...(srCmData?.jobs || []),
     ...(rrData?.jobs || []),
     ...(Array.isArray(remoteOkJobs) ? remoteOkJobs : (remoteOkJobs?.jobs || [])),
     ...(Array.isArray(wwrJobs) ? wwrJobs : (wwrJobs?.jobs || []))
-  ].filter((job) => !isJobExpired(job.lastDate, todayStr)); // Strict auto-expiry removal
+  ].filter((job) => !isJobExpired(job.lastDate, todayStr) && isValidRecruitmentJob(job)); // Strict validity & auto-expiry removal
 
   const allFreshJobs = deduplicateJobs(rawJobs);
 
@@ -1384,7 +1253,7 @@ export async function aggregateAllLiveData() {
   const currentYear = now.getFullYear();
   const currentAffairsEdition = `${currentMonthName} ${currentYear}`;
 
-  console.log(`📊 Total Cleaned Live Current Affairs & News: ${allLiveNews.length} (from 17+ portals)`);
+  console.log(`📊 Total Cleaned Live Current Affairs & News: ${allLiveNews.length} (from 18+ portals)`);
   console.log(`📊 Total Active Verified Jobs: ${allFreshJobs.length}`);
   console.log(`📺 Total Channel Videos Synced: ${allVideos.length}`);
   console.log(`🗓️ Current Affairs Active Edition: ${currentAffairsEdition}`);
@@ -1392,7 +1261,7 @@ export async function aggregateAllLiveData() {
   const payload = {
     lastUpdated: new Date().toISOString(),
     status: "LIVE_SYNC_OK",
-    activePortalsCount: 17,
+    activePortalsCount: 18,
     currentAffairsEdition: currentAffairsEdition,
     channelVideos: allVideos,
     jobs: allFreshJobs,

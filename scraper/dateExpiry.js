@@ -1,6 +1,7 @@
 /**
- * Robust Job Expiry Checker for VEE Scraper
- * Automatically purges any job whose lastDate has passed today's date.
+ * Robust Job Expiry & Recruitment Validity Checker for VEE Scraper & App
+ * 1. Automatically purges any job whose lastDate has passed today's date.
+ * 2. Strictly validates genuine recruitment jobs and blocks news, accidents, crime, tragedies.
  */
 export function isJobExpired(lastDateStr, todayStr) {
   if (!lastDateStr) return false;
@@ -33,4 +34,50 @@ export function isJobExpired(lastDateStr, todayStr) {
   }
 
   return false;
+}
+
+/**
+ * Strict Recruitment Job Validator
+ * Blocks any news article, accident, hospital admission, crime, tragedy, or fake cell
+ */
+export function isValidRecruitmentJob(job) {
+  if (!job || !job.title) return false;
+
+  // 1. Genuine private tech/global jobs from verified APIs (RemoteOK, WeWorkRemotely)
+  if (job.category === 'Private' && (job.source?.includes('RemoteOK') || job.source?.includes('WeWorkRemotely'))) {
+    return true;
+  }
+
+  const title = (job.title || '').toLowerCase();
+  const dept = (job.dept || '').toLowerCase();
+  const combined = `${title} ${dept}`;
+
+  // 2. Reject news articles masquerading as recruitment cards
+  if (job.isNewsArticle && !job.applyUrl?.includes('sarkari') && !job.applyUrl?.includes('freejobalert') && !job.applyUrl?.includes('rojgar')) {
+    return false;
+  }
+
+  // 3. Strictly reject crimes, accidents, hospital admissions, tragedies, scams, protests
+  const rejectWords = [
+    'हादसा', 'दुर्घटना', 'accident', 'घायल', 'गोली', 'गोलीबारी', 'shoot', 'इलाज',
+    'आईसीयू', 'icu', 'अस्पताल', 'hospital', 'मौत', 'मृत्यु',
+    'हत्या', 'murder', 'dead', 'death', 'शव', 'police custody', 'गिरफ्तार', 'arrest',
+    'fir', 'मुआवजा', 'धरना', 'ज्ञापन', 'strike', 'protest', 'विवाद',
+    'फंदे', 'सड़क पार', 'सड़क हादसा', 'बहन को', 'भाई ने', 'दुष्कर्म', 'चोरी',
+    'लूट', 'अपराध', 'फर्जीवाड़ा', 'scam', 'धोखाधड़ी'
+  ];
+
+  if (rejectWords.some(w => combined.includes(w))) {
+    return false;
+  }
+
+  // 4. Reject suspicious pseudo-departments invented from headlines
+  if (dept.includes('recruitment cell')) {
+    const allowedCells = ['railway recruitment cell', 'rrc', 'central recruitment cell', 'government recruitment cell'];
+    if (!allowedCells.some(ac => dept.includes(ac))) {
+      return false;
+    }
+  }
+
+  return true;
 }

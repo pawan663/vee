@@ -621,13 +621,14 @@ export default function JobsTab({
       if (newsSourceFilter !== 'ALL') {
         const sourceLower = (n.source || '').toLowerCase();
         const catLower = (n.category || '').toLowerCase();
+        const tagLower = (n.tag || '').toLowerCase();
         const filterLower = newsSourceFilter.toLowerCase();
-        const match = sourceLower.includes(filterLower) || catLower.includes(filterLower);
+        const match = sourceLower.includes(filterLower) || catLower.includes(filterLower) || tagLower.includes(filterLower);
         if (!match) return false;
       }
       if (searchTerm.trim()) {
         const term = searchTerm.toLowerCase().trim();
-        const combined = `${n.title || ''} ${n.source || ''} ${n.category || ''}`.toLowerCase();
+        const combined = `${n.title || ''} ${n.source || ''} ${n.category || ''} ${n.tag || ''}`.toLowerCase();
         if (!combined.includes(term)) return false;
       }
       return true;
@@ -888,28 +889,34 @@ export default function JobsTab({
 
           {/* Publisher & Category Filter Bar */}
           <div className="qualification-scroll-bar mb-2.5 flex-row gap-1.5 no-scrollbar" style={{ overflowX: 'auto', display: 'flex', whiteSpace: 'nowrap' }}>
-            {['ALL', 'Drishti IAS (Hindi)', 'GKToday', 'Jagran Josh GK', 'Sarkari Result', 'Sarkari Result .cm', 'Dainik Bhaskar', 'Amar Ujala', 'Navbharat Times', 'Live Hindustan', 'Times of India'].map((src) => (
-              <button
-                key={src}
-                className={`qual-pill-btn text-3xs ${newsSourceFilter === src ? 'active' : ''}`}
-                onClick={() => setNewsSourceFilter(src)}
-                style={{
-                  padding: '5px 12px',
-                  borderRadius: '9999px',
-                  fontWeight: newsSourceFilter === src ? 'bold' : '600',
-                  background: newsSourceFilter === src ? '#1E3A8A' : 'var(--bg-card)',
-                  color: newsSourceFilter === src ? '#FFFFFF' : 'var(--text-primary)',
-                  border: '1px solid var(--border)'
-                }}
-              >
-                {src === 'ALL' ? `सभी आर्टिकल्स (${liveNews.length})` : src}
-              </button>
-            ))}
+            {['ALL', 'Business', 'Drishti IAS (Hindi)', 'GKToday', 'Jagran Josh GK', 'Sarkari Result', 'Sarkari Result .cm', 'Dainik Bhaskar', 'Amar Ujala', 'Navbharat Times', 'Live Hindustan', 'Times of India'].map((src) => {
+              const label = src === 'ALL'
+                ? `सभी आर्टिकल्स (${liveNews.length})`
+                : (src === 'Business' ? '💼 बिजनेस व आर्थिकी (Business)' : src);
+              return (
+                <button
+                  key={src}
+                  className={`qual-pill-btn text-3xs ${newsSourceFilter === src ? 'active' : ''}`}
+                  onClick={() => setNewsSourceFilter(src)}
+                  style={{
+                    padding: '5px 12px',
+                    borderRadius: '9999px',
+                    fontWeight: newsSourceFilter === src ? 'bold' : '600',
+                    background: newsSourceFilter === src ? '#1E3A8A' : 'var(--bg-card)',
+                    color: newsSourceFilter === src ? '#FFFFFF' : 'var(--text-primary)',
+                    border: '1px solid var(--border)'
+                  }}
+                >
+                  {label}
+                </button>
+              );
+            })}
           </div>
 
           <div className="news-cards-list">
             {displayedNews && displayedNews.length > 0 ? (
               displayedNews.map((n) => {
+                const isBusiness = (n.category || '').toLowerCase() === 'business' || (n.tag || '').toLowerCase() === 'business' || (n.source || '').toLowerCase().includes('business');
                 const isDrishti = (n.source || '').includes('Drishti');
                 const isGKToday = (n.source || '').includes('GKToday');
                 const isJagranGK = (n.source || '').includes('Jagran');
@@ -918,7 +925,11 @@ export default function JobsTab({
                 let badgeBg = '#F1F5F9';
                 let borderLeft = '4px solid #3B82F6';
 
-                if (isDrishti) {
+                if (isBusiness) {
+                  badgeColor = '#0F766E';
+                  badgeBg = '#CCFBF1';
+                  borderLeft = '4px solid #14B8A6';
+                } else if (isDrishti) {
                   badgeColor = '#C2410C';
                   badgeBg = '#FFEDD5';
                   borderLeft = '4px solid #EA580C';
@@ -944,7 +955,7 @@ export default function JobsTab({
                         className="badge-source-sm font-bold text-3xs px-2 py-0.5 rounded"
                         style={{ color: badgeColor, background: badgeBg }}
                       >
-                        {isDrishti ? '📖 दृष्टि IAS' : (isGKToday ? '🌐 GKToday (CA)' : (isJagranGK ? '🧠 जागरण GK' : `📡 ${n.source}`))}
+                        {isBusiness ? '💼 बिजनेस व आर्थिकी' : (isDrishti ? '📖 दृष्टि IAS' : (isGKToday ? '🌐 GKToday (CA)' : (isJagranGK ? '🧠 जागरण GK' : `📡 ${n.source}`)))}
                       </span>
                       <span className="text-3xs text-muted">
                         {n.timeAgo || (n.category ? `• ${n.category}` : 'Live')}
