@@ -295,7 +295,7 @@ export default function LegalPolicyModal({ isOpen, initialTab = 'disclaimer', on
                     यदि किसी वेबसाइट या प्रकाशक को किसी लिंक या सारांश पर आपत्ति है, तो वे सीधे हमारे ग्रीवेंस ऑफिसर को ई-मेल कर सकते हैं:
                   </p>
                   <p className="font-bold text-primary mt-1">
-                    📧 ई-मेल: vacancyeraeducation@gmail.com
+                    📧 ई-मेल: pkmeena988796@gmail.com
                   </p>
                   <p className="text-muted m-0">
                     हम बिना किसी विवाद के <b>36 से 48 घंटे</b> के भीतर उस सामग्री को ऐप से हटा देंगे।
@@ -340,7 +340,7 @@ export default function LegalPolicyModal({ isOpen, initialTab = 'disclaimer', on
               )}
 
               <p className="text-3xs text-muted text-center m-0 mt-2">
-                क्लाउड से भी अकाउंट हटाने के लिए <b>vacancyeraeducation@gmail.com</b> पर "Delete Account" लिखकर भेजें। 48 घंटे में प्रक्रिया पूर्ण कर दी जाएगी।
+                क्लाउड से भी अकाउंट हटाने के लिए <b>pkmeena988796@gmail.com</b> पर "Delete Account" लिखकर भेजें। 48 घंटे में प्रक्रिया पूर्ण कर दी जाएगी।
               </p>
             </div>
           )}
