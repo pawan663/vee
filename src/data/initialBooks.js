@@ -182,12 +182,12 @@ export const initialMocks = [
   // Test 1: Daily Current Affairs & GK 2026 Free Mock Test
   {
     id: "mock-ca-2026",
-    title: "⚡ Daily Current Affairs & All India GK 2026 Live Free Mock Test",
+    title: "⚡ Daily Current Affairs (Drishti IAS & GKToday Edition) 2026 Mock Test",
     totalQuestions: 10,
     durationMinutes: 10,
     attempts: "114.2K Aspirants",
     difficulty: "Official Pattern",
-    category: "Current Affairs 2026",
+    category: "Current Affairs",
     badge: "100% FREE",
     questions: [
       {
@@ -439,7 +439,7 @@ export const initialMocks = [
     durationMinutes: 10,
     attempts: "135.8K Aspirants",
     difficulty: "Police Standard",
-    category: "Defence / Police",
+    category: "SSC & Police",
     badge: "100% FREE",
     questions: [
       {
@@ -511,6 +511,90 @@ export const initialMocks = [
         options: ["24 मिनट में 5 किलोमीटर", "6.5 मिनट में 1.6 किलोमीटर", "30 मिनट में 5 किलोमीटर", "10 मिनट में 2 किलोमीटर"],
         correctIndex: 0,
         explanation: "एसएससी जीडी पुरुष उम्मीदवारों को 24 मिनट में 5 किलोमीटर की दौड़ सफलतापूर्वक पूरी करनी होती है।"
+      }
+    ]
+  },
+
+  // Test 5: All-India General Knowledge & Indian Constitution (Jagran Josh & GKToday Special)
+  {
+    id: "mock-jagran-gk",
+    title: "🏛️ General Knowledge (GK/GS) & Indian Constitution (Jagran Josh & GKToday Special)",
+    totalQuestions: 10,
+    durationMinutes: 10,
+    attempts: "98.4K Aspirants",
+    difficulty: "All-India Standard",
+    category: "General Knowledge",
+    badge: "100% FREE",
+    questions: [
+      {
+        id: "gk-1",
+        question: "भारतीय संविधान का 'अनुच्छेद 21' (Article 21) नागरिकों को कौन सा मौलिक अधिकार प्रदान करता है?",
+        options: ["प्राण और दैहिक स्वतंत्रता का संरक्षण (Right to Life & Personal Liberty)", "समानता का अधिकार", "धार्मिक स्वतंत्रता का अधिकार", "अस्पृश्यता का अंत"],
+        correctIndex: 0,
+        explanation: "अनुच्छेद 21 जीवन और व्यक्तिगत स्वतंत्रता के अधिकार की गारंटी देता है, जिसे आपातकाल के दौरान भी निलंबित नहीं किया जा सकता।"
+      },
+      {
+        id: "gk-2",
+        question: "ध्वज संहिता (Flag Code of India) के अनुसार, भारतीय राष्ट्रीय ध्वज का लंबाई और चौड़ाई का अनुपात (Ratio) कितना होना चाहिए?",
+        options: ["3 : 2", "2 : 3", "4 : 3", "5 : 3"],
+        correctIndex: 0,
+        explanation: "भारतीय ध्वज संहिता के अनुसार राष्ट्रीय ध्वज की लंबाई और ऊंचाई/चौड़ाई का अनुपात 3:2 होना चाहिए।"
+      },
+      {
+        id: "gk-3",
+        question: "भारत की सबसे लंबी स्थलीय अंतरराष्ट्रीय सीमा किस पड़ोसी देश के साथ लगती है?",
+        options: ["बांग्लादेश (4,096.7 किमी)", "चीन", "पाकिस्तान", "नेपाल"],
+        correctIndex: 0,
+        explanation: "भारत की सबसे लंबी अंतरराष्ट्रीय सीमा बांग्लादेश के साथ 4,096.7 किलोमीटर लगती है, जो 5 राज्यों (असम, मेघालय, त्रिपुरा, मिजोरम, प. बंगाल) से होकर गुजरती है।"
+      },
+      {
+        id: "gk-4",
+        question: "कंप्यूटर में प्रयुक्त 'IC Chip' (Integrated Circuit) प्रायः किस अर्धचालक तत्व से बनाई जाती है?",
+        options: ["सिलिकॉन (Silicon)", "तांबा (Copper)", "सीसा (Lead)", "सोना (Gold)"],
+        correctIndex: 0,
+        explanation: "इंटीग्रेटेड सर्किट (IC Chips) सिलिकॉन (Si) नामक सेमीकंडक्टर धातु से निर्मित होती हैं।"
+      },
+      {
+        id: "gk-5",
+        question: "भारत के किस राज्य को 'टाइगर स्टेट' (Tiger State of India) के नाम से जाना जाता है?",
+        options: ["मध्य प्रदेश", "कर्नाटक", "उत्तराखंड", "राजस्थान"],
+        correctIndex: 0,
+        explanation: "राष्ट्रीय बाघ गणना के अनुसार मध्य प्रदेश में देश में सर्वाधिक बाघ (785) पाए जाते हैं, इसलिए इसे टाइगर स्टेट कहा जाता है।"
+      },
+      {
+        id: "gk-6",
+        question: "भारतीय संविधान सभा की प्रारूप समिति (Drafting Committee) के अध्यक्ष कौन थे?",
+        options: ["डॉ. भीमराव रामजी अंबेडकर", "डॉ. राजेंद्र प्रसाद", "जवाहरलाल नेहरू", "सरदार पटेल"],
+        correctIndex: 0,
+        explanation: "29 अगस्त 1947 को गठित 7 सदस्यीय प्रारूप समिति के अध्यक्ष बाबासाहेब डॉ. बी.आर. अंबेडकर थे।"
+      },
+      {
+        id: "gk-7",
+        question: "मानव शरीर की सबसे बड़ी ग्रंथि (Largest Gland) कौन सी होती है?",
+        options: ["यकृत (Liver)", "अग्न्याशय (Pancreas)", "थायरॉयड (Thyroid)", "पिट्यूटरी (Pituitary)"],
+        correctIndex: 0,
+        explanation: "मानव शरीर की सबसे बड़ी ग्रंथि यकृत (Liver) है, जिसका भार लगभग 1.5 से 2 किलोग्राम होता है और यह पित्त रस का स्राव करती है।"
+      },
+      {
+        id: "gk-8",
+        question: "विटामिन 'C' का रासायनिक नाम (Chemical Name) क्या होता है?",
+        options: ["एस्कॉर्बिक एसिड (Ascorbic Acid)", "रेटिनॉल", "थायमिन", "टोकोफेरोल"],
+        correctIndex: 0,
+        explanation: "विटामिन सी का रासायनिक नाम एस्कॉर्बिक एसिड है। इसकी कमी से स्कर्वी (मसूड़ों से खून आना) रोग होता है।"
+      },
+      {
+        id: "gk-9",
+        question: "कर्क रेखा (Tropic of Cancer - 23.5° N) भारत के कितने राज्यों से होकर गुजरती है?",
+        options: ["8 राज्यों से", "6 राज्यों से", "7 राज्यों से", "9 राज्यों से"],
+        correctIndex: 0,
+        explanation: "कर्क रेखा गुजरात, राजस्थान, मध्य प्रदेश, छत्तीसगढ़, झारखंड, पश्चिम बंगाल, त्रिपुरा और मिजोरम - कुल 8 राज्यों से गुजरती है।"
+      },
+      {
+        id: "gk-10",
+        question: "गांधी जी ने किस वर्ष ऐतिहासिक 'दांडी मार्च' (नमक सत्याग्रह) की शुरुआत साबरमती आश्रम से की थी?",
+        options: ["12 मार्च 1930", "15 अगस्त 1942", "13 अप्रैल 1919", "26 जनवरी 1931"],
+        correctIndex: 0,
+        explanation: "महात्मा गांधी ने 12 मार्च 1930 को साबरमती आश्रम से 78 अनुयायियों के साथ 240 मील की दांडी यात्रा शुरू की और 6 अप्रैल 1930 को नमक कानून तोड़ा था।"
       }
     ]
   }

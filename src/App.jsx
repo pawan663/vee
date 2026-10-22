@@ -22,6 +22,7 @@ import { initialShorts } from './data/initialShorts';
 import { initialBooks, initialMocks } from './data/initialBooks';
 import liveScrapedData from './data/liveScrapedData.json';
 import { deduplicateJobs, deduplicateNews } from './utils/deduplicate';
+import { isJobExpired } from './utils/dateExpiry';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('jobs');
@@ -53,10 +54,11 @@ export default function App() {
     };
   });
 
-  // Core Data State: Real scraped live jobs first, followed by curated base jobs
+  // Core Data State: Real scraped live jobs first, followed by curated base jobs (strictly unexpired)
   const [jobs, setJobs] = useState(() => {
+    const today = new Date().toISOString().split('T')[0];
     const liveJobs = (liveScrapedData && Array.isArray(liveScrapedData.jobs)) ? liveScrapedData.jobs : [];
-    const allCandidates = [...liveJobs, ...initialJobs];
+    const allCandidates = [...liveJobs, ...initialJobs].filter((j) => !isJobExpired(j.lastDate, today));
     return deduplicateJobs(allCandidates);
   });
 
@@ -216,10 +218,13 @@ export default function App() {
         lastSyncHashRef.current = currentHash;
 
         const today = new Date().toISOString().split('T')[0];
-        const activeIncoming = data.jobs.filter((j) => !j.lastDate || j.lastDate >= today);
+        const activeIncoming = data.jobs.filter((j) => !isJobExpired(j.lastDate, today));
 
         if (activeIncoming.length > 0) {
-          setJobs((prevJobs) => deduplicateJobs([...activeIncoming, ...prevJobs]));
+          setJobs((prevJobs) => {
+            const unexpiredPrev = prevJobs.filter((j) => !isJobExpired(j.lastDate, today));
+            return deduplicateJobs([...activeIncoming, ...unexpiredPrev]);
+          });
         }
 
         if (data.news && Array.isArray(data.news) && data.news.length > 0) {

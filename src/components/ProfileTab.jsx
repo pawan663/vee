@@ -1058,7 +1058,35 @@ export default function ProfileTab({
             </span>
           </div>
 
-          {/* 3. YouTube Channel @vacancyeraeducation */}
+          {/* 3. Drishti IAS & GKToday Daily Current Affairs */}
+          <div className="metric-row flex-between p-2 rounded" style={{ background: 'var(--surface-color, #F8FAFC)' }}>
+            <div className="flex-center-start gap-2">
+              <span className="status-dot-green">🟢</span>
+              <div>
+                <p className="text-xs font-semibold m-0">Drishti IAS & GKToday Current Affairs</p>
+                <p className="text-3xs text-muted m-0">Daily News Analysis, Prelims Facts & Editorials</p>
+              </div>
+            </div>
+            <span className="badge-pill font-bold text-3xs text-amber-700" style={{ background: 'rgba(245, 158, 11, 0.12)' }}>
+              Daily Live Synced
+            </span>
+          </div>
+
+          {/* 4. Jagran Josh General Knowledge (GK) */}
+          <div className="metric-row flex-between p-2 rounded" style={{ background: 'var(--surface-color, #F8FAFC)' }}>
+            <div className="flex-center-start gap-2">
+              <span className="status-dot-green">🟢</span>
+              <div>
+                <p className="text-xs font-semibold m-0">Jagran Josh General Knowledge (GK)</p>
+                <p className="text-3xs text-muted m-0">Subject GK, Constitution, Science & Quizzes</p>
+              </div>
+            </div>
+            <span className="badge-pill font-bold text-3xs text-indigo-700" style={{ background: 'rgba(99, 102, 241, 0.12)' }}>
+              All-India GK Live
+            </span>
+          </div>
+
+          {/* 5. YouTube Channel @vacancyeraeducation */}
           <div className="metric-row flex-between p-2 rounded" style={{ background: 'var(--surface-color, #F8FAFC)' }}>
             <div className="flex-center-start gap-2">
               <span className="status-dot-green">🟢</span>
@@ -1068,11 +1096,11 @@ export default function ProfileTab({
               </div>
             </div>
             <span className="badge-pill font-bold text-3xs text-danger" style={{ background: 'rgba(239, 68, 68, 0.12)' }}>
-              14 Real Videos Synced
+              15 Real Videos Synced
             </span>
           </div>
 
-          {/* 4. Automated Cloud Runner */}
+          {/* 6. Automated Cloud Runner */}
           <div className="metric-row flex-between p-2 rounded" style={{ background: 'var(--surface-color, #F8FAFC)' }}>
             <div className="flex-center-start gap-2">
               <span className="status-dot-green">🟢</span>
@@ -1086,17 +1114,17 @@ export default function ProfileTab({
             </span>
           </div>
 
-          {/* 5. Failover Protection Guard */}
+          {/* 7. Strict Auto-Expiry & Failover Shield */}
           <div className="metric-row flex-between p-2 rounded" style={{ background: 'var(--surface-color, #F8FAFC)' }}>
             <div className="flex-center-start gap-2">
               <span className="status-dot-green">🛡️</span>
               <div>
-                <p className="text-xs font-semibold m-0">Failover & Offline Shield</p>
-                <p className="text-3xs text-muted m-0">Agar koi site down ho to local cache se chalega</p>
+                <p className="text-xs font-semibold m-0">Auto-Expiry & Zero Downtime Shield</p>
+                <p className="text-3xs text-muted m-0">अंतिम तिथि निकलते ही जॉब हट जाती है + ऑफलाइन बैकअप</p>
               </div>
             </div>
             <span className="badge-pill font-bold text-3xs text-emerald-700" style={{ background: 'rgba(16, 185, 129, 0.12)' }}>
-              Zero Downtime
+              Auto-Purge Active
             </span>
           </div>
         </div>

@@ -4,6 +4,7 @@ import path from 'path';
 import { deduplicateJobs, deduplicateNews } from './deduplicate.js';
 
 const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
+import { isJobExpired } from './dateExpiry.js';
 
 async function fetchHtml(url) {
   try {
@@ -1120,14 +1121,131 @@ export async function scrapeYouTubeChannel() {
   }
 }
 
+// 15. Scrape Drishti IAS Hindi Daily Current Affairs & Editorials
+export async function scrapeDrishtiHindiCurrentAffairs() {
+  console.log("📖 [15/17] Scraping Drishti IAS Hindi Daily Current Affairs...");
+  try {
+    const html = await fetchHtml('https://www.drishtiias.com/hindi/current-affairs-news-analysis-editorials');
+    if (!html) return [];
+    const $ = cheerio.load(html);
+    const items = [];
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    $('a').each((_, el) => {
+      const href = $(el).attr('href') || '';
+      let text = $(el).text().replace(/\s+/g, ' ').trim();
+      text = text.replace(/\.{3,}$/, '').trim();
+      if ((href.includes('/hindi/daily-updates') || href.includes('/hindi/current-affairs') || href.includes('editorial')) && text.length >= 15 && text.length <= 150) {
+        if (!text.includes('डाउनलोड') && !text.includes('टेस्ट सीरीज़') && !text.includes('क्विज़ संग्रह') && !text.includes('यहाँ क्लिक करें')) {
+          const fullUrl = href.startsWith('http') ? href : `https://www.drishtiias.com${href}`;
+          if (!items.some(it => it.title === text || it.url === fullUrl)) {
+            items.push({
+              id: `drishti-${Date.now()}-${items.length}`,
+              title: text,
+              source: 'Drishti IAS (Hindi)',
+              category: 'Current Affairs',
+              url: fullUrl,
+              timeAgo: 'Daily Current Affairs & Editorial',
+              date: todayStr
+            });
+          }
+        }
+      }
+    });
+    console.log(`📖 Successfully fetched ${items.length} items from Drishti IAS Hindi!`);
+    return items;
+  } catch (err) {
+    console.warn("⚠️ Drishti IAS Hindi scrape issue:", err.message);
+    return [];
+  }
+}
+
+// 16. Scrape GKToday Current Affairs & Subject Analysis
+export async function scrapeGKTodayCurrentAffairs() {
+  console.log("🌐 [16/17] Scraping GKToday Current Affairs & GK Analysis...");
+  try {
+    const html = await fetchHtml('https://www.gktoday.in/current-affairs/');
+    if (!html) return [];
+    const $ = cheerio.load(html);
+    const items = [];
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    $('a').each((_, el) => {
+      const href = $(el).attr('href') || '';
+      let text = $(el).text().replace(/\s+/g, ' ').trim();
+      if (text.length >= 25 && href.startsWith('https://www.gktoday.in/') && !href.includes('/category/') && !href.includes('/pdfs/')) {
+        if (!text.includes('Quiz') && !text.includes('Previous Months') && !text.includes('MCQs') && !text.includes('Categories')) {
+          if (!items.some(it => it.title === text || it.url === href)) {
+            items.push({
+              id: `gktoday-${Date.now()}-${items.length}`,
+              title: text,
+              source: 'GKToday',
+              category: 'Current Affairs',
+              url: href,
+              timeAgo: 'Daily Current Affairs Analysis',
+              date: todayStr
+            });
+          }
+        }
+      }
+    });
+    console.log(`🌐 Successfully fetched ${items.length} items from GKToday!`);
+    return items;
+  } catch (err) {
+    console.warn("⚠️ GKToday scrape issue:", err.message);
+    return [];
+  }
+}
+
+// 17. Scrape Jagran Josh General Knowledge (GK)
+export async function scrapeJagranJoshGK() {
+  console.log("📚 [17/17] Scraping Jagran Josh General Knowledge (GK)...");
+  try {
+    const html = await fetchHtml('https://www.jagranjosh.com/general-knowledge');
+    if (!html) return [];
+    const $ = cheerio.load(html);
+    const items = [];
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    $('a').each((_, el) => {
+      const href = $(el).attr('href') || '';
+      $(el).find('img').remove();
+      let text = $(el).text().replace(/\s+/g, ' ').trim();
+      text = text.replace(/^alt=["']?/i, '').replace(/<[^>]*>/g, '').trim();
+
+      if (href.includes('/general-knowledge/') && text.length >= 25 && text.length <= 150) {
+        if (!text.includes('Read More') && !text.includes('Click Here') && !text.includes('Latest News')) {
+          const fullUrl = href.startsWith('http') ? href : `https://www.jagranjosh.com${href}`;
+          if (!items.some(it => it.title === text || it.url === fullUrl)) {
+            items.push({
+              id: `jagran-gk-${Date.now()}-${items.length}`,
+              title: text,
+              source: 'Jagran Josh GK',
+              category: 'General Knowledge',
+              url: fullUrl,
+              timeAgo: 'GK Facts & Explanations',
+              date: todayStr
+            });
+          }
+        }
+      }
+    });
+    console.log(`📚 Successfully fetched ${items.length} items from Jagran Josh GK!`);
+    return items;
+  } catch (err) {
+    console.warn("⚠️ Jagran Josh GK scrape issue:", err.message);
+    return [];
+  }
+}
+
 // Main Aggregator & Multi-Target Publisher
 export async function aggregateAllLiveData() {
   console.log("==================================================");
-  console.log("🚀 STARTING 12-PORTAL REAL-TIME AGGREGATION (GOVT + REMOTE/PRIVATE)...");
+  console.log("🚀 STARTING 17-PORTAL REAL-TIME AGGREGATION (GOVT + PRIVATE + DRISHTI + GKTODAY + JAGRAN GK)...");
   console.log("⏰ Time:", new Date().toLocaleTimeString());
   console.log("==================================================");
 
-  // Bulletproof Failover Guard: If any portal fails, other 12 portals continue seamlessly
+  // Bulletproof Failover Guard: If any portal fails, other portals continue seamlessly
   const safeScrape = async (fn, name) => {
     try {
       const res = await fn();
@@ -1152,7 +1270,10 @@ export async function aggregateAllLiveData() {
     rrData,
     remoteOkJobs,
     wwrJobs,
-    channelVideos
+    channelVideos,
+    drishtiData,
+    gkTodayData,
+    jagranGkData
   ] = await Promise.all([
     safeScrape(scrapeFreeJobAlert, 'FreeJobAlert'),
     safeScrape(scrapeJagranJosh, 'JagranJosh'),
@@ -1167,10 +1288,13 @@ export async function aggregateAllLiveData() {
     safeScrape(scrapeRojgarResult, 'RojgarResult'),
     safeScrape(scrapeRemoteOkJobs, 'RemoteOK'),
     safeScrape(scrapeWeWorkRemotelyJobs, 'WeWorkRemotely'),
-    safeScrape(scrapeYouTubeChannel, 'YouTubeChannel')
+    safeScrape(scrapeYouTubeChannel, 'YouTubeChannel'),
+    safeScrape(scrapeDrishtiHindiCurrentAffairs, 'DrishtiIASHindi'),
+    safeScrape(scrapeGKTodayCurrentAffairs, 'GKToday'),
+    safeScrape(scrapeJagranJoshGK, 'JagranJoshGK')
   ]);
 
-  // Combine news with intelligent deduplication (including FreeJobAlert Admit Cards & Results & RojgarResult)
+  // Combine news with intelligent deduplication (including Drishti IAS, GKToday, Jagran GK, FreeJobAlert)
   const rawNews = [
     ...(fjaData?.news || (Array.isArray(fjaData) ? fjaData : [])),
     ...(jjData?.news || []),
@@ -1182,11 +1306,14 @@ export async function aggregateAllLiveData() {
     ...(Array.isArray(gnNews) ? gnNews : (gnNews?.news || [])),
     ...(srComData?.news || []),
     ...(srCmData?.news || []),
-    ...(rrData?.news || [])
+    ...(rrData?.news || []),
+    ...(Array.isArray(drishtiData) ? drishtiData : (drishtiData?.news || [])),
+    ...(Array.isArray(gkTodayData) ? gkTodayData : (gkTodayData?.news || [])),
+    ...(Array.isArray(jagranGkData) ? jagranGkData : (jagranGkData?.news || []))
   ];
   const allLiveNews = deduplicateNews(rawNews);
 
-  // Combine fresh jobs with intelligent deduplication (including RemoteOK & WeWorkRemotely)
+  // Combine fresh jobs with intelligent deduplication + strict auto-expiry removal
   const todayStr = new Date().toISOString().split('T')[0];
   const rawJobs = [
     ...(fjaData?.jobs || []),
@@ -1201,7 +1328,7 @@ export async function aggregateAllLiveData() {
     ...(rrData?.jobs || []),
     ...(Array.isArray(remoteOkJobs) ? remoteOkJobs : (remoteOkJobs?.jobs || [])),
     ...(Array.isArray(wwrJobs) ? wwrJobs : (wwrJobs?.jobs || []))
-  ].filter((job) => job.lastDate >= todayStr); // Strict auto-expiry removal
+  ].filter((job) => !isJobExpired(job.lastDate, todayStr)); // Strict auto-expiry removal
 
   const allFreshJobs = deduplicateJobs(rawJobs);
 
@@ -1241,7 +1368,7 @@ export async function aggregateAllLiveData() {
   const currentYear = now.getFullYear();
   const currentAffairsEdition = `${currentMonthName} ${currentYear}`;
 
-  console.log(`📊 Total Cleaned Live News: ${allLiveNews.length} (from 12+ PR portals)`);
+  console.log(`📊 Total Cleaned Live Current Affairs & News: ${allLiveNews.length} (from 17+ portals)`);
   console.log(`📊 Total Active Verified Jobs: ${allFreshJobs.length}`);
   console.log(`📺 Total Channel Videos Synced: ${allVideos.length}`);
   console.log(`🗓️ Current Affairs Active Edition: ${currentAffairsEdition}`);
@@ -1249,7 +1376,7 @@ export async function aggregateAllLiveData() {
   const payload = {
     lastUpdated: new Date().toISOString(),
     status: "LIVE_SYNC_OK",
-    activePortalsCount: 14,
+    activePortalsCount: 17,
     currentAffairsEdition: currentAffairsEdition,
     channelVideos: allVideos,
     jobs: allFreshJobs,

@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Search, Filter, Sparkles, Building, Briefcase, ExternalLink, Newspaper, Radio, Flame, ChevronRight, LayoutGrid, RefreshCw, Trophy, Ticket } from 'lucide-react';
 import JobCard from './JobCard';
 import { TOP_INDIAN_COMPANIES } from '../data/indianCompanies';
+import { isJobExpired } from '../utils/dateExpiry';
 
 // Strict State Match & Exclude Rules to eliminate cross-state bleeding (e.g. Delhi Police appearing in UP)
 const STATE_RULES = {
@@ -386,8 +387,8 @@ export default function JobsTab({
 
   const filteredJobs = useMemo(() => {
     return jobs.filter((job) => {
-    // Expiry check
-    if (job.lastDate < todayStr) return false;
+    // Expiry check - strictly purge any job whose last date has passed
+    if (isJobExpired(job.lastDate, todayStr)) return false;
 
     // Multi-token Smart Search (matches keywords in any order across all fields)
     if (searchTerm.trim()) {
@@ -871,9 +872,9 @@ export default function JobsTab({
             <span className="badge-live-sm text-3xs">{displayedNews.length} Updates</span>
           </div>
 
-          {/* Publisher Filter Bar */}
-          <div className="qualification-scroll-bar mb-2.5 flex-row gap-1.5 no-scrollbar">
-            {['ALL', 'Sarkari Result', 'Sarkari Result .cm', 'Dainik Bhaskar', 'Amar Ujala', 'Navbharat Times', 'Jagran Josh', 'Live Hindustan', 'Times of India'].map((src) => (
+          {/* Publisher & Category Filter Bar */}
+          <div className="qualification-scroll-bar mb-2.5 flex-row gap-1.5 no-scrollbar" style={{ overflowX: 'auto', display: 'flex', whiteSpace: 'nowrap' }}>
+            {['ALL', 'Drishti IAS (Hindi)', 'GKToday', 'Jagran Josh GK', 'Sarkari Result', 'Sarkari Result .cm', 'Dainik Bhaskar', 'Amar Ujala', 'Navbharat Times', 'Live Hindustan', 'Times of India'].map((src) => (
               <button
                 key={src}
                 className={`qual-pill-btn text-3xs ${newsSourceFilter === src ? 'active' : ''}`}

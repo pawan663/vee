@@ -4,6 +4,7 @@ import { BookOpen, Award, Star, ShoppingBag, Clock, Users, ArrowRight, ExternalL
 export default function BooksTab({ books = [], mocks = [], onStartMock, t }) {
   const [subTab, setSubTab] = useState('books'); // 'books' | 'mocks'
   const [selectedCategory, setSelectedCategory] = useState('ALL');
+  const [selectedMockCategory, setSelectedMockCategory] = useState('ALL');
 
   const categories = [
     { id: 'ALL', label: 'सभी पुस्तकें' },
@@ -14,10 +15,24 @@ export default function BooksTab({ books = [], mocks = [], onStartMock, t }) {
     { id: 'Math & Aptitude', label: '📐 गणित व रीजनिंग' }
   ];
 
+  const mockCategories = [
+    { id: 'ALL', label: 'सभी टेस्ट्स' },
+    { id: 'Current Affairs', label: '🔥 दैनिक करेंट अफेयर्स (Drishti & GKToday)' },
+    { id: 'General Knowledge', label: '🏛️ सामान्य ज्ञान व राजव्यवस्था (Jagran GK)' },
+    { id: 'Railways', label: '🚆 रेलवे RRB साइंस व GK' },
+    { id: 'Technical / ITI', label: '🛠️ ITI Fitter & Electrician ट्रेड' },
+    { id: 'SSC & Police', label: '👮 एसएससी GD व पुलिस भर्ती' }
+  ];
+
   const filteredBooks = useMemo(() => {
     if (selectedCategory === 'ALL') return books;
     return books.filter((b) => b.category === selectedCategory);
   }, [books, selectedCategory]);
+
+  const filteredMocks = useMemo(() => {
+    if (selectedMockCategory === 'ALL') return mocks;
+    return mocks.filter((m) => m.category === selectedMockCategory);
+  }, [mocks, selectedMockCategory]);
 
   return (
     <div className="books-tab-container">
@@ -187,7 +202,28 @@ export default function BooksTab({ books = [], mocks = [], onStartMock, t }) {
             </div>
           </div>
 
-          {mocks.map((mock) => (
+          {/* Subject Filter for Mock Tests */}
+          <div className="qualification-scroll-bar mb-3 flex-row gap-1.5 no-scrollbar" style={{ overflowX: 'auto', display: 'flex', whiteSpace: 'nowrap' }}>
+            {mockCategories.map((cat) => (
+              <button
+                key={cat.id}
+                className={`qual-pill-btn text-3xs ${selectedMockCategory === cat.id ? 'active' : ''}`}
+                onClick={() => setSelectedMockCategory(cat.id)}
+                style={{
+                  padding: '5px 12px',
+                  borderRadius: '9999px',
+                  fontWeight: selectedMockCategory === cat.id ? 'bold' : '600',
+                  background: selectedMockCategory === cat.id ? '#15803D' : 'var(--bg-card)',
+                  color: selectedMockCategory === cat.id ? '#FFFFFF' : 'var(--text-primary)',
+                  border: '1px solid var(--border)'
+                }}
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
+
+          {filteredMocks.map((mock) => (
             <div key={mock.id} className="mock-card mb-3 p-3 card-styled" style={{ borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-card)' }}>
               <div className="flex-between">
                 <span className="badge-pill text-3xs font-bold" style={{ background: '#DCFCE7', color: '#15803D', border: '1px solid #86EFAC', padding: '2px 6px', borderRadius: '4px' }}>
