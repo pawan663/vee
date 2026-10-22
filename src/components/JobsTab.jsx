@@ -1118,16 +1118,110 @@ export default function JobsTab({
           {/* Jobs List */}
           <div className="jobs-list">
             {displayJobs.length > 0 ? (
-              displayJobs.map((job) => (
-                <JobCard
-                  key={job.id}
-                  job={job}
-                  onOpenDetail={onOpenDetail}
-                  onOpenApply={onOpenApply}
-                  isSaved={savedJobIds.includes(job.id)}
-                  onToggleSave={onToggleSave}
-                  t={t}
-                />
+              displayJobs.map((job, idx) => (
+                <React.Fragment key={job.id}>
+                  <JobCard
+                    job={job}
+                    onOpenDetail={onOpenDetail}
+                    onOpenApply={onOpenApply}
+                    isSaved={savedJobIds.includes(job.id)}
+                    onToggleSave={onToggleSave}
+                    t={t}
+                  />
+
+                  {/* Native Google AdMob / AdSense Sponsored Banner Unit */}
+                  {idx === 2 && (
+                    <div
+                      className="admob-native-banner my-2.5 p-3 rounded-xl border text-center shadow-xs"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(241, 245, 249, 0.95), rgba(226, 232, 240, 0.8))',
+                        borderColor: 'rgba(203, 213, 225, 0.8)'
+                      }}
+                    >
+                      <div className="flex-between text-3xs text-muted mb-1 px-0.5">
+                        <span
+                          className="badge-ad-tag"
+                          style={{
+                            fontSize: '9px',
+                            fontWeight: 'bold',
+                            padding: '1px 5px',
+                            borderRadius: '4px',
+                            background: '#0F172A',
+                            color: '#FFFFFF',
+                            letterSpacing: '0.4px'
+                          }}
+                        >
+                          SPONSORED • AD
+                        </span>
+                        <span style={{ fontSize: '9px', color: '#64748B' }}>Google AdSense / AdMob</span>
+                      </div>
+                      <div
+                        className="ad-inner-content p-2.5 rounded-lg flex-between flex-wrap gap-2 text-left"
+                        style={{ background: 'var(--card-bg, #FFFFFF)', border: '1px solid rgba(226, 232, 240, 0.8)' }}
+                      >
+                        <div className="flex-1 min-w-[200px]">
+                          <p className="text-xs font-bold text-slate-800 m-0">🎯 Best Books & Test Series for ITI & Railway ALP 2026</p>
+                          <p className="text-3xs text-muted mt-0.5 mb-0">Free Practice Mocks + Previous Years Solved Papers</p>
+                        </div>
+                        <a
+                          href="https://play.google.com/store/apps/details?id=com.vacancyera.vee"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn-accent-xs font-bold text-3xs px-2.5 py-1.5 rounded inline-flex flex-center gap-1"
+                          style={{ background: '#2563EB', color: '#FFFFFF', textDecoration: 'none' }}
+                        >
+                          Check Offer <ExternalLink size={10} />
+                        </a>
+                      </div>
+                    </div>
+                  )}
+
+                  {idx === 8 && (
+                    <div
+                      className="admob-native-banner my-2.5 p-3 rounded-xl border text-center shadow-xs"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(254, 243, 199, 0.6), rgba(253, 230, 138, 0.4))',
+                        borderColor: '#FDE68A'
+                      }}
+                    >
+                      <div className="flex-between text-3xs text-muted mb-1 px-0.5">
+                        <span
+                          className="badge-ad-tag"
+                          style={{
+                            fontSize: '9px',
+                            fontWeight: 'bold',
+                            padding: '1px 5px',
+                            borderRadius: '4px',
+                            background: '#B45309',
+                            color: '#FFFFFF',
+                            letterSpacing: '0.4px'
+                          }}
+                        >
+                          SPONSORED • AD
+                        </span>
+                        <span style={{ fontSize: '9px', color: '#92400E' }}>Google AdSense / AdMob</span>
+                      </div>
+                      <div
+                        className="ad-inner-content p-2.5 rounded-lg flex-between flex-wrap gap-2 text-left"
+                        style={{ background: 'var(--card-bg, #FFFFFF)', border: '1px solid rgba(253, 230, 138, 0.8)' }}
+                      >
+                        <div className="flex-1 min-w-[200px]">
+                          <p className="text-xs font-bold text-amber-900 m-0">⚡ Live Coaching & Skill Certification: Up to 50% Off</p>
+                          <p className="text-3xs text-muted mt-0.5 mb-0">Certified Diplomas for Private MNC Jobs (Tata, Maruti, L&T)</p>
+                        </div>
+                        <a
+                          href="https://play.google.com/store/apps/details?id=com.vacancyera.vee"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn-accent-xs font-bold text-3xs px-2.5 py-1.5 rounded inline-flex flex-center gap-1"
+                          style={{ background: '#D97706', color: '#FFFFFF', textDecoration: 'none' }}
+                        >
+                          Learn More <ExternalLink size={10} />
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                </React.Fragment>
               ))
             ) : (
               <div className="empty-state text-center p-4">

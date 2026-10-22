@@ -445,6 +445,9 @@ export default function App() {
               onChangeLang={setCurrentLang}
               darkMode={darkMode}
               onToggleDarkMode={() => setDarkMode(!darkMode)}
+              lastSyncedTime={lastSyncedTime}
+              onManualSync={() => syncLiveData(true)}
+              isSyncing={isSyncing}
               t={t}
             />
           )}

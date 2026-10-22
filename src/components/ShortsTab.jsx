@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Play, ThumbsUp, MessageSquare, Share2, Send, Video, Flame, X, ExternalLink } from 'lucide-react';
+import { VIDEO_REGISTRY } from '../data/videoRegistry';
 
 export default function ShortsTab({ shorts, onSelectJob, t }) {
   const [likesState, setLikesState] = useState({});
@@ -19,7 +20,7 @@ export default function ShortsTab({ shorts, onSelectJob, t }) {
           <h3 className="font-bold text-sm flex-center gap-1">
             ⚡ 60-Second Job Shorts <span className="badge-live-sm bg-danger text-white">REELS</span>
           </h3>
-          <p className="text-2xs text-muted">Vacancy Era Education channel ke short video analysis dekhein</p>
+          <p className="text-2xs text-muted">Vacancy Era Education (@vacancyeraeducation) official video reels</p>
         </div>
         <a
           href="https://www.youtube.com/@vacancyeraeducation/shorts"
@@ -33,10 +34,12 @@ export default function ShortsTab({ shorts, onSelectJob, t }) {
       </div>
 
       <div className="shorts-list">
-        {shorts.map((short) => {
+        {shorts.map((short, idx) => {
           const isLiked = likesState[short.id];
           const isPlaying = activePlayingId === short.id;
-          const youtubeId = short.youtubeId || 'yLXb10KOm6c';
+          const fallbackVideoId = VIDEO_REGISTRY[idx % VIDEO_REGISTRY.length]?.videoId || 'EZvKIO-TNsQ';
+          const youtubeId = short.youtubeId || fallbackVideoId;
+          const thumbnailSrc = `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
 
           return (
             <div key={short.id} className="short-card mb-4" style={{ position: 'relative', overflow: 'hidden', borderRadius: '12px' }}>
@@ -91,7 +94,14 @@ export default function ShortsTab({ shorts, onSelectJob, t }) {
                   </div>
                 ) : (
                   <>
-                    <img src={short.videoThumbnail} alt={short.title} className="short-thumb-img" />
+                    <img
+                      src={thumbnailSrc}
+                      alt={short.title}
+                      className="short-thumb-img"
+                      onError={(e) => {
+                        e.target.src = short.videoThumbnail || 'https://images.unsplash.com/photo-1541888946425-d0fbb18f15f7?auto=format&fit=crop&w=720&q=80';
+                      }}
+                    />
                     <div className="short-overlay-gradient"></div>
 
                     {/* Top Details */}

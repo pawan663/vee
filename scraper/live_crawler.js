@@ -1092,6 +1092,34 @@ export async function scrapeWeWorkRemotelyJobs() {
   return jobs;
 }
 
+// 14. Scrape Official Vacancy Era Education YouTube Channel Real-Time Feed
+export async function scrapeYouTubeChannel() {
+  console.log("📺 [14/14] Scraping Official @vacancyeraeducation YouTube Feed...");
+  try {
+    const xml = await fetchHtml('https://www.youtube.com/feeds/videos.xml?channel_id=UChHRt-QM9T9Wyx1Q4zUTcVg');
+    if (!xml) return [];
+    const $ = cheerio.load(xml, { xmlMode: true });
+    const videos = [];
+    $('entry').each((_, el) => {
+      const videoId = $(el).find('yt\\:videoId, videoId').text().trim();
+      const title = $(el).find('title').text().trim();
+      if (videoId && title) {
+        videos.push({
+          videoId,
+          videoUrl: `https://youtu.be/${videoId}`,
+          title,
+          channel: '@vacancyeraeducation'
+        });
+      }
+    });
+    console.log(`📺 Successfully fetched ${videos.length} live videos from @vacancyeraeducation!`);
+    return videos;
+  } catch (err) {
+    console.warn("⚠️ YouTube RSS fetch failed, using fallback registry:", err.message);
+    return [];
+  }
+}
+
 // Main Aggregator & Multi-Target Publisher
 export async function aggregateAllLiveData() {
   console.log("==================================================");
@@ -1123,7 +1151,8 @@ export async function aggregateAllLiveData() {
     srCmData,
     rrData,
     remoteOkJobs,
-    wwrJobs
+    wwrJobs,
+    channelVideos
   ] = await Promise.all([
     safeScrape(scrapeFreeJobAlert, 'FreeJobAlert'),
     safeScrape(scrapeJagranJosh, 'JagranJosh'),
@@ -1137,7 +1166,8 @@ export async function aggregateAllLiveData() {
     safeScrape(scrapeSarkariResultCm, 'SarkariResult.cm'),
     safeScrape(scrapeRojgarResult, 'RojgarResult'),
     safeScrape(scrapeRemoteOkJobs, 'RemoteOK'),
-    safeScrape(scrapeWeWorkRemotelyJobs, 'WeWorkRemotely')
+    safeScrape(scrapeWeWorkRemotelyJobs, 'WeWorkRemotely'),
+    safeScrape(scrapeYouTubeChannel, 'YouTubeChannel')
   ]);
 
   // Combine news with intelligent deduplication (including FreeJobAlert Admit Cards & Results & RojgarResult)
@@ -1175,9 +1205,22 @@ export async function aggregateAllLiveData() {
 
   const allFreshJobs = deduplicateJobs(rawJobs);
 
-  // Ensure 100% of jobs have auto-generated video guidance links directly to your official channel (@vacancyeraeducation)
+  // Automatically match jobs with real videos from your channel (@vacancyeraeducation)
+  const allVideos = Array.isArray(channelVideos) ? channelVideos : [];
   allFreshJobs.forEach((job) => {
-    if (!job.videoUrl || job.videoUrl.includes('youtube.com/results')) {
+    const jobText = `${job.title || ''} ${job.dept || ''}`.toLowerCase();
+    const matchedVid = allVideos.find((v) => {
+      const vTitle = (v.title || '').toLowerCase();
+      const keywords = ['isro', 'ntpc', 'bhel', 'ongc', 'coal india', 'hero', 'dmrc', 'oil india', 'lic', 'drdo', 'nmdc', 'ncl', 'nhai', 'railway', 'ssc', 'police'];
+      return keywords.some(k => jobText.includes(k) && vTitle.includes(k));
+    });
+
+    if (matchedVid) {
+      job.videoId = matchedVid.videoId;
+      job.videoUrl = `https://youtu.be/${matchedVid.videoId}`;
+      job.videoTitle = matchedVid.title;
+      job.channel = '@vacancyeraeducation';
+    } else if (!job.videoUrl || job.videoUrl.includes('youtube.com/results')) {
       const cleanSearch = (job.title || '')
         .replace(/2026|Recruitment|Bharti|Online Form|\d+[\s,]*Posts|\d+[\s,]*Vacanc(y|ies)/gi, '')
         .replace(/[^\w\s\u0900-\u097F]/gi, ' ')
@@ -1200,13 +1243,15 @@ export async function aggregateAllLiveData() {
 
   console.log(`📊 Total Cleaned Live News: ${allLiveNews.length} (from 12+ PR portals)`);
   console.log(`📊 Total Active Verified Jobs: ${allFreshJobs.length}`);
+  console.log(`📺 Total Channel Videos Synced: ${allVideos.length}`);
   console.log(`🗓️ Current Affairs Active Edition: ${currentAffairsEdition}`);
 
   const payload = {
     lastUpdated: new Date().toISOString(),
     status: "LIVE_SYNC_OK",
-    activePortalsCount: 13,
+    activePortalsCount: 14,
     currentAffairsEdition: currentAffairsEdition,
+    channelVideos: allVideos,
     jobs: allFreshJobs,
     news: allLiveNews
   };

@@ -62,6 +62,29 @@ export default function CharchaTab({
     return {};
   });
 
+  // Followed Aspirants / Creators Tracking
+  const [followedAuthors, setFollowedAuthors] = useState(() => {
+    const saved = localStorage.getItem('vee_followed_authors');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) {}
+    }
+    return { 'Pawan Meena': true, 'Rohan Sharma': true };
+  });
+
+  const handleToggleFollow = (author, e) => {
+    if (e) e.stopPropagation();
+    const next = { ...followedAuthors };
+    if (next[author]) {
+      delete next[author];
+      showToast(`Unfollowed @${author}`);
+    } else {
+      next[author] = true;
+      showToast(`Aapne @${author} ko follow kiya! Unki har charcha aapko pehle dikhegi 🎉`);
+    }
+    setFollowedAuthors(next);
+    localStorage.setItem('vee_followed_authors', JSON.stringify(next));
+  };
+
   // Modals state
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [activeThreadPost, setActiveThreadPost] = useState(null);
@@ -501,18 +524,18 @@ export default function CharchaTab({
       {/* Posts List */}
       <div className="posts-list">
         {filteredPosts.length > 0 ? (
-          filteredPosts.map((post) => {
+          filteredPosts.map((post, idx) => {
             const netScore = (post.upvotes || 0) - (post.downvotes || 0);
             const myVote = userVotes[post.id];
             const isSaved = savedPostIds.includes(post.id);
             const linkedJob = resolveJob(post.jobId);
 
             return (
-              <div
-                key={post.id}
-                className={`charcha-post-card charcha-card-${(post.category || 'Sarkari').toLowerCase()} mb-3 cursor-pointer`}
-                onClick={() => setActiveThreadPost(post)}
-              >
+              <React.Fragment key={post.id}>
+                <div
+                  className={`charcha-post-card charcha-card-${(post.category || 'Sarkari').toLowerCase()} mb-3 cursor-pointer`}
+                  onClick={() => setActiveThreadPost(post)}
+                >
                 {/* Author Header */}
                 <div className="post-author-row flex-between">
                   <div className="flex-center gap-2">
@@ -530,6 +553,23 @@ export default function CharchaTab({
                             HR Verified
                           </span>
                         )}
+                        <button
+                          type="button"
+                          className="btn-follow-tag text-3xs font-bold"
+                          onClick={(e) => handleToggleFollow(post.author, e)}
+                          style={{
+                            fontSize: '9px',
+                            padding: '1px 7px',
+                            borderRadius: '10px',
+                            border: followedAuthors[post.author] ? '1px solid #10B981' : '1px solid #3B82F6',
+                            background: followedAuthors[post.author] ? '#ECFDF5' : '#EFF6FF',
+                            color: followedAuthors[post.author] ? '#059669' : '#1D4ED8',
+                            cursor: 'pointer',
+                            marginLeft: '4px'
+                          }}
+                        >
+                          {followedAuthors[post.author] ? '✓ Following' : '+ Follow'}
+                        </button>
                       </div>
                       <span className="post-time text-3xs text-muted">
                         {formatTimeAgo(post.timeAgo)}
@@ -683,8 +723,55 @@ export default function CharchaTab({
                   </button>
                 </div>
               </div>
-            );
-          })
+
+              {/* Native Google AdMob / AdSense Sponsored Banner Unit in Charcha Feed */}
+              {idx === 1 && (
+                <div
+                  className="admob-native-banner my-2.5 p-3 rounded-xl border text-center shadow-xs"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(238, 242, 255, 0.95), rgba(224, 231, 255, 0.8))',
+                    borderColor: 'rgba(199, 210, 254, 0.8)'
+                  }}
+                >
+                  <div className="flex-between text-3xs text-muted mb-1 px-0.5">
+                    <span
+                      style={{
+                        fontSize: '9px',
+                        fontWeight: 'bold',
+                        padding: '1px 5px',
+                        borderRadius: '4px',
+                        background: '#4338CA',
+                        color: '#FFFFFF',
+                        letterSpacing: '0.4px'
+                      }}
+                    >
+                      COMMUNITY SPONSOR • AD
+                    </span>
+                    <span style={{ fontSize: '9px', color: '#6366F1' }}>Google AdSense / AdMob</span>
+                  </div>
+                  <div
+                    className="ad-inner-content p-2.5 rounded-lg flex-between flex-wrap gap-2 text-left"
+                    style={{ background: 'var(--card-bg, #FFFFFF)', border: '1px solid rgba(199, 210, 254, 0.8)' }}
+                  >
+                    <div className="flex-1 min-w-[200px]">
+                      <p className="text-xs font-bold text-indigo-900 m-0">📚 Free NCERT, ITI & RRB Handwritten PDF Notes</p>
+                      <p className="text-3xs text-muted mt-0.5 mb-0">Join 50,000+ Aspirants Discussion & Study Material Group</p>
+                    </div>
+                    <a
+                      href="https://play.google.com/store/apps/details?id=com.vacancyera.vee"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-accent-xs font-bold text-3xs px-2.5 py-1.5 rounded inline-flex flex-center gap-1"
+                      style={{ background: '#4F46E5', color: '#FFFFFF', textDecoration: 'none' }}
+                    >
+                      Get Notes <ExternalLink size={10} />
+                    </a>
+                  </div>
+                </div>
+              )}
+            </React.Fragment>
+          );
+        })
         ) : (
           <div className="empty-state text-center p-4">
             <HelpCircle size={36} className="text-muted inline mb-2" />
@@ -763,6 +850,23 @@ export default function CharchaTab({
                       <ShieldCheck size={11} /> MOD
                     </span>
                   )}
+                  <button
+                    type="button"
+                    className="btn-follow-tag text-3xs font-bold"
+                    onClick={(e) => handleToggleFollow(activeThreadPost.author, e)}
+                    style={{
+                      fontSize: '9px',
+                      padding: '1px 7px',
+                      borderRadius: '10px',
+                      border: followedAuthors[activeThreadPost.author] ? '1px solid #10B981' : '1px solid #3B82F6',
+                      background: followedAuthors[activeThreadPost.author] ? '#ECFDF5' : '#EFF6FF',
+                      color: followedAuthors[activeThreadPost.author] ? '#059669' : '#1D4ED8',
+                      cursor: 'pointer',
+                      marginLeft: '6px'
+                    }}
+                  >
+                    {followedAuthors[activeThreadPost.author] ? '✓ Following' : '+ Follow'}
+                  </button>
                 </div>
                 <span className="text-3xs text-muted">
                   u/{activeThreadPost.handle || 'aspirant'} • {formatTimeAgo(activeThreadPost.timeAgo)}
