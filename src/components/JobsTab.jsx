@@ -618,10 +618,21 @@ export default function JobsTab({
 
   const displayedNews = useMemo(() => {
     return (liveNews || []).filter((n) => {
-      if (newsSourceFilter === 'ALL') return true;
-      return (n.source || '').toLowerCase().includes(newsSourceFilter.toLowerCase());
+      if (newsSourceFilter !== 'ALL') {
+        const sourceLower = (n.source || '').toLowerCase();
+        const catLower = (n.category || '').toLowerCase();
+        const filterLower = newsSourceFilter.toLowerCase();
+        const match = sourceLower.includes(filterLower) || catLower.includes(filterLower);
+        if (!match) return false;
+      }
+      if (searchTerm.trim()) {
+        const term = searchTerm.toLowerCase().trim();
+        const combined = `${n.title || ''} ${n.source || ''} ${n.category || ''}`.toLowerCase();
+        if (!combined.includes(term)) return false;
+      }
+      return true;
     });
-  }, [liveNews, newsSourceFilter]);
+  }, [liveNews, newsSourceFilter, searchTerm]);
 
   // Ticker headlines: combine freshest active jobs + breaking news, duplicated for smooth seamless marquee loop
   const tickerItems = useMemo(() => {
@@ -863,13 +874,16 @@ export default function JobsTab({
           </div>
         </div>
       ) : activeCategory === 'NEWS' ? (
-        /* If Live News Tab is chosen */
+        /* If Live News & Current Affairs Tab is chosen */
         <div className="live-news-section mb-3">
-          <div className="news-header-banner p-2 mb-2 flex-between">
-            <span className="text-xs font-bold text-accent flex-center gap-1">
-              <Newspaper size={14} /> Dainik Bhaskar, Amar Ujala & NBT Live Updates
-            </span>
-            <span className="badge-live-sm text-3xs">{displayedNews.length} Updates</span>
+          <div className="news-header-banner p-2.5 mb-2.5 flex-between rounded-xl" style={{ background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)', border: '1px solid #93C5FD' }}>
+            <div>
+              <span className="text-xs font-bold text-primary flex-center-start gap-1.5">
+                <Newspaper size={16} /> दैनिक समसामयिकी (Current Affairs), GK व भर्ती बुलेटिन
+              </span>
+              <p className="text-3xs text-muted m-0 mt-0.5">Drishti IAS, GKToday (100+), Jagran GK, अमर उजाला व दैनिक भास्कर</p>
+            </div>
+            <span className="badge-live-sm bg-primary text-white text-3xs font-bold px-2 py-0.5 rounded-full">{displayedNews.length} Live</span>
           </div>
 
           {/* Publisher & Category Filter Bar */}
@@ -879,41 +893,103 @@ export default function JobsTab({
                 key={src}
                 className={`qual-pill-btn text-3xs ${newsSourceFilter === src ? 'active' : ''}`}
                 onClick={() => setNewsSourceFilter(src)}
+                style={{
+                  padding: '5px 12px',
+                  borderRadius: '9999px',
+                  fontWeight: newsSourceFilter === src ? 'bold' : '600',
+                  background: newsSourceFilter === src ? '#1E3A8A' : 'var(--bg-card)',
+                  color: newsSourceFilter === src ? '#FFFFFF' : 'var(--text-primary)',
+                  border: '1px solid var(--border)'
+                }}
               >
-                {src === 'ALL' ? `All (${liveNews.length})` : src}
+                {src === 'ALL' ? `सभी आर्टिकल्स (${liveNews.length})` : src}
               </button>
             ))}
           </div>
 
           <div className="news-cards-list">
             {displayedNews && displayedNews.length > 0 ? (
-              displayedNews.map((n) => (
-                <div
-                  key={n.id}
-                  className="news-card mb-2 p-3 card-styled cursor-pointer"
-                  onClick={() => onOpenNews && onOpenNews(n)}
-                >
-                  <div className="flex-between">
-                    <span className="badge-source-sm font-bold text-3xs">📡 {n.source}</span>
-                    <span className="text-3xs text-muted">{n.timeAgo}</span>
+              displayedNews.map((n) => {
+                const isDrishti = (n.source || '').includes('Drishti');
+                const isGKToday = (n.source || '').includes('GKToday');
+                const isJagranGK = (n.source || '').includes('Jagran');
+
+                let badgeColor = '#475569';
+                let badgeBg = '#F1F5F9';
+                let borderLeft = '4px solid #3B82F6';
+
+                if (isDrishti) {
+                  badgeColor = '#C2410C';
+                  badgeBg = '#FFEDD5';
+                  borderLeft = '4px solid #EA580C';
+                } else if (isGKToday) {
+                  badgeColor = '#047857';
+                  badgeBg = '#D1FAE5';
+                  borderLeft = '4px solid #10B981';
+                } else if (isJagranGK) {
+                  badgeColor = '#4338CA';
+                  badgeBg = '#E0E7FF';
+                  borderLeft = '4px solid #6366F1';
+                }
+
+                return (
+                  <div
+                    key={n.id}
+                    className="news-card mb-2.5 p-3 card-styled cursor-pointer"
+                    style={{ borderLeft: borderLeft, borderRadius: '10px', background: 'var(--bg-card)' }}
+                    onClick={() => onOpenNews && onOpenNews(n)}
+                  >
+                    <div className="flex-between">
+                      <span
+                        className="badge-source-sm font-bold text-3xs px-2 py-0.5 rounded"
+                        style={{ color: badgeColor, background: badgeBg }}
+                      >
+                        {isDrishti ? '📖 दृष्टि IAS' : (isGKToday ? '🌐 GKToday (CA)' : (isJagranGK ? '🧠 जागरण GK' : `📡 ${n.source}`))}
+                      </span>
+                      <span className="text-3xs text-muted">
+                        {n.timeAgo || (n.category ? `• ${n.category}` : 'Live')}
+                      </span>
+                    </div>
+
+                    <h4 className="news-headline font-bold text-xs mt-1.5 leading-snug" style={{ color: 'var(--text-color, #1E293B)' }}>
+                      {formatHeadline(n.title)}
+                    </h4>
+
+                    <div className="flex-between mt-2 pt-2 border-top gap-2 flex-wrap">
+                      <span className="text-3xs text-muted flex-center gap-1">
+                        ⏱️ {n.date || 'Today'}
+                      </span>
+                      <div className="flex-center gap-2">
+                        <button
+                          type="button"
+                          className="btn-accent-xs inline-flex flex-center gap-1 text-3xs font-bold px-2.5 py-1 rounded"
+                          style={{ background: '#2563EB', color: '#FFFFFF', border: 'none', cursor: 'pointer' }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (onOpenNews) onOpenNews(n);
+                          }}
+                        >
+                          📖 पूरा लेख पढ़ें (In-App)
+                        </button>
+                        {n.url && (
+                          <a
+                            href={n.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-3xs text-muted font-semibold flex-center gap-0.5"
+                            onClick={(e) => e.stopPropagation()}
+                            style={{ textDecoration: 'none' }}
+                          >
+                            वेबसाइट <ExternalLink size={10} />
+                          </a>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <h4 className="news-headline font-bold text-xs mt-1 leading-snug">{formatHeadline(n.title)}</h4>
-                  <div className="mt-2 text-right">
-                    <button
-                      className="inline-flex flex-center gap-1 text-2xs text-accent font-semibold btn-link"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (n.url) window.open(n.url, '_blank', 'noopener,noreferrer');
-                        if (onOpenNews) onOpenNews(n);
-                      }}
-                    >
-                      पूरी खबर पढ़ें <ExternalLink size={11} />
-                    </button>
-                  </div>
-                </div>
-              ))
+                );
+              })
             ) : (
-              <p className="text-center text-xs text-muted py-3">Koi news match nahi hui.</p>
+              <p className="text-center text-xs text-muted py-3">कोई समाचार या करेंट अफेयर्स मैच नहीं हुआ।</p>
             )}
           </div>
         </div>

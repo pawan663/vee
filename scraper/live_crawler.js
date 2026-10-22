@@ -423,7 +423,7 @@ export async function scrapeJagranJosh() {
 
   const $ = cheerio.load(html);
   $('a[href*="/articles/"]').each((i, el) => {
-    if (news.length >= 15) return;
+    if (news.length >= 30) return;
     // Skip image thumbnail anchor wrappers
     if ($(el).find('img').length > 0 && $(el).text().trim().length < 8) return;
     const headline = cleanTitle($(el).text());
@@ -485,7 +485,7 @@ export async function scrapeNavbharatTimes() {
 
   const $ = cheerio.load(html);
   $('a[href*="/education/jobs-junction/"]').each((i, el) => {
-    if (news.length >= 15) return;
+    if (news.length >= 30) return;
     let title = cleanTitle($(el).text());
     let href = $(el).attr('href') || '';
     if (title && title.length > 20 && !title.includes('और पढ़ें') && !news.some(n => n.title === title)) {
@@ -542,7 +542,7 @@ export async function scrapeLiveHindustan() {
 
   const $ = cheerio.load(html);
   $('a[href*="/career/"]').each((i, el) => {
-    if (news.length >= 15) return;
+    if (news.length >= 30) return;
     const headlineEl = $(el).find('h2, h3, .title').first();
     const rawText = headlineEl.length > 0 ? headlineEl.text() : $(el).text();
     let title = cleanTitle(rawText);
@@ -602,7 +602,7 @@ export async function scrapeDainikBhaskar() {
 
   const $ = cheerio.load(xml, { xmlMode: true });
   $('item').each((i, el) => {
-    if (news.length >= 15) return;
+    if (news.length >= 30) return;
     const title = cleanTitle($(el).find('title').text());
     const link = $(el).find('link').text();
     if (title && link && !news.some(n => n.title === title)) {
@@ -658,7 +658,7 @@ export async function scrapeAmarUjala() {
 
   const $ = cheerio.load(xml, { xmlMode: true });
   $('item').each((i, el) => {
-    if (news.length >= 15) return;
+    if (news.length >= 30) return;
     const title = cleanTitle($(el).find('title').text());
     const link = $(el).find('link').text();
     if (title && link && !news.some(n => n.title === title)) {
@@ -714,7 +714,7 @@ export async function scrapeTimesOfIndia() {
 
   const $ = cheerio.load(xml, { xmlMode: true });
   $('item').each((i, el) => {
-    if (news.length >= 15) return;
+    if (news.length >= 30) return;
     const title = cleanTitle($(el).find('title').text());
     const link = $(el).find('link').text();
     if (title && link && !news.some(n => n.title === title)) {
@@ -769,7 +769,7 @@ export async function scrapeGoogleNewsHindi() {
 
   const $ = cheerio.load(xml, { xmlMode: true });
   $('item').each((i, el) => {
-    if (news.length >= 15) return;
+    if (news.length >= 30) return;
     const title = cleanTitle($(el).find('title').text());
     const link = $(el).find('link').text();
     const source = $(el).find('source').text() || 'Google Alert';
@@ -1160,36 +1160,52 @@ export async function scrapeDrishtiHindiCurrentAffairs() {
   }
 }
 
-// 16. Scrape GKToday Current Affairs & Subject Analysis
+// 16. Scrape GKToday Current Affairs & Subject Analysis (100+ Articles across 10 Pages)
 export async function scrapeGKTodayCurrentAffairs() {
-  console.log("🌐 [16/17] Scraping GKToday Current Affairs & GK Analysis...");
+  console.log("🌐 [16/17] Scraping GKToday Current Affairs (100+ Articles across 10 Pages)...");
   try {
-    const html = await fetchHtml('https://www.gktoday.in/current-affairs/');
-    if (!html) return [];
-    const $ = cheerio.load(html);
+    const pageUrls = [
+      'https://www.gktoday.in/current-affairs/',
+      'https://www.gktoday.in/current-affairs/page/2/',
+      'https://www.gktoday.in/current-affairs/page/3/',
+      'https://www.gktoday.in/current-affairs/page/4/',
+      'https://www.gktoday.in/current-affairs/page/5/',
+      'https://www.gktoday.in/current-affairs/page/6/',
+      'https://www.gktoday.in/current-affairs/page/7/',
+      'https://www.gktoday.in/current-affairs/page/8/',
+      'https://www.gktoday.in/current-affairs/page/9/',
+      'https://www.gktoday.in/current-affairs/page/10/'
+    ];
+
+    const htmls = await Promise.all(pageUrls.map((u) => fetchHtml(u)));
     const items = [];
     const todayStr = new Date().toISOString().split('T')[0];
 
-    $('a').each((_, el) => {
-      const href = $(el).attr('href') || '';
-      let text = $(el).text().replace(/\s+/g, ' ').trim();
-      if (text.length >= 25 && href.startsWith('https://www.gktoday.in/') && !href.includes('/category/') && !href.includes('/pdfs/')) {
-        if (!text.includes('Quiz') && !text.includes('Previous Months') && !text.includes('MCQs') && !text.includes('Categories')) {
-          if (!items.some(it => it.title === text || it.url === href)) {
-            items.push({
-              id: `gktoday-${Date.now()}-${items.length}`,
-              title: text,
-              source: 'GKToday',
-              category: 'Current Affairs',
-              url: href,
-              timeAgo: 'Daily Current Affairs Analysis',
-              date: todayStr
-            });
+    htmls.forEach((html) => {
+      if (!html) return;
+      const $ = cheerio.load(html);
+      $('a').each((_, el) => {
+        const href = $(el).attr('href') || '';
+        let text = $(el).text().replace(/\s+/g, ' ').trim();
+        if (text.length >= 25 && href.startsWith('https://www.gktoday.in/') && !href.includes('/category/') && !href.includes('/pdfs/') && !href.includes('/page/')) {
+          if (!text.includes('Quiz') && !text.includes('Previous Months') && !text.includes('MCQs') && !text.includes('Categories')) {
+            if (!items.some((it) => it.title === text || it.url === href)) {
+              items.push({
+                id: `gktoday-${Date.now()}-${items.length}`,
+                title: text,
+                source: 'GKToday',
+                category: 'Current Affairs',
+                url: href,
+                timeAgo: 'Daily Current Affairs Analysis',
+                date: todayStr
+              });
+            }
           }
         }
-      }
+      });
     });
-    console.log(`🌐 Successfully fetched ${items.length} items from GKToday!`);
+
+    console.log(`🌐 Successfully fetched ${items.length} 100+ items from GKToday!`);
     return items;
   } catch (err) {
     console.warn("⚠️ GKToday scrape issue:", err.message);
