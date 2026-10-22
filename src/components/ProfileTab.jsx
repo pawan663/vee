@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Bookmark, CheckCircle2, Award, DollarSign, Settings, Globe, Moon, Sun, Star, Share2, Shield, Wrench, ExternalLink, HelpCircle, ChevronRight, Edit3, MapPin, Target, GraduationCap, X, Check, Copy, Clock, Calendar, PlusCircle, Trash2, Bell, AlertTriangle, FileText, Upload, Download, Eye, Image as ImageIcon, RefreshCw, Activity, Radio, Wifi, Server } from 'lucide-react';
+import { User, Bookmark, CheckCircle2, Award, DollarSign, Settings, Globe, Moon, Sun, Star, Share2, Shield, Lock, Wrench, ExternalLink, HelpCircle, ChevronRight, Edit3, MapPin, Target, GraduationCap, X, Check, Copy, Clock, Calendar, PlusCircle, Trash2, Bell, AlertTriangle, FileText, Upload, Download, Eye, Image as ImageIcon, RefreshCw, Activity, Radio, Wifi, Server } from 'lucide-react';
 
 export default function ProfileTab({
   userProfile,
@@ -12,6 +12,7 @@ export default function ProfileTab({
   onOpenJob,
   onOpenTools,
   onOpenReview,
+  onOpenLegal,
   currentLang,
   onChangeLang,
   darkMode,
@@ -988,7 +989,7 @@ export default function ProfileTab({
 
         {/* Share App */}
         <div
-          className="menu-row flex-between py-2.5 cursor-pointer"
+          className="menu-row flex-between py-2.5 border-bottom cursor-pointer"
           onClick={() => {
             const shareText = `Sarkari & Private Jobs, Instant PDF, Mock Tests aur Aspirant Charcha ke liye download karein *VEE App*!\nhttps://play.google.com/store/apps/details?id=com.vacancyera.vee`;
             window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, '_blank');
@@ -999,6 +1000,74 @@ export default function ProfileTab({
               <Share2 size={15} className="text-success" />
             </div>
             <span className="text-xs font-semibold">{t.shareApp}</span>
+          </div>
+          <ChevronRight size={15} className="text-muted" />
+        </div>
+
+        {/* Government Disclaimer & Sources */}
+        <div
+          className="menu-row flex-between py-2.5 border-bottom cursor-pointer"
+          onClick={() => onOpenLegal && onOpenLegal('disclaimer')}
+        >
+          <div className="flex-center gap-2.5">
+            <div className="menu-icon-circle bg-amber-light">
+              <Shield size={15} className="text-warning" />
+            </div>
+            <div>
+              <span className="text-xs font-semibold">सरकारी डिस्क्लेमर व स्रोत</span>
+              <span className="text-3xs text-muted block">Government Disclaimer & Official Sources</span>
+            </div>
+          </div>
+          <ChevronRight size={15} className="text-muted" />
+        </div>
+
+        {/* Privacy Policy */}
+        <div
+          className="menu-row flex-between py-2.5 border-bottom cursor-pointer"
+          onClick={() => onOpenLegal && onOpenLegal('privacy')}
+        >
+          <div className="flex-center gap-2.5">
+            <div className="menu-icon-circle bg-blue-light">
+              <Lock size={15} className="text-primary" />
+            </div>
+            <div>
+              <span className="text-xs font-semibold">प्राइवेसी पॉलिसी (Privacy Policy)</span>
+              <span className="text-3xs text-muted block">Google Play Policy & Data Protection</span>
+            </div>
+          </div>
+          <ChevronRight size={15} className="text-muted" />
+        </div>
+
+        {/* Fair Use, DMCA & Takedown Policy */}
+        <div
+          className="menu-row flex-between py-2.5 border-bottom cursor-pointer"
+          onClick={() => onOpenLegal && onOpenLegal('fairuse')}
+        >
+          <div className="flex-center gap-2.5">
+            <div className="menu-icon-circle bg-purple-light">
+              <FileText size={15} className="text-secondary" />
+            </div>
+            <div>
+              <span className="text-xs font-semibold">कॉपीराइट, फेयर यूज़ व DMCA</span>
+              <span className="text-3xs text-muted block">Fair Dealing & Content Takedown Notice</span>
+            </div>
+          </div>
+          <ChevronRight size={15} className="text-muted" />
+        </div>
+
+        {/* Delete Account & Data (Google Play Requirement) */}
+        <div
+          className="menu-row flex-between py-2.5 cursor-pointer"
+          onClick={() => onOpenLegal && onOpenLegal('delete')}
+        >
+          <div className="flex-center gap-2.5">
+            <div className="menu-icon-circle" style={{ background: '#FEE2E2' }}>
+              <Trash2 size={15} className="text-danger" />
+            </div>
+            <div>
+              <span className="text-xs font-semibold text-danger">अकाउंट व डेटा हटाएं (Delete Data)</span>
+              <span className="text-3xs text-muted block">Purge profile, bookmarks & local history</span>
+            </div>
           </div>
           <ChevronRight size={15} className="text-muted" />
         </div>
@@ -1148,10 +1217,14 @@ export default function ProfileTab({
       </div>
 
       {/* Official Government Disclaimer (Google Play Compliance) */}
-      <div className="disclaimer-compliance-box p-3 rounded mb-4 text-center">
+      <div
+        className="disclaimer-compliance-box p-3 rounded mb-4 text-center cursor-pointer"
+        onClick={() => onOpenLegal && onOpenLegal('disclaimer')}
+        title="Click to view full Government Disclaimer & Official Sources"
+      >
         <Shield size={18} className="text-muted inline mb-1" />
         <p className="text-3xs text-muted leading-relaxed">
-          <b>Official Disclaimer:</b> VEE is an educational and career alert app operated by Vacancy Era Education. We do not represent or claim affiliation with any government entity. All job notifications and exam links are sourced from official publicly available websites (e.g. ssc.gov.in, rrbapply.gov.in, bhel.com).
+          <b>Official Disclaimer:</b> VEE is an educational and career alert app operated by Vacancy Era Education. We do not represent or claim affiliation with any government entity. All job notifications and exam links are sourced from official publicly available websites (e.g. ssc.gov.in, rrbapply.gov.in, bhel.com). <span className="text-accent underline font-semibold">विस्तृत पढ़ें &gt;</span>
         </p>
       </div>
 

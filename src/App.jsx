@@ -14,6 +14,7 @@ import MockTestModal from './components/MockTestModal';
 import ToolsModal from './components/ToolsModal';
 import ReviewModal from './components/ReviewModal';
 import AuthModal from './components/AuthModal';
+import LegalPolicyModal from './components/LegalPolicyModal';
 
 import { translations } from './data/translations';
 import { initialJobs } from './data/initialJobs';
@@ -111,6 +112,7 @@ export default function App() {
   const [activeMock, setActiveMock] = useState(null);
   const [isToolsOpen, setIsToolsOpen] = useState(false);
   const [isReviewOpen, setIsReviewOpen] = useState(false);
+  const [legalPolicyTab, setLegalPolicyTab] = useState(null);
   const [isAuthOpen, setIsAuthOpen] = useState(() => {
     const saved = localStorage.getItem('vee_user_profile');
     if (saved) {
@@ -151,6 +153,29 @@ export default function App() {
       setUserProfile(guestProfile);
       localStorage.removeItem('vee_current_account_key');
     }
+  };
+
+  const handleClearAllUserData = () => {
+    localStorage.removeItem('vee_user_profile');
+    localStorage.removeItem('vee_saved_jobs');
+    localStorage.removeItem('vee_applied_jobs');
+    localStorage.removeItem('vee_current_account_key');
+    const guestProfile = {
+      name: 'VEE Aspirant',
+      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
+      state: 'All India',
+      goal: 'Govt Job Aspirant',
+      qual: '12th / Graduate',
+      followers: '0',
+      following: '0',
+      karma: '0',
+      isLoggedIn: false,
+      phone: '',
+      email: ''
+    };
+    setUserProfile(guestProfile);
+    setSavedJobIds([]);
+    setAppliedJobs([]);
   };
 
   // Persistence Effects
@@ -445,6 +470,7 @@ export default function App() {
               onOpenTools={() => setIsToolsOpen(true)}
               onOpenReview={() => setIsReviewOpen(true)}
               onOpenAuth={() => setIsAuthOpen(true)}
+              onOpenLegal={(tab) => setLegalPolicyTab(tab || 'disclaimer')}
               onLogout={handleLogout}
               currentLang={currentLang}
               onChangeLang={setCurrentLang}
@@ -523,6 +549,14 @@ export default function App() {
           onClose={() => setIsAuthOpen(false)}
           onLoginSuccess={handleLoginSuccess}
           currentProfile={userProfile}
+          t={t}
+        />
+
+        <LegalPolicyModal
+          isOpen={!!legalPolicyTab}
+          initialTab={legalPolicyTab || 'disclaimer'}
+          onClose={() => setLegalPolicyTab(null)}
+          onClearUserData={handleClearAllUserData}
           t={t}
         />
       </div>
