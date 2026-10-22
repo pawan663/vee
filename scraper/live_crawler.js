@@ -57,25 +57,46 @@ function cleanTitle(raw) {
 }
 
 function detectQualification(text) {
-  if (/iti/i.test(text)) return { type: 'ITI', qual: 'ITI Pass (NCVT/SCVT)' };
-  if (/10th|10वीं|मैट्रिक/i.test(text)) return { type: '10th', qual: '10th Pass (Matriculation)' };
-  if (/12th|12वीं|इंटर|कॉन्स्टेबल|constable/i.test(text)) return { type: '12th', qual: '12th Pass (Intermediate)' };
-  if (/डिप्लोमा|diploma|polytechnic/i.test(text)) return { type: 'Diploma', qual: 'Polytechnic Diploma' };
+  const t = (text || '').toLowerCase();
+  if (/b\.tech|b\.e|mca|bca|m\.tech|engineering/i.test(t)) return { type: 'B.Tech', qual: 'B.Tech / B.E / Engineering' };
+  if (/mba|pgdm|post graduate|m\.sc|m\.com|m\.a|ph\.d|masters/i.test(t)) return { type: 'Graduate', qual: 'Post Graduate (MBA / M.Sc / Masters)' };
+  if (/diploma|polytechnic|d\.pharm/i.test(t)) return { type: 'Diploma', qual: 'Polytechnic Diploma in relevant Branch' };
+  if (/iti/i.test(t)) return { type: 'ITI', qual: 'ITI Pass in relevant Trade (NCVT/SCVT)' };
+  if (/12th|12वीं|इंटर|inter|10\+2|constable|कॉन्स्टेबल|clerk|लिपिक/i.test(t)) return { type: '12th', qual: '12th Pass (Intermediate / 10+2)' };
+  if (/10th|10वीं|मैट्रिक|matric|group d|mts|peon/i.test(t)) return { type: '10th', qual: '10th Pass (Matriculation)' };
   return { type: 'Graduate', qual: 'Graduation / Any Degree' };
 }
 
 export function enrichJobDetails(title, qualType) {
   const t = (title || '').toLowerCase();
 
-  // 1. Extract post count from title (matches numbers with commas or standalone numbers, excluding year 2024-2027)
-  let posts = "Active Vacancies";
-  const postMatch = title.match(/(\d{1,3}(?:,\d{3})+|\b(?!2024|2025|2026|2027)\d{2,6}\b)(?!\s*-\s*\d)/);
-  if (postMatch) {
-    posts = `${postMatch[1]} Posts`;
+  // 1. Accurate Post Count Extraction directly tied to "Posts" / "Vacancies" / "पद"
+  let posts = "Active Openings";
+  const explicitPostMatch = title.match(/(\d{1,3}(?:,\d{3})*|\d+)\s*(?:posts?|vacanc(?:y|ies)|पद)/i);
+  if (explicitPostMatch) {
+    const num = explicitPostMatch[1].trim();
+    posts = num === '1' ? '1 Post' : `${num} Posts`;
+  } else {
+    const bracketMatch = title.match(/[\(\[]\s*(\d{1,3}(?:,\d{3})*|\d+)\s*(?:posts?|पद)?\s*[\)\]]/i);
+    if (bracketMatch && !['2024', '2025', '2026', '2027'].includes(bracketMatch[1])) {
+      const num = bracketMatch[1].trim();
+      posts = num === '1' ? '1 Post' : `${num} Posts`;
+    } else {
+      const forPostsMatch = title.match(/(?:for|of)\s+(\d{1,3}(?:,\d{3})*|\d+)\s+.*?\bposts?\b/i);
+      if (forPostsMatch && !['2024', '2025', '2026', '2027'].includes(forPostsMatch[1])) {
+        const num = forPostsMatch[1].trim();
+        posts = num === '1' ? '1 Post' : `${num} Posts`;
+      } else {
+        const generalNum = title.match(/(?:–|-|\/)\s*(\d{1,3}(?:,\d{3})*|\d{2,6})\s*(?:–|-|\/|$)/);
+        if (generalNum && !['2024', '2025', '2026', '2027'].includes(generalNum[1])) {
+          posts = `${generalNum[1]} Posts`;
+        }
+      }
+    }
   }
 
-  // 2. Department identification
-  let dept = "Government Recruitment Cell";
+  // 2. Accurate Department identification
+  let dept = "Government Department";
   let videoId = null;
   let videoUrl = null;
   let videoTitle = null;
@@ -100,17 +121,97 @@ export function enrichJobDetails(title, qualType) {
   } else if (/\brpf\b|railway protection force/i.test(t)) {
     dept = "Railway Protection Force (RPF)";
   } else if (/delhi police/i.test(t)) {
-    dept = "Delhi Police";
+    dept = "Delhi Police (Govt of India)";
   } else if (/coast guard|icg/i.test(t)) {
-    dept = "Indian Coast Guard";
+    dept = "Indian Coast Guard (Ministry of Defence)";
   } else if (/indian army|\barmy\b/i.test(t)) {
     dept = "Indian Army (Defence Forces)";
   } else if (/indian navy|\bnavy\b/i.test(t)) {
     dept = "Indian Navy (Defence Forces)";
   } else if (/air force|iaf|airforce/i.test(t)) {
     dept = "Indian Air Force (IAF)";
-  } else if (/\blic\b|life insurance/i.test(t)) {
-    dept = "Life Insurance Corporation of India (LIC)";
+  } else if (/supreme court|\bsci\b/i.test(t)) {
+    dept = "Supreme Court of India (SCI)";
+  } else if (/high court/i.test(t)) {
+    dept = "High Court Judicial Services";
+  } else if (/railway|rrb|rrc|group d/i.test(t)) {
+    dept = "Ministry of Railways (RRB / RRC)";
+  } else if (/\bupsssc\b/i.test(t)) {
+    dept = "Uttar Pradesh Subordinate Services Selection Commission (UPSSSC)";
+  } else if (/\buppsc\b/i.test(t)) {
+    dept = "Uttar Pradesh Public Service Commission (UPPSC)";
+  } else if (/\bupprpb\b|up police/i.test(t)) {
+    dept = "Uttar Pradesh Police Recruitment & Promotion Board (UPPRPB)";
+  } else if (/\bbpsc\b/i.test(t)) {
+    dept = "Bihar Public Service Commission (BPSC)";
+  } else if (/\bbtsc\b/i.test(t)) {
+    dept = "Bihar Technical Services Commission (BTSC)";
+  } else if (/\brpsc\b/i.test(t)) {
+    dept = "Rajasthan Public Service Commission (RPSC)";
+  } else if (/\brsmssb\b|\brssb\b/i.test(t)) {
+    dept = "Rajasthan Staff Selection Board (RSSB / RSMSSB)";
+  } else if (/\buksssc\b/i.test(t)) {
+    dept = "Uttarakhand Subordinate Service Selection Commission (UKSSSC)";
+  } else if (/\bukpsc\b/i.test(t)) {
+    dept = "Uttarakhand Public Service Commission (UKPSC)";
+  } else if (/\bmpesb\b|vyapam/i.test(t)) {
+    dept = "Madhya Pradesh Employees Selection Board (MPESB)";
+  } else if (/\bhssc\b/i.test(t)) {
+    dept = "Haryana Staff Selection Commission (HSSC)";
+  } else if (/\bopsc\b/i.test(t)) {
+    dept = "Odisha Public Service Commission (OPSC)";
+  } else if (/\bossc\b/i.test(t)) {
+    dept = "Odisha Staff Selection Commission (OSSC)";
+  } else if (/\bwbpsc\b/i.test(t)) {
+    dept = "West Bengal Public Service Commission (WBPSC)";
+  } else if (/\bjkssb\b/i.test(t)) {
+    dept = "J&K Services Selection Board (JKSSB)";
+  } else if (/\bssc\b|\bcgl\b|\bchsl\b|\bmts\b|havaldar|\bgd\b/i.test(t)) {
+    dept = "Staff Selection Commission (SSC)";
+  } else if (/\bupsc\b|\bnda\b|\bcds\b|civil service/i.test(t)) {
+    dept = "Union Public Service Commission (UPSC)";
+  } else if (/\baai\b|airports authority/i.test(t)) {
+    dept = "Airports Authority of India (AAI)";
+  } else if (/\beil\b|engineers india/i.test(t)) {
+    dept = "Engineers India Limited (EIL, Navratna PSU)";
+  } else if (/\bcsir\b|cftri|ihbt/i.test(t)) {
+    dept = "Council of Scientific & Industrial Research (CSIR)";
+  } else if (/\bnicl\b/i.test(t)) {
+    dept = "National Insurance Company Limited (NICL)";
+  } else if (/\buiic\b/i.test(t)) {
+    dept = "United India Insurance Company (UIIC)";
+  } else if (/\boicl\b/i.test(t)) {
+    dept = "Oriental Insurance Company Limited (OICL)";
+  } else if (/\bnabard\b|nabfins/i.test(t)) {
+    dept = "NABARD / NABFINS Financial Services";
+  } else if (/\bexim bank\b/i.test(t)) {
+    dept = "Export-Import Bank of India (Exim Bank)";
+  } else if (/\brbi\b|reserve bank/i.test(t)) {
+    dept = "Reserve Bank of India (RBI)";
+  } else if (/\bsbi\b|state bank of india/i.test(t)) {
+    dept = "State Bank of India (SBI)";
+  } else if (/\bkvic\b/i.test(t)) {
+    dept = "Khadi & Village Industries Commission (KVIC)";
+  } else if (/\bsai\b|sports authority/i.test(t)) {
+    dept = "Sports Authority of India (SAI)";
+  } else if (/\bnift\b/i.test(t)) {
+    dept = "National Institute of Fashion Technology (NIFT)";
+  } else if (/\bnta\b|ugc net/i.test(t)) {
+    dept = "National Testing Agency (NTA)";
+  } else if (/\bdgft\b/i.test(t)) {
+    dept = "Directorate General of Foreign Trade (DGFT)";
+  } else if (/\bhurl\b/i.test(t)) {
+    dept = "Hindustan Urvarak & Rasayan Limited (HURL)";
+  } else if (/\bbmhrc\b/i.test(t)) {
+    dept = "Bhopal Memorial Hospital & Research Centre (ICMR)";
+  } else if (/\brites\b/i.test(t)) {
+    dept = "RITES Limited (Ministry of Railways)";
+  } else if (/\bnhai\b/i.test(t)) {
+    dept = "National Highways Authority of India (NHAI)";
+  } else if (/\bnmdc\b/i.test(t)) {
+    dept = "National Mineral Development Corp (NMDC)";
+  } else if (/\bncl\b/i.test(t)) {
+    dept = "Northern Coalfields Limited (NCL)";
   } else if (/\bntpc\b/i.test(t)) {
     dept = "NTPC Limited (Govt PSU)";
   } else if (/\bbhel\b/i.test(t)) {
@@ -125,75 +226,93 @@ export function enrichJobDetails(title, qualType) {
     dept = "Indian Space Research Organisation (ISRO)";
   } else if (/\bdmrc\b|delhi metro/i.test(t)) {
     dept = "Delhi Metro Rail Corporation (DMRC)";
-  } else if (/\bnmdc\b/i.test(t)) {
-    dept = "National Mineral Development Corp (NMDC)";
-  } else if (/\bncl\b/i.test(t)) {
-    dept = "Northern Coalfields Limited (NCL)";
-  } else if (/\bnhai\b/i.test(t)) {
-    dept = "National Highways Authority of India (NHAI)";
   } else if (/\bcwc\b|warehousing/i.test(t)) {
     dept = "Central Warehousing Corporation (CWC)";
   } else if (/\birel\b/i.test(t)) {
     dept = "IREL (India) Limited (Govt PSU)";
-  } else if (/railway|rrb|rrc|group d/i.test(t)) {
-    dept = "Ministry of Railways (RRB / RRC)";
-  } else if (/\bssc\b|\bcgl\b|\bchsl\b|\bmts\b|havaldar|\bgd\b/i.test(t)) {
-    dept = "Staff Selection Commission (SSC)";
-  } else if (/\bupsc\b|\bnda\b|\bcds\b|civil service/i.test(t)) {
-    dept = "Union Public Service Commission (UPSC)";
-  } else if (/bank|ibps|\bsbi\b|\brbi\b|\bpnb\b|canara|uco/i.test(t)) {
-    dept = "Banking Recruitment Board (IBPS / SBI)";
+  } else if (/\blic\b|life insurance/i.test(t)) {
+    dept = "Life Insurance Corporation of India (LIC)";
+  } else if (/bank of baroda|\bbob\b/i.test(t)) {
+    dept = "Bank of Baroda";
+  } else if (/punjab & sind|punjab and sind/i.test(t)) {
+    dept = "Punjab & Sind Bank";
+  } else if (/uco bank/i.test(t)) {
+    dept = "UCO Bank";
+  } else if (/canara bank/i.test(t)) {
+    dept = "Canara Bank";
+  } else if (/bank|ibps|\bpnb\b|co-operative bank/i.test(t)) {
+    dept = "Banking Recruitment Board (IBPS / PSB)";
   } else if (/police|constable|\bsi\b|daroga|sub[\s-]?inspector|सिपाही|दरोगा/i.test(t)) {
     dept = "State Police Recruitment Board";
   } else if (/teacher|\btet\b|\bprt\b|\btgt\b|\bpgt\b|upessc/i.test(t)) {
     dept = "Education Dept / School Selection Board";
   } else if (/post office|\bgds\b|\bdak\b/i.test(t)) {
     dept = "Department of Posts (India Post)";
+  } else if (/port authority/i.test(t)) {
+    const portMatch = title.match(/([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\s+Port\s+Authority)/);
+    dept = portMatch ? portMatch[1] : "Major Port Authority of India";
+  } else if (/university|vishwavidyalaya/i.test(t)) {
+    const univMatch = title.match(/([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\s+University)/);
+    dept = univMatch ? univMatch[1] : "Central / State University";
   } else {
-    const firstWord = title.trim().split(/\s+/)[0];
-    if (firstWord && firstWord.length > 2 && !/हादसा|सड़क|गोली|घायल|अस्पताल|hospital|joint|road|brother|sister|agra/i.test(firstWord)) {
-      dept = `${firstWord} Board / Dept`;
+    const words = title.trim().split(/\s+/).filter(w => !/recruitment|online|form|apply|bharti|posts?|2026/i.test(w));
+    if (words.length >= 2) {
+      dept = `${words[0]} ${words[1]}`;
+    } else if (words.length === 1) {
+      dept = words[0];
     } else {
       dept = "Government Department";
     }
   }
 
-  // 3. Realistic Salary based on type & dept
+  // 3. Realistic Post-Aligned Salary
   let salary = "Level 3 - Level 7 (₹21,700 - ₹69,100) + DA";
-  if (qualType === '10th' || /group d|mts|peon/i.test(t)) {
+  if (/apprentice/i.test(t)) {
+    salary = "Monthly Stipend ₹7,000 - ₹12,500/month (As per Apprenticeship Rules)";
+  } else if (qualType === '10th' || /group d|mts|peon|safai|attendant|helper/i.test(t)) {
     salary = "Level 1 (₹18,000 - ₹56,900) + DA + HRA";
-  } else if (qualType === 'ITI' || /technician|trade|artisan|apprentice/i.test(t)) {
-    salary = "Level 2/3 (₹19,900 - ₹63,200) + Allowances";
-  } else if (qualType === '12th' || /clerk|constable/i.test(t)) {
-    salary = "Level 3/4 (₹21,700 - ₹81,100) + HRA";
-  } else if (qualType === 'Graduate' || /officer|inspector|sub engineer/i.test(t)) {
-    salary = "Level 6/7 (₹35,400 - ₹1,42,400) + Grade Pay";
+  } else if (qualType === 'ITI' || /technician|trade|artisan|fitter|mechanic|driver/i.test(t)) {
+    salary = "Level 2 / Level 3 (₹19,900 - ₹69,100) + Allowances";
+  } else if (qualType === '12th' || /clerk|constable|typist|deo|junior assistant/i.test(t)) {
+    salary = "Level 3 / Level 4 (₹21,700 - ₹81,100) + HRA";
+  } else if (/presiding officer|director|chief executive|general manager|dgm/i.test(t)) {
+    salary = "Level 12 - Level 14 (₹1,44,200 - ₹2,18,200) + Perks";
+  } else if (qualType === 'Graduate' || qualType === 'B.Tech' || /officer|inspector|sub[\s-]?engineer|assistant manager|engineer|scientist|faculty/i.test(t)) {
+    salary = "Level 6 / Level 7 (₹35,400 - ₹1,42,400) + Grade Pay";
   }
 
-  // 4. Age Limit
-  let ageLimit = "18 - 35 Years (Relaxation as per rules)";
-  if (/police|defence|army|navy|airforce|crpf|assam rifles/i.test(t)) {
-    ageLimit = "18 - 28 Years (Relaxation as per rules)";
-  } else if (/apprentice/i.test(t)) {
-    ageLimit = "15 - 24 Years";
+  // 4. Post-Aligned Age Limit
+  let ageLimit = "18 - 35 Years (Relaxation as per Govt Rules)";
+  if (/apprentice/i.test(t)) {
+    ageLimit = "15 - 24 Years (Age Relaxation as per rules)";
+  } else if (/police|defence|army|navy|airforce|crpf|bsf|cisf|itbp|ssb|assam rifles/i.test(t)) {
+    ageLimit = "18 - 25 Years (Relaxation for OBC/SC/ST)";
+  } else if (/director|chief|general manager|presiding officer|specialist/i.test(t)) {
+    ageLimit = "Up to 56 Years (As per Experience)";
   }
 
-  // 5. Selection Process
+  // 5. Post-Aligned Selection Process
   let selectionProcess = "CBT / Written Exam + Document Verification";
-  if (/police|army|navy|crpf|constable|tradesman/i.test(t)) {
-    selectionProcess = "CBT Exam + Physical Test (PET/PST) + Medical";
+  if (/apprentice/i.test(t)) {
+    selectionProcess = "10th & ITI Merit List (No Written Exam) + Document Verification";
+  } else if (/police|army|navy|crpf|bsf|cisf|itbp|ssb|constable|tradesman|sub[\s-]?inspector/i.test(t)) {
+    selectionProcess = "CBT Exam + Physical Test (PET/PST) + Medical Examination";
   } else if (/gds|merit/i.test(t)) {
-    selectionProcess = "10th Merit List (Zero Written Exam)";
-  } else if (/interview|faculty|specialist/i.test(t)) {
+    selectionProcess = "10th Class Merit List (Zero Written Exam)";
+  } else if (/interview|faculty|specialist|officer|manager|director/i.test(t)) {
     selectionProcess = "Screening Test + Personal Interview";
   }
 
   // 6. Application Fee
-  let fee = "₹100 (Gen/OBC), Nil (SC/ST/Women)";
-  if (/railway|rrb/i.test(t)) {
-    fee = "₹500 (₹400 Refundable after CBT)";
-  } else if (/bank|ibps|sbi/i.test(t)) {
-    fee = "₹850 (Gen/OBC), ₹175 (SC/ST)";
+  let fee = "₹100 (Gen/OBC), Nil (SC/ST/Women/Ex-SM)";
+  if (/railway|rrb|rrc/i.test(t)) {
+    fee = "₹500 (₹400 Refundable after appearing in CBT)";
+  } else if (/bank|ibps|sbi|rbi|pnb|uco|canara/i.test(t)) {
+    fee = "₹850 (Gen/OBC/EWS), ₹175 (SC/ST/PWD)";
+  } else if (/apprentice/i.test(t)) {
+    fee = "Nil (100% Free Application)";
+  } else if (/upsc/i.test(t)) {
+    fee = "₹100 (Gen/OBC Male), Nil (Female/SC/ST/PwBD)";
   }
 
   return { posts, dept, salary, ageLimit, selectionProcess, fee, videoId, videoUrl, videoTitle };
@@ -236,15 +355,54 @@ function detectFjaState(org, postName) {
   return 'All India';
 }
 
+function formatQualText(rawQual, fallbackType) {
+  const q = (rawQual || '').trim();
+  if (!q || q.length < 3 || /^(other|others|retired\s*staff|various)$/i.test(q)) {
+    if (fallbackType === '10th') return '10th Pass (Matriculation) from recognized Board';
+    if (fallbackType === '12th') return '12th Pass (Intermediate / 10+2) in any stream';
+    if (fallbackType === 'ITI') return 'ITI Pass in relevant Trade (NCVT/SCVT)';
+    if (fallbackType === 'Diploma') return 'Polytechnic Diploma in relevant Branch';
+    if (fallbackType === 'B.Tech') return 'B.Tech / B.E / Engineering Degree in relevant discipline';
+    return 'Graduation / Relevant Educational Qualification as per Notification';
+  }
+  if (/^10th$/i.test(q)) return '10th Pass (Matriculation) from recognized Board';
+  if (/^12th$/i.test(q)) return '12th Pass (Intermediate / 10+2) in any stream';
+  if (/^iti$/i.test(q)) return 'ITI Pass in relevant Trade (NCVT/SCVT)';
+  if (/^diploma$/i.test(q)) return 'Polytechnic Diploma in relevant Engineering / Technology';
+  if (/^b\.?e\b|^b\.?tech\b/i.test(q) && q.length < 15) return 'B.Tech / B.E / Engineering Degree in relevant discipline';
+  if (/^any degree$/i.test(q)) return 'Graduation / Any Bachelor Degree from recognized University';
+  return q;
+}
+
 function detectFjaQual(qualText, postText) {
   const text = `${qualText} ${postText}`.toLowerCase();
-  if (/iti/i.test(text)) return { type: 'ITI', qual: qualText || 'ITI Pass (NCVT/SCVT)' };
-  if (/diploma|polytechnic|d\.pharm/i.test(text)) return { type: 'Diploma', qual: qualText || 'Polytechnic Diploma' };
-  if (/10th|10वीं|matric/i.test(text)) return { type: '10th', qual: qualText || '10th Pass (Matric)' };
-  if (/12th|12वीं|inter|intermediate|10\+2/i.test(text)) return { type: '12th', qual: qualText || '12th Pass (10+2)' };
-  if (/b\.tech|b\.e|mca|bca|engineering/i.test(text)) return { type: 'B.Tech', qual: qualText || 'B.Tech / B.E / Engineering' };
-  if (/graduate|degree|b\.a|b\.sc|b\.com|mba|pgdm/i.test(text)) return { type: 'Graduate', qual: qualText || 'Any Graduate' };
-  return { type: 'Graduate', qual: qualText || 'Any Degree' };
+  let type = 'Graduate';
+  let qual = qualText;
+
+  if (/b\.tech|b\.e|mca|bca|m\.tech|engineering/i.test(text)) {
+    type = 'B.Tech';
+    qual = qualText || 'B.Tech / B.E / Engineering Degree';
+  } else if (/mba|pgdm|post graduate|m\.sc|m\.com|m\.a|ph\.d|masters/i.test(text)) {
+    type = 'Graduate';
+    qual = qualText || 'Post Graduate (MBA / M.Sc / Masters Degree)';
+  } else if (/diploma|polytechnic|d\.pharm/i.test(text)) {
+    type = 'Diploma';
+    qual = qualText || 'Polytechnic Diploma in relevant Branch';
+  } else if (/iti/i.test(text)) {
+    type = 'ITI';
+    qual = qualText || 'ITI Pass in relevant Trade (NCVT/SCVT)';
+  } else if (/12th|12वीं|inter|intermediate|10\+2/i.test(text)) {
+    type = '12th';
+    qual = qualText || '12th Pass (Intermediate / 10+2)';
+  } else if (/10th|10वीं|matric/i.test(text)) {
+    type = '10th';
+    qual = qualText || '10th Pass (Matriculation)';
+  } else if (/graduate|degree|b\.a|b\.sc|b\.com/i.test(text)) {
+    type = 'Graduate';
+    qual = qualText || 'Graduation / Any Bachelor Degree';
+  }
+
+  return { type, qual: formatQualText(qual, type) };
 }
 
 function getOfficialPortalUrl(dept, title, articleLink) {
@@ -321,6 +479,19 @@ export async function scrapeFreeJobAlert() {
           const text = cleanTitle($(a).text());
           const href = $(a).attr('href');
           if (text && href && !href.includes('#') && text !== heading && text !== 'View All') {
+            if (/admit\s*card|hall\s*ticket|call\s*letter|eligibility\s*result|final\s*result|\bresult\b|score\s*card|answer\s*key|merit\s*list|exam\s*date/i.test(text) && !/online\s*form|apply\s*online/i.test(text)) {
+              news.push({
+                id: `fja-box-news-${Date.now()}-${i}`,
+                title: text,
+                url: href,
+                source: "FreeJobAlert",
+                tag: /admit/i.test(text) ? "Admit Card" : (/result/i.test(text) ? "Result" : "Exam Alert"),
+                timeAgo: "Live Alert",
+                isAdmit: /admit/i.test(text),
+                isResult: /result/i.test(text)
+              });
+              return;
+            }
             const q = detectFjaQual('', text);
             const state = detectFjaState('', text);
             const details = enrichJobDetails(text, q.type);
@@ -409,6 +580,19 @@ export async function scrapeFreeJobAlert() {
         const link = $(tr).find('a[href*="/articles/"]').attr('href') || $(tr).find('a').attr('href');
 
         if (org && postName && link && !postName.toLowerCase().includes('post name')) {
+          if (/admit\s*card|hall\s*ticket|call\s*letter|eligibility\s*result|final\s*result|\bresult\b|score\s*card|answer\s*key|merit\s*list|exam\s*date/i.test(postName) && !/online\s*form|apply\s*online/i.test(postName)) {
+            news.push({
+              id: `fja-live-news-${Date.now()}-${i}`,
+              title: `${org} - ${postName}`,
+              url: link,
+              source: "FreeJobAlert",
+              tag: /admit/i.test(postName) ? "Admit Card" : (/result/i.test(postName) ? "Result" : "Exam Alert"),
+              timeAgo: "Live Alert",
+              isAdmit: /admit/i.test(postName),
+              isResult: /result/i.test(postName)
+            });
+            return;
+          }
           const lastDate = parseFjaDate(lastDateRaw);
           if (!lastDate || lastDate >= todayStr) {
             const q = detectFjaQual(qual, postName);
@@ -416,7 +600,13 @@ export async function scrapeFreeJobAlert() {
             const title = `${org} ${postName} Recruitment 2026`;
             if (!jobs.some(j => j.title.toLowerCase() === title.toLowerCase())) {
               const details = enrichJobDetails(title, q.type);
-              const postCount = postName.includes('Posts') ? (postName.split('–')[1]?.trim() || details.posts) : details.posts;
+              let postCount = details.posts;
+              if (postCount === "Active Openings" && postName.includes('Posts')) {
+                const parts = postName.split('–');
+                if (parts.length > 1 && /\d+\s*posts/i.test(parts[parts.length - 1])) {
+                  postCount = parts[parts.length - 1].trim();
+                }
+              }
               jobs.push({
                 id: `fja-live-${Date.now()}-${i}`,
                 title: title,
@@ -458,6 +648,19 @@ export async function scrapeFreeJobAlert() {
       const title = cleanTitle($feed(el).find('title').text());
       const link = $feed(el).find('link').text() || $feed(el).find('guid').text();
       if (title && title.length > 12 && !jobs.some(j => j.title.toLowerCase() === title.toLowerCase())) {
+        if (/admit\s*card|hall\s*ticket|call\s*letter|eligibility\s*result|final\s*result|\bresult\b|score\s*card|answer\s*key|merit\s*list|exam\s*date/i.test(title) && !/online\s*form|apply\s*online/i.test(title)) {
+          news.push({
+            id: `fja-feed-news-${Date.now()}-${i}`,
+            title: title,
+            url: link,
+            source: "FreeJobAlert",
+            tag: /admit/i.test(title) ? "Admit Card" : (/result/i.test(title) ? "Result" : "Exam Alert"),
+            timeAgo: "Live Alert",
+            isAdmit: /admit/i.test(title),
+            isResult: /result/i.test(title)
+          });
+          return;
+        }
         const q = detectQualification(title);
         const details = enrichJobDetails(title, q.type);
         jobs.push({
@@ -706,8 +909,29 @@ export async function scrapeSarkariResultCom() {
     if (href.includes('youtube') || href.includes('instagram') || href.includes('twitter') || href.includes('t.me') || href.includes('itunes') || href.includes('play.google')) return;
     if (/sarkari\s*result|tools|privacy|disclaimer|contact|about|home/i.test(text)) return;
 
-    if (/online form|recruitment|bharti|vacancy|post|apply/i.test(text)) {
-      if (!jobs.some(j => j.title.toLowerCase() === text.toLowerCase()) && jobs.length < 20) {
+    const isAdmitOrResult = /result|admit\s*card|answer\s*key|cutoff|score\s*card|hall\s*ticket|eligibility|selection/i.test(text);
+    const isOnlineForm = /online\s*form|apply\s*online/i.test(text);
+
+    if (isAdmitOrResult && !isOnlineForm) {
+      if (!news.some(n => n.title.toLowerCase() === text.toLowerCase()) && news.length < 25) {
+        const isAdmit = /admit\s*card|hall\s*ticket/i.test(text);
+        const isResult = /result|score\s*card|selection|merit/i.test(text);
+        news.push({
+          id: `sr-news-${Date.now()}-${i}`,
+          title: text,
+          source: "Sarkari Result",
+          url: href,
+          timeAgo: "Live Sarkari Alert",
+          tag: isAdmit ? "Admit Card" : (isResult ? "Result" : "Sarkari Result"),
+          isAdmit,
+          isResult
+        });
+      }
+      return;
+    }
+
+    if (/online\s*form|recruitment|bharti|vacancy|\bposts?\b|apply/i.test(text)) {
+      if (!jobs.some(j => j.title.toLowerCase() === text.toLowerCase()) && jobs.length < 25) {
         const q = detectQualification(text);
         const details = enrichJobDetails(text, q.type);
         jobs.push({
@@ -735,17 +959,6 @@ export async function scrapeSarkariResultCom() {
           selectionProcess: details.selectionProcess
         });
       }
-    } else if (/result|admit card|answer key|cutoff|selection/i.test(text)) {
-      if (!news.some(n => n.title.toLowerCase() === text.toLowerCase()) && news.length < 15) {
-        news.push({
-          id: `sr-news-${Date.now()}-${i}`,
-          title: text,
-          source: "Sarkari Result",
-          url: href,
-          timeAgo: "Live Sarkari Alert",
-          tag: "Sarkari Result"
-        });
-      }
     }
   });
 
@@ -768,8 +981,29 @@ export async function scrapeSarkariResultCm() {
     if (href.includes('privacy') || href.includes('disclaimer') || href.includes('contact') || href.includes('about')) return;
     if (/sarkari\s*result|tools|privacy|disclaimer|contact|about|home/i.test(text)) return;
 
-    if (/form|recruitment|bharti|vacancy|posts|karmchari|teacher/i.test(text)) {
-      if (!jobs.some(j => j.title.toLowerCase() === text.toLowerCase()) && jobs.length < 20) {
+    const isAdmitOrResult = /result|admit\s*card|answer\s*key|cutoff|score\s*card|hall\s*ticket|out|declared/i.test(text);
+    const isOnlineForm = /online\s*form|apply\s*online/i.test(text);
+
+    if (isAdmitOrResult && !isOnlineForm) {
+      if (!news.some(n => n.title.toLowerCase() === text.toLowerCase()) && news.length < 25) {
+        const isAdmit = /admit\s*card|hall\s*ticket/i.test(text);
+        const isResult = /result|score\s*card|merit/i.test(text);
+        news.push({
+          id: `srcm-news-${Date.now()}-${i}`,
+          title: text,
+          source: "Sarkari Result .cm",
+          url: href,
+          timeAgo: "Sarkari Alert",
+          tag: isAdmit ? "Admit Card" : (isResult ? "Result" : "Sarkari Result .cm"),
+          isAdmit,
+          isResult
+        });
+      }
+      return;
+    }
+
+    if (/form|recruitment|bharti|vacancy|\bposts?\b|karmchari|teacher/i.test(text)) {
+      if (!jobs.some(j => j.title.toLowerCase() === text.toLowerCase()) && jobs.length < 25) {
         const q = detectQualification(text);
         const details = enrichJobDetails(text, q.type);
         jobs.push({
@@ -797,17 +1031,6 @@ export async function scrapeSarkariResultCm() {
           selectionProcess: details.selectionProcess
         });
       }
-    } else if (/result|admit card|answer key|out|declared/i.test(text)) {
-      if (!news.some(n => n.title.toLowerCase() === text.toLowerCase()) && news.length < 15) {
-        news.push({
-          id: `srcm-news-${Date.now()}-${i}`,
-          title: text,
-          source: "Sarkari Result .cm",
-          url: href,
-          timeAgo: "Sarkari Alert",
-          tag: "Sarkari Result .cm"
-        });
-      }
     }
   });
 
@@ -828,8 +1051,29 @@ export async function scrapeRojgarResult() {
     const text = cleanTitle($(el).text());
     if (!href.includes('rojgarresult.com') || text.length < 15 || text.includes('Rojgar Result') || text.includes('Disclaimer')) return;
 
-    if (/online form|recruitment|bharti|vacancy|posts|tre 4|pgt|chsl|assistant/i.test(text)) {
-      if (!jobs.some(j => j.title.toLowerCase() === text.toLowerCase()) && jobs.length < 15) {
+    const isAdmitOrResult = /result|admit\s*card|answer\s*key|score\s*card|allotment|cutoff|hall\s*ticket/i.test(text);
+    const isOnlineForm = /online\s*form|apply\s*online/i.test(text);
+
+    if (isAdmitOrResult && !isOnlineForm) {
+      if (!news.some(n => n.title.toLowerCase() === text.toLowerCase()) && news.length < 25) {
+        const isAdmit = /admit\s*card|hall\s*ticket/i.test(text);
+        const isResult = /result|allotment|score\s*card/i.test(text);
+        news.push({
+          id: `rr-news-${Date.now()}-${i}`,
+          title: text,
+          source: "Rojgar Result",
+          url: href,
+          timeAgo: "Live Update",
+          tag: isAdmit ? "Admit Card" : (isResult ? "Merit / Result" : "Rojgar Alert"),
+          isAdmit,
+          isResult
+        });
+      }
+      return;
+    }
+
+    if (/online\s*form|recruitment|bharti|vacancy|\bposts?\b|tre 4|pgt|chsl|assistant/i.test(text)) {
+      if (!jobs.some(j => j.title.toLowerCase() === text.toLowerCase()) && jobs.length < 20) {
         const q = detectQualification(text);
         const details = enrichJobDetails(text, q.type);
         jobs.push({
@@ -855,21 +1099,6 @@ export async function scrapeRojgarResult() {
           videoId: details.videoId,
           videoUrl: details.videoUrl,
           videoTitle: details.videoTitle
-        });
-      }
-    } else if (/result|admit card|score card|allotment/i.test(text)) {
-      if (!news.some(n => n.title.toLowerCase() === text.toLowerCase()) && news.length < 15) {
-        const isAdmit = /admit card|hall ticket/i.test(text);
-        const isResult = /result|allotment|score card/i.test(text);
-        news.push({
-          id: `rr-news-${Date.now()}-${i}`,
-          title: text,
-          source: "Rojgar Result",
-          url: href,
-          timeAgo: "Live Update",
-          tag: isAdmit ? "Admit Card" : (isResult ? "Merit / Result" : "Rojgar Alert"),
-          isAdmit,
-          isResult
         });
       }
     }
@@ -1396,4 +1625,6 @@ export async function aggregateAllLiveData() {
 }
 
 // Auto-run if executed directly
-aggregateAllLiveData().catch(console.error);
+if (process.argv[1] && process.argv[1].replace(/\\/g, '/').endsWith('live_crawler.js')) {
+  aggregateAllLiveData().catch(console.error);
+}

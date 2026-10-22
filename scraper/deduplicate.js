@@ -98,17 +98,46 @@ export function areJobsDuplicate(jobA, jobB) {
 }
 
 export function mergeJobListing(target, incoming) {
-  const dept = (target.dept && !target.dept.includes('Recruitment Cell') && !target.dept.includes('Government'))
-    ? target.dept
-    : (incoming.dept || target.dept);
-
-  const posts = (target.posts && target.posts !== 'Active Vacancies')
-    ? target.posts
-    : (incoming.posts || target.posts);
-
+  // Keep the most informative and clean title
   const title = (target.title && target.title.length > (incoming.title || '').length)
     ? target.title
     : (incoming.title || target.title);
+
+  // Department: prioritize specific over generic
+  const isGenericDept = (d) => !d || /government department|recruitment\s*cell|official\s*portal/i.test(d);
+  const dept = !isGenericDept(target.dept)
+    ? target.dept
+    : (!isGenericDept(incoming.dept) ? incoming.dept : (target.dept || incoming.dept));
+
+  // Posts: prioritize explicit count over generic placeholders
+  const isGenericPosts = (p) => !p || /active\s*(vacancies|openings)|multiple\s*openings/i.test(p);
+  let posts = !isGenericPosts(target.posts)
+    ? target.posts
+    : (!isGenericPosts(incoming.posts) ? incoming.posts : (target.posts || incoming.posts || 'Active Openings'));
+
+  if (isGenericPosts(posts)) {
+    const combinedTitles = `${target.title || ''} ${incoming.title || ''}`;
+    const m = combinedTitles.match(/(\d{1,3}(?:,\d{3})*|\d+)\s*(?:posts?|vacanc(?:y|ies)|पद)/i);
+    if (m) {
+      posts = `${m[1].trim()} Posts`;
+    }
+  }
+
+  // Apprentice protection: ensure stipend & merit list are preserved
+  const isApprentice = /apprentice/i.test(`${title} ${dept}`);
+  const salary = isApprentice
+    ? "Monthly Stipend ₹7,000 - ₹12,500/month (As per Apprenticeship Rules)"
+    : (incoming.salary || target.salary);
+
+  const selectionProcess = isApprentice
+    ? "10th & ITI Merit List (No Written Exam) + Document Verification"
+    : (target.selectionProcess || incoming.selectionProcess);
+
+  // Qualification: prioritize specific
+  const isGenericQual = (q) => !q || /any degree|graduation \/ any degree|other/i.test(q);
+  const qualification = !isGenericQual(incoming.qualification) && incoming.qualification
+    ? incoming.qualification
+    : (!isGenericQual(target.qualification) ? target.qualification : (incoming.qualification || target.qualification));
 
   return {
     ...target,
@@ -116,6 +145,12 @@ export function mergeJobListing(target, incoming) {
     title,
     dept,
     posts,
+    salary,
+    selectionProcess,
+    qualification,
+    videoId: target.videoId || incoming.videoId || null,
+    videoUrl: target.videoUrl || incoming.videoUrl || null,
+    videoTitle: target.videoTitle || incoming.videoTitle || null,
     pdfUrl: (target.pdfUrl && target.pdfUrl.includes('.pdf')) ? target.pdfUrl : (incoming.pdfUrl || target.pdfUrl),
     applyUrl: (incoming.applyUrl && incoming.applyUrl.startsWith('http') && !incoming.applyUrl.includes('google.com'))
       ? incoming.applyUrl

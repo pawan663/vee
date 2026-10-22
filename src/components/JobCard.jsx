@@ -1,6 +1,7 @@
 import React from 'react';
 import { Calendar, Users, Bookmark, FileText, Send, Flame, ChevronRight, Building, PlayCircle } from 'lucide-react';
 import { getJobVideo } from '../data/videoRegistry';
+import { formatQualification } from '../utils/dateExpiry';
 
 export default function JobCard({ job, onOpenDetail, onOpenApply, isSaved, onToggleSave, t }) {
   const matchedVideo = getJobVideo(job);
@@ -69,7 +70,7 @@ export default function JobCard({ job, onOpenDetail, onOpenApply, isSaved, onTog
           <Users size={11} /> {job.posts}
         </span>
         <span className="meta-pill text-3xs font-semibold">
-          🎓 {job.qualification}
+          🎓 {formatQualification(job.qualification)}
         </span>
         {job.source && (
           <span className="badge-source-card text-3xs font-semibold" title={job.source}>

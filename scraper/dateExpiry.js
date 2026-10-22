@@ -79,5 +79,23 @@ export function isValidRecruitmentJob(job) {
     }
   }
 
+  // 5. Reject Admit Cards, Exam Dates, Results, Answer Keys masquerading as jobs
+  if (/admit\s*card|hall\s*ticket|call\s*letter|eligibility\s*result|final\s*result|\bresult\b|score\s*card|answer\s*key|merit\s*list|exam\s*date/i.test(title) && !/online\s*form|apply\s*online/i.test(title)) {
+    return false;
+  }
+
   return true;
+}
+
+export function formatQualification(q) {
+  if (!q) return '10th / 12th / ITI / Graduate (As per Official Notification)';
+  const clean = String(q).trim();
+  if (/^12th$/i.test(clean)) return '12th Pass (Intermediate / 10+2)';
+  if (/^10th$/i.test(clean)) return '10th Pass (Matriculation)';
+  if (/^iti$/i.test(clean)) return 'ITI Pass in relevant Trade (NCVT/SCVT)';
+  if (/^diploma$/i.test(clean)) return 'Polytechnic Diploma in relevant Branch';
+  if (/^graduate$/i.test(clean)) return 'Graduation / Any Bachelor Degree';
+  if (/^b\.?tech$/i.test(clean)) return 'B.Tech / B.E Degree in relevant discipline';
+  if (/^(other|others|retired\s*staff)$/i.test(clean)) return 'Relevant Qualification as per Notification';
+  return clean;
 }
