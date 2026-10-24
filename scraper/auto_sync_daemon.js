@@ -34,7 +34,8 @@ function runCrawlerCycle() {
   isRunning = true;
   console.log(`\n[${new Date().toLocaleTimeString()}] 🔄 Starting continuous live crawler cycle...`);
   const crawlerScript = path.resolve('scraper/live_crawler.js');
-  const child = spawn('node', [crawlerScript], { stdio: 'inherit' });
+  const nodeBinary = process.execPath || 'node';
+  const child = spawn(nodeBinary, [crawlerScript], { stdio: 'inherit' });
 
   child.on('close', (code) => {
     isRunning = false;

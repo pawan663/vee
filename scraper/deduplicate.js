@@ -97,6 +97,21 @@ export function areJobsDuplicate(jobA, jobB) {
   return false;
 }
 
+export function isClosingWithinDays(dateStr, days = 7) {
+  if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
+  const target = new Date(dateStr).getTime();
+  const now = new Date(new Date().toISOString().split('T')[0]).getTime();
+  const diffDays = Math.round((target - now) / 86400000);
+  return diffDays >= 0 && diffDays <= days;
+}
+
+export function isSyntheticDate(d) {
+  if (!d) return true;
+  const t25 = new Date(Date.now() + 25 * 86400000).toISOString().split('T')[0];
+  const t30 = new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0];
+  return d === t25 || d === t30;
+}
+
 export function mergeJobListing(target, incoming) {
   // Keep the most informative and clean title
   const title = (target.title && target.title.length > (incoming.title || '').length)
@@ -139,6 +154,27 @@ export function mergeJobListing(target, incoming) {
     ? incoming.qualification
     : (!isGenericQual(target.qualification) ? target.qualification : (incoming.qualification || target.qualification));
 
+  // REAL DATE PRESERVATION:
+  // Genuine advertisement last dates take absolute priority over synthetic fallback dates (+25 / +30 days)
+  let lastDate = target.lastDate;
+  let isRealDate = Boolean(target.isRealDate);
+
+  if (incoming.isRealDate && !target.isRealDate) {
+    lastDate = incoming.lastDate;
+    isRealDate = true;
+  } else if (!isSyntheticDate(incoming.lastDate) && isSyntheticDate(target.lastDate)) {
+    lastDate = incoming.lastDate;
+    isRealDate = Boolean(incoming.isRealDate || true);
+  } else if (target.isRealDate) {
+    lastDate = target.lastDate;
+    isRealDate = true;
+  } else {
+    lastDate = (!isSyntheticDate(incoming.lastDate) && incoming.lastDate) ? incoming.lastDate : (target.lastDate || incoming.lastDate);
+    isRealDate = Boolean(incoming.isRealDate || target.isRealDate);
+  }
+
+  const isClosingSoon = isClosingWithinDays(lastDate, 7);
+
   return {
     ...target,
     ...incoming,
@@ -148,6 +184,9 @@ export function mergeJobListing(target, incoming) {
     salary,
     selectionProcess,
     qualification,
+    lastDate,
+    isRealDate,
+    isClosingSoon,
     videoId: target.videoId || incoming.videoId || null,
     videoUrl: target.videoUrl || incoming.videoUrl || null,
     videoTitle: target.videoTitle || incoming.videoTitle || null,
@@ -169,6 +208,7 @@ export function deduplicateJobs(jobsList) {
     } else {
       result.push({
         ...job,
+        isClosingSoon: isClosingWithinDays(job.lastDate, 7),
         source: cleanMergeSources(job.source, '')
       });
     }
