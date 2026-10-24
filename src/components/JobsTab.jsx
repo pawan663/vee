@@ -1303,6 +1303,7 @@ export default function JobsTab({
                     isSaved={savedJobIds.includes(job.id)}
                     onToggleSave={onToggleSave}
                     t={t}
+                    currentLang={currentLang}
                   />
 
                   {/* Native Google AdMob / AdSense Sponsored Banner Unit */}

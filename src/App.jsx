@@ -551,6 +551,7 @@ export default function App() {
           onLoginSuccess={handleLoginSuccess}
           currentProfile={userProfile}
           t={t}
+          currentLang={currentLang}
         />
 
         <LegalPolicyModal
