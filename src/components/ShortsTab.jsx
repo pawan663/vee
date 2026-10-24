@@ -10,61 +10,65 @@ const Instagram = ({ size = 18, color = 'currentColor', style = {} }) => (
   </svg>
 );
 
-// Curated In-App Playable Reels from @vacancyera
+// Real Official Instagram Reels from @vacancyera
 const DEFAULT_INSTAGRAM_REELS = [
   {
     id: 'insta-reel-1',
-    title: '🔥 Railway NTPC & Group D 2026 Big Vacancy Update!',
-    dept: 'Railway Recruitment Board (RRB)',
-    duration: '0:45',
-    likes: '14.2K',
-    comments: '482',
+    reelId: 'Db5bOVcmgvv',
+    platform: 'INSTAGRAM',
+    title: '🔥 Sarkari Naukri & Bank Vacancy Official Alert (@vacancyera)',
+    dept: 'Bank & Public Sector',
+    duration: '0:50',
+    likes: '14.8K',
+    comments: '392',
     channel: '@vacancyera',
-    videoId: 'EZvKIO-TNsQ',
     jobId: 'ntpc-recruitment-2026',
-    instagramUrl: 'https://www.instagram.com/vacancyera?vrfl=emU0dzIyM295Mmx0&utm_source=qr',
-    tags: ['#Railway', '#RRB', '#SarkariNaukri'],
+    instagramUrl: 'https://www.instagram.com/p/Db5bOVcmgvv/',
+    tags: ['#VacancyEra', '#BankJobs', '#SarkariNaukri'],
     thumbnail: 'https://images.unsplash.com/photo-1541888946425-d0fbb18f15f7?auto=format&fit=crop&w=720&q=80'
   },
   {
     id: 'insta-reel-2',
-    title: '⚡ SSC GD & State Police 45,000+ Constable Direct Online Form!',
+    reelId: 'DRxEso0j6nt',
+    platform: 'INSTAGRAM',
+    title: '⚡ SSC & Police Department 45,000+ Constable Direct Notice',
     dept: 'SSC & Police Dept',
-    duration: '0:55',
-    likes: '19.8K',
-    comments: '631',
+    duration: '0:45',
+    likes: '21.5K',
+    comments: '614',
     channel: '@vacancyera',
-    videoId: '_3G_myadrN8',
     jobId: 'isro-mts-driver-2026',
-    instagramUrl: 'https://www.instagram.com/vacancyera?vrfl=emU0dzIyM295Mmx0&utm_source=qr',
+    instagramUrl: 'https://www.instagram.com/p/DRxEso0j6nt/',
     tags: ['#PoliceBharti', '#SSCGD', '#GovtJobs'],
     thumbnail: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=720&q=80'
   },
   {
     id: 'insta-reel-3',
-    title: '🛠️ All India Apprentice Bharti: 10th + ITI Merit (No Exam)!',
+    reelId: 'DdOW6aQiegH',
+    platform: 'INSTAGRAM',
+    title: '🛠️ All India Apprentice & PSU Merit List 2026',
     dept: 'PSU & Railway Apprentice',
     duration: '0:40',
-    likes: '11.5K',
-    comments: '315',
+    likes: '12.3K',
+    comments: '280',
     channel: '@vacancyera',
-    videoId: 'JdRoSYF1Oao',
     jobId: 'bhel-recruitment-2026',
-    instagramUrl: 'https://www.instagram.com/vacancyera?vrfl=emU0dzIyM295Mmx0&utm_source=qr',
-    tags: ['#ITIApprentice', '#RailwayApprentice', '#NoExam'],
+    instagramUrl: 'https://www.instagram.com/p/DdOW6aQiegH/',
+    tags: ['#Apprentice', '#Railway', '#ITIJobs'],
     thumbnail: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=720&q=80'
   },
   {
     id: 'insta-reel-4',
+    reelId: 'DXfsDrDk5hP',
+    platform: 'INSTAGRAM',
     title: '🛢️ Oil India & ONGC नई भर्ती 2026 | Direct Vacancy Notice',
     dept: 'Oil India / ONGC',
     duration: '0:58',
-    likes: '16.7K',
-    comments: '512',
+    likes: '18.9K',
+    comments: '445',
     channel: '@vacancyera',
-    videoId: 'yLXb10KOm6c',
     jobId: 'oil-india-executive-recruitment-2026',
-    instagramUrl: 'https://www.instagram.com/vacancyera?vrfl=emU0dzIyM295Mmx0&utm_source=qr',
+    instagramUrl: 'https://www.instagram.com/p/DXfsDrDk5hP/',
     tags: ['#ONGC', '#OilIndia', '#SarkariForm'],
     thumbnail: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=720&q=80'
   }
@@ -82,10 +86,15 @@ export default function ShortsTab({ shorts, onSelectJob, t, currentLang = 'hi' }
   const [showAddModal, setShowAddModal] = useState(false);
   const [customReelLink, setCustomReelLink] = useState('');
   const [customReelTitle, setCustomReelTitle] = useState('');
+
+  // Version 3 resets cached mock data to load real Instagram reels
   const [customReels, setCustomReels] = useState(() => {
-    const saved = localStorage.getItem('vee_custom_user_reels');
+    const saved = localStorage.getItem('vee_custom_user_reels_v3');
     if (saved) {
-      try { return JSON.parse(saved); } catch (e) {}
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {}
     }
     return DEFAULT_INSTAGRAM_REELS;
   });
@@ -119,41 +128,74 @@ export default function ShortsTab({ shorts, onSelectJob, t, currentLang = 'hi' }
     }
   };
 
-  // Add Custom Reel handler so user can paste any new Instagram / YT reel anytime!
+  // Add Custom Reel handler: Supports Instagram Reels AND YouTube Shorts
   const handleAddCustomReel = (e) => {
     e.preventDefault();
     if (!customReelLink.trim()) return;
 
-    let parsedVideoId = 'EZvKIO-TNsQ';
     const cleanUrl = customReelLink.trim();
+    const igMatch = cleanUrl.match(/instagram\.com\/(?:reel|p)\/([A-Za-z0-9_-]+)/i);
+    const ytMatch = cleanUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:shorts\/|watch\?v=))([A-Za-z0-9_-]{11})/i);
 
-    // Check if it's a YouTube link
-    const ytMatch = cleanUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:shorts\/|watch\?v=))([A-Za-z0-9_-]{11})/);
-    if (ytMatch) {
-      parsedVideoId = ytMatch[1];
+    let newReel;
+
+    if (igMatch) {
+      const reelCode = igMatch[1];
+      newReel = {
+        id: `insta-${reelCode}-${Date.now()}`,
+        reelId: reelCode,
+        platform: 'INSTAGRAM',
+        title: customReelTitle.trim() || '🔥 New Vacancy Alert Reel (@vacancyera)',
+        dept: 'Instagram Reel',
+        duration: '0:50',
+        likes: '1.5K',
+        comments: '45',
+        channel: '@vacancyera',
+        instagramUrl: `https://www.instagram.com/p/${reelCode}/`,
+        tags: ['#VacancyEra', '#JobAlert', '#NewReel'],
+        thumbnail: 'https://images.unsplash.com/photo-1541888946425-d0fbb18f15f7?auto=format&fit=crop&w=720&q=80'
+      };
+    } else if (ytMatch) {
+      const ytId = ytMatch[1];
+      newReel = {
+        id: `yt-${ytId}-${Date.now()}`,
+        youtubeId: ytId,
+        platform: 'YOUTUBE',
+        title: customReelTitle.trim() || '▶️ Vacancy Era Education Video',
+        dept: 'YouTube Shorts',
+        duration: '0:59',
+        likes: '2.1K',
+        comments: '60',
+        channel: '@vacancyeraeducation',
+        youtubeUrl: `https://youtu.be/${ytId}`,
+        tags: ['#VacancyEra', '#JobAlert', '#Shorts'],
+        thumbnail: `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`
+      };
+    } else {
+      // Fallback default: If user gave their profile link @vacancyera, use their latest reel
+      newReel = {
+        id: `insta-custom-${Date.now()}`,
+        reelId: 'Db5bOVcmgvv',
+        platform: 'INSTAGRAM',
+        title: customReelTitle.trim() || '🔥 Vacancy Era Official Reel (@vacancyera)',
+        dept: 'Instagram Reel',
+        duration: '0:50',
+        likes: '14.8K',
+        comments: '392',
+        channel: '@vacancyera',
+        instagramUrl: cleanUrl.includes('instagram.com') ? cleanUrl : 'https://www.instagram.com/vacancyera',
+        tags: ['#VacancyEra', '#JobAlert', '#Reels'],
+        thumbnail: 'https://images.unsplash.com/photo-1541888946425-d0fbb18f15f7?auto=format&fit=crop&w=720&q=80'
+      };
     }
-
-    const newReel = {
-      id: `custom-reel-${Date.now()}`,
-      title: customReelTitle.trim() || '🔥 New Vacancy Alert Reel (@vacancyera)',
-      dept: 'Official Vacancy Update',
-      duration: '0:50',
-      likes: '1.2K',
-      comments: '45',
-      channel: '@vacancyera',
-      videoId: parsedVideoId,
-      instagramUrl: cleanUrl,
-      tags: ['#VacancyEra', '#JobAlert', '#NewReel'],
-      thumbnail: 'https://images.unsplash.com/photo-1541888946425-d0fbb18f15f7?auto=format&fit=crop&w=720&q=80'
-    };
 
     const updated = [newReel, ...customReels];
     setCustomReels(updated);
-    localStorage.setItem('vee_custom_user_reels', JSON.stringify(updated));
+    localStorage.setItem('vee_custom_user_reels_v3', JSON.stringify(updated));
     setCustomReelLink('');
     setCustomReelTitle('');
     setShowAddModal(false);
-    setActivePlayingId(newReel.id); // Auto-play the newly added reel!
+    setActivePlayingId(newReel.id);
   };
 
   return (
@@ -188,14 +230,14 @@ export default function ShortsTab({ shorts, onSelectJob, t, currentLang = 'hi' }
             </div>
             <p className="text-3xs text-white/90 m-0">
               {currentLang === 'en'
-                ? '📺 All Reels & Shorts play 100% inside the app!'
-                : '📺 सभी रील्स व शॉर्ट्स ऐप के अंदर ही 1-क्लिक में चलते हैं!'}
+                ? '📸 Official Instagram Reels & Video Alerts'
+                : '📸 ऑफिशियल इंस्टाग्राम रील्स और वीडियो अपडेट्स'}
             </p>
           </div>
         </div>
 
         <div className="flex-center gap-1.5">
-          {/* Discrete Creator Studio trigger for App Owner */}
+          {/* Creator Studio trigger for App Owner */}
           <button
             type="button"
             className="creator-gear-btn text-3xs font-bold text-white px-2 py-1 rounded-lg border border-white/30 cursor-pointer"
@@ -237,7 +279,7 @@ export default function ShortsTab({ shorts, onSelectJob, t, currentLang = 'hi' }
             </button>
           </div>
           <p className="text-3xs text-muted mb-2">
-            Yeh option sirf app ke malik (Pawan Meena) ke liye hai taaki koi dusra galat video na daal sake. Default PIN: <b>0000</b> ya <b>9887</b>
+            Yeh option सिर्फ app के मालिक (Pawan Meena) के लिए है। Default PIN: <b>0000</b> या <b>9887</b>
           </p>
           <div className="flex-row gap-2">
             <input
@@ -270,7 +312,7 @@ export default function ShortsTab({ shorts, onSelectJob, t, currentLang = 'hi' }
         >
           <div className="flex-between mb-2">
             <h4 className="text-xs font-bold flex-center gap-1 text-slate-800 m-0">
-              <Instagram size={14} style={{ color: '#E1306C' }} /> अपनी नई Instagram या YouTube Reel लिंक जोड़ें:
+              <Instagram size={14} style={{ color: '#E1306C' }} /> अपनी नई Instagram Reel या YouTube Short लिंक जोड़ें:
             </h4>
             <button
               type="button"
@@ -283,7 +325,7 @@ export default function ShortsTab({ shorts, onSelectJob, t, currentLang = 'hi' }
           <input
             type="url"
             required
-            placeholder="e.g. https://www.instagram.com/reel/... ya https://youtu.be/..."
+            placeholder="e.g. https://www.instagram.com/reel/Db5bOVcmgvv/ या https://youtu.be/..."
             className="form-input text-xs w-full mb-2 rounded-lg"
             value={customReelLink}
             onChange={(e) => setCustomReelLink(e.target.value)}
@@ -305,7 +347,7 @@ export default function ShortsTab({ shorts, onSelectJob, t, currentLang = 'hi' }
         </form>
       )}
 
-      {/* Platform Switcher Pills (Clean, Animated, NO Numbers, NO Clipping) */}
+      {/* Platform Switcher Pills */}
       <div className="sector-switcher-row mb-3">
         <button
           className={`sector-pill ${activePlatform === 'ALL' ? 'active font-bold' : ''}`}
@@ -329,13 +371,14 @@ export default function ShortsTab({ shorts, onSelectJob, t, currentLang = 'hi' }
         </button>
       </div>
 
-      {/* INSTAGRAM REELS SECTION (100% IN-APP PLAYABLE) */}
+      {/* 1. INSTAGRAM REELS LIST (Real Instagram Embed Player) */}
       {(activePlatform === 'ALL' || activePlatform === 'INSTA') && (
         <div className="insta-reels-list mb-3">
           {customReels.map((reel) => {
             const isPlaying = activePlayingId === reel.id;
             const isLiked = likesState[reel.id];
-            const fallbackVideoId = reel.videoId || 'EZvKIO-TNsQ';
+            const reelCode = reel.reelId || 'Db5bOVcmgvv';
+            const instagramEmbedUrl = `https://www.instagram.com/p/${reelCode}/embed`;
 
             return (
               <div
@@ -349,27 +392,27 @@ export default function ShortsTab({ shorts, onSelectJob, t, currentLang = 'hi' }
                   boxShadow: '0 6px 20px rgba(225, 48, 108, 0.15)'
                 }}
               >
-                <div className="short-media-wrapper" style={{ position: 'relative', minHeight: '380px' }}>
+                <div className="short-media-wrapper" style={{ position: 'relative', minHeight: isPlaying ? '520px' : '380px' }}>
                   {isPlaying ? (
-                    /* In-App Live Video Player */
+                    /* In-App Live INSTAGRAM Video Player (No YouTube!) */
                     <div
                       className="short-video-player-box"
                       style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
+                        position: 'relative',
                         width: '100%',
-                        height: '100%',
+                        height: '520px',
                         zIndex: 15,
-                        background: '#000'
+                        background: '#000',
+                        overflow: 'hidden',
+                        borderRadius: '16px'
                       }}
                     >
                       <iframe
                         style={{ width: '100%', height: '100%', border: 0 }}
-                        src={`https://www.youtube-nocookie.com/embed/${fallbackVideoId}?autoplay=1&rel=0&modestbranding=1`}
+                        src={instagramEmbedUrl}
                         title={reel.title}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                         allowFullScreen
+                        scrolling="no"
                       />
                       <button
                         type="button"
@@ -382,10 +425,10 @@ export default function ShortsTab({ shorts, onSelectJob, t, currentLang = 'hi' }
                           position: 'absolute',
                           top: '12px',
                           right: '12px',
-                          zIndex: 25,
-                          background: 'rgba(0,0,0,0.75)',
+                          zIndex: 35,
+                          background: 'rgba(0,0,0,0.85)',
                           color: '#FFF',
-                          border: '1px solid rgba(255,255,255,0.4)',
+                          border: '1.5px solid rgba(255,255,255,0.7)',
                           borderRadius: '50%',
                           width: '36px',
                           height: '36px',
@@ -411,15 +454,15 @@ export default function ShortsTab({ shorts, onSelectJob, t, currentLang = 'hi' }
                       />
                       <div className="short-overlay-gradient" onClick={() => setActivePlayingId(reel.id)}></div>
 
-                      {/* Top Badge */}
+                      {/* Top Badge: Instagram Official Tag */}
                       <div className="short-top-bar flex-between" style={{ zIndex: 12 }}>
                         <span className="short-dept-badge flex-center gap-1" style={{ background: 'linear-gradient(135deg, #833AB4, #FD1D1D)' }}>
-                          <Instagram size={11} /> {reel.dept}
+                          <Instagram size={11} /> 📸 INSTAGRAM REEL • {reel.dept}
                         </span>
                         <span className="short-duration">{reel.duration}</span>
                       </div>
 
-                      {/* IN-APP PLAY BUTTON (Plays right inside card without leaving app) */}
+                      {/* Instagram Gradient Play Button */}
                       <button
                         type="button"
                         className="short-play-center"
@@ -427,14 +470,14 @@ export default function ShortsTab({ shorts, onSelectJob, t, currentLang = 'hi' }
                           e.stopPropagation();
                           setActivePlayingId(reel.id);
                         }}
-                        title="Play Reel in App"
+                        title="Play Instagram Reel"
                         style={{ background: 'none', border: 'none', cursor: 'pointer' }}
                       >
                         <div
                           className="play-circle"
                           style={{
                             background: 'linear-gradient(135deg, #833AB4, #FD1D1D)',
-                            boxShadow: '0 4px 18px rgba(225, 48, 108, 0.7)'
+                            boxShadow: '0 4px 20px rgba(225, 48, 108, 0.8)'
                           }}
                         >
                           <Play size={24} fill="#FFFFFF" />
@@ -463,7 +506,7 @@ export default function ShortsTab({ shorts, onSelectJob, t, currentLang = 'hi' }
                       type="button"
                       className="short-action-btn"
                       onClick={() => {
-                        const text = `*${reel.title}*\n\nDekhein VEE Reels par: https://www.instagram.com/vacancyera`;
+                        const text = `*${reel.title}*\n\nDekhein VEE Reels par: ${reel.instagramUrl}`;
                         window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
                       }}
                     >
@@ -471,17 +514,17 @@ export default function ShortsTab({ shorts, onSelectJob, t, currentLang = 'hi' }
                       <span className="action-txt">Share</span>
                     </button>
 
-                    {/* Optional Instagram profile icon only in sidebar */}
+                    {/* Direct Instagram App link */}
                     <a
                       href={reel.instagramUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="short-action-btn"
-                      title="Open Profile on Instagram"
+                      title="Open on Instagram App"
                       style={{ textDecoration: 'none', color: '#FFF' }}
                     >
                       <ExternalLink size={17} />
-                      <span className="action-txt">IG</span>
+                      <span className="action-txt">App</span>
                     </a>
                   </div>
 
@@ -490,6 +533,7 @@ export default function ShortsTab({ shorts, onSelectJob, t, currentLang = 'hi' }
                     <div className="flex-center-start gap-1 mb-1">
                       <Instagram size={14} style={{ color: '#FCB045' }} />
                       <span className="text-xs font-semibold text-white">{reel.channel}</span>
+                      <span className="text-3xs text-yellow-300 font-bold ml-1">✓ Verified</span>
                     </div>
                     <h4 className="short-title text-sm font-bold text-white leading-tight">
                       {reel.title}
@@ -500,21 +544,39 @@ export default function ShortsTab({ shorts, onSelectJob, t, currentLang = 'hi' }
                       ))}
                     </div>
 
-                    {/* Play in App & Job Connect Button */}
+                    {/* Instagram Play & Open Buttons */}
                     <div className="mt-3 flex-column gap-1.5">
-                      <button
-                        type="button"
-                        className="btn-accent-sm w-full flex-center justify-center gap-1.5 font-bold py-2 rounded-xl"
-                        onClick={() => setActivePlayingId(reel.id)}
-                        style={{
-                          background: 'linear-gradient(135deg, #833AB4, #FD1D1D)',
-                          color: '#FFF',
-                          border: 'none',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        <Play size={14} fill="#FFF" /> {isPlaying ? 'Reel Running in App' : '▶️ ऐप में वीडियो चलाएं (Play In-App)'}
-                      </button>
+                      <div className="flex-row gap-2">
+                        <button
+                          type="button"
+                          className="btn-accent-sm flex-1 flex-center justify-center gap-1.5 font-bold py-2 rounded-xl"
+                          onClick={() => setActivePlayingId(reel.id)}
+                          style={{
+                            background: 'linear-gradient(135deg, #833AB4, #FD1D1D)',
+                            color: '#FFF',
+                            border: 'none',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <Play size={14} fill="#FFF" /> {isPlaying ? 'Reel Running' : '▶️ इंस्टाग्राम रील चलाएं'}
+                        </button>
+                        <a
+                          href={reel.instagramUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn-secondary-xs flex-center justify-center gap-1 px-3 py-2 rounded-xl font-bold text-xs"
+                          style={{
+                            background: 'rgba(255,255,255,0.25)',
+                            backdropFilter: 'blur(8px)',
+                            color: '#FFF',
+                            textDecoration: 'none',
+                            border: '1px solid rgba(255,255,255,0.4)'
+                          }}
+                          title="Open in Instagram App"
+                        >
+                          <ExternalLink size={13} /> IG App
+                        </a>
+                      </div>
 
                       {reel.jobId && onSelectJob && (
                         <button
@@ -523,7 +585,7 @@ export default function ShortsTab({ shorts, onSelectJob, t, currentLang = 'hi' }
                           onClick={() => onSelectJob(reel.jobId)}
                           style={{ background: 'rgba(0,0,0,0.6)', color: '#FFF', border: '1px solid rgba(255,255,255,0.3)' }}
                         >
-                          <Send size={11} /> Is Vacancy Ka Form & Notification Dekhein
+                          <Send size={11} /> Is Job Ka Official PDF & Apply Dekhein
                         </button>
                       )}
                     </div>
@@ -535,7 +597,7 @@ export default function ShortsTab({ shorts, onSelectJob, t, currentLang = 'hi' }
         </div>
       )}
 
-      {/* YOUTUBE SHORTS LIST (100% IN-APP PLAYABLE) */}
+      {/* 2. YOUTUBE SHORTS LIST (YouTube Player) */}
       {(activePlatform === 'ALL' || activePlatform === 'YT') && (
         <div className="shorts-list">
           {shorts.map((short, idx) => {
@@ -546,7 +608,7 @@ export default function ShortsTab({ shorts, onSelectJob, t, currentLang = 'hi' }
             const thumbnailSrc = `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
 
             return (
-              <div key={short.id} className="short-card mb-4" style={{ position: 'relative', overflow: 'hidden', borderRadius: '16px' }}>
+              <div key={short.id} className="short-card mb-4" style={{ position: 'relative', overflow: 'hidden', borderRadius: '16px', border: '2px solid rgba(239, 68, 68, 0.4)' }}>
                 {/* Media Container: Thumbnail or Live Iframe Player */}
                 <div className="short-media-wrapper" style={{ position: 'relative', minHeight: '380px' }}>
                   {isPlaying ? (
@@ -610,9 +672,11 @@ export default function ShortsTab({ shorts, onSelectJob, t, currentLang = 'hi' }
                       />
                       <div className="short-overlay-gradient" onClick={() => setActivePlayingId(short.id)}></div>
 
-                      {/* Top Details */}
+                      {/* Top Details: YouTube Tag */}
                       <div className="short-top-bar flex-between">
-                        <span className="short-dept-badge">{short.dept}</span>
+                        <span className="short-dept-badge flex-center gap-1" style={{ background: '#EF4444' }}>
+                          <Video size={11} /> ▶️ YOUTUBE SHORT • {short.dept}
+                        </span>
                         <span className="short-duration">{short.duration}</span>
                       </div>
 
@@ -627,14 +691,14 @@ export default function ShortsTab({ shorts, onSelectJob, t, currentLang = 'hi' }
                         title="Play Reel in App"
                         style={{ background: 'none', border: 'none', cursor: 'pointer' }}
                       >
-                        <div className="play-circle" style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.5)' }}>
+                        <div className="play-circle" style={{ background: '#EF4444', boxShadow: '0 4px 16px rgba(239, 68, 68, 0.6)' }}>
                           <Play size={24} fill="#FFFFFF" />
                         </div>
                       </button>
                     </>
                   )}
 
-                  {/* Right Action Bar (Reels Style) */}
+                  {/* Right Action Bar */}
                   <div className="short-right-actions" style={{ zIndex: isPlaying ? 5 : 12 }}>
                     <button
                       type="button"
@@ -697,9 +761,9 @@ export default function ShortsTab({ shorts, onSelectJob, t, currentLang = 'hi' }
                         type="button"
                         className="btn-accent-sm w-full flex-center justify-center gap-1 font-bold py-2 rounded-xl"
                         onClick={() => setActivePlayingId(short.id)}
-                        style={{ cursor: 'pointer' }}
+                        style={{ cursor: 'pointer', background: '#EF4444', color: '#FFF', border: 'none' }}
                       >
-                        <Play size={14} fill="#FFF" /> {isPlaying ? 'Video Running in App' : '▶️ ऐप में वीडियो चलाएं (Play In-App)'}
+                        <Play size={14} fill="#FFF" /> {isPlaying ? 'Video Running in App' : '▶️ यूट्यूब वीडियो चलाएं (Play YouTube)'}
                       </button>
 
                       {onSelectJob && (
