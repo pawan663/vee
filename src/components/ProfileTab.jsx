@@ -1169,6 +1169,31 @@ export default function ProfileTab({
             </span>
           </div>
 
+          {/* 5B. Instagram Official Channel @vacancyera */}
+          <div
+            className="metric-row flex-between p-2 rounded cursor-pointer"
+            style={{ background: 'var(--surface-color, #F8FAFC)' }}
+            onClick={() => window.open('https://www.instagram.com/vacancyera?vrfl=emU0dzIyM295Mmx0&utm_source=qr', '_blank')}
+          >
+            <div className="flex-center-start gap-2">
+              <span className="status-dot-green">📸</span>
+              <div>
+                <p className="text-xs font-semibold m-0">Instagram Official Reels</p>
+                <p className="text-3xs text-muted m-0">@vacancyera (Daily Fast Vacancy Updates)</p>
+              </div>
+            </div>
+            <a
+              href="https://www.instagram.com/vacancyera?vrfl=emU0dzIyM295Mmx0&utm_source=qr"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="badge-pill font-bold text-3xs text-pink-600"
+              style={{ background: 'rgba(236, 72, 153, 0.12)', textDecoration: 'none' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              Follow @vacancyera ↗
+            </a>
+          </div>
+
           {/* 6. Automated Cloud Runner */}
           <div className="metric-row flex-between p-2 rounded" style={{ background: 'var(--surface-color, #F8FAFC)' }}>
             <div className="flex-center-start gap-2">

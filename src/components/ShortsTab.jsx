@@ -10,7 +10,7 @@ const Instagram = ({ size = 18, color = 'currentColor', style = {} }) => (
   </svg>
 );
 
-// Curated Instagram Reels from @vacancyeraeducation
+// Curated Instagram Reels from @vacancyera
 const INSTAGRAM_REELS = [
   {
     id: 'insta-reel-1',
@@ -19,8 +19,8 @@ const INSTAGRAM_REELS = [
     duration: '0:45',
     likes: '12.4K',
     comments: '482',
-    channel: '@vacancyeraeducation',
-    instagramUrl: 'https://www.instagram.com/vacancyeraeducation/',
+    channel: '@vacancyera',
+    instagramUrl: 'https://www.instagram.com/vacancyera?vrfl=emU0dzIyM295Mmx0&utm_source=qr',
     tags: ['#Railway', '#RRB', '#SarkariNaukri'],
     thumbnail: 'https://images.unsplash.com/photo-1541888946425-d0fbb18f15f7?auto=format&fit=crop&w=720&q=80'
   },
@@ -31,8 +31,8 @@ const INSTAGRAM_REELS = [
     duration: '0:55',
     likes: '18.9K',
     comments: '631',
-    channel: '@vacancyeraeducation',
-    instagramUrl: 'https://www.instagram.com/vacancyeraeducation/',
+    channel: '@vacancyera',
+    instagramUrl: 'https://www.instagram.com/vacancyera?vrfl=emU0dzIyM295Mmx0&utm_source=qr',
     tags: ['#PoliceBharti', '#SSCGD', '#GovtJobs'],
     thumbnail: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=720&q=80'
   },
@@ -43,8 +43,8 @@ const INSTAGRAM_REELS = [
     duration: '0:40',
     likes: '9.8K',
     comments: '315',
-    channel: '@vacancyeraeducation',
-    instagramUrl: 'https://www.instagram.com/vacancyeraeducation/',
+    channel: '@vacancyera',
+    instagramUrl: 'https://www.instagram.com/vacancyera?vrfl=emU0dzIyM295Mmx0&utm_source=qr',
     tags: ['#ITIApprentice', '#RailwayApprentice', '#NoExam'],
     thumbnail: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=720&q=80'
   }
@@ -89,7 +89,7 @@ export default function ShortsTab({ shorts, onSelectJob, t }) {
           </div>
           <div>
             <div className="flex-center-start gap-1">
-              <span className="font-extrabold text-xs">@vacancyeraeducation</span>
+              <span className="font-extrabold text-xs">@vacancyera</span>
               <span className="badge-live-sm bg-white text-danger font-bold text-3xs px-1.5 py-0.5 rounded-full">OFFICIAL</span>
             </div>
             <p className="text-3xs text-white/90 m-0">Instagram Reels par daily 30-sec vacancy alerts dekhein!</p>
@@ -97,13 +97,13 @@ export default function ShortsTab({ shorts, onSelectJob, t }) {
         </div>
 
         <a
-          href="https://www.instagram.com/vacancyeraeducation/"
+          href="https://www.instagram.com/vacancyera?vrfl=emU0dzIyM295Mmx0&utm_source=qr"
           target="_blank"
           rel="noopener noreferrer"
           className="badge-live-sm bg-white text-danger font-bold text-2xs px-3 py-1.5 rounded-xl inline-flex flex-center gap-1 shadow-sm"
           style={{ textDecoration: 'none' }}
         >
-          <Instagram size={13} /> Follow on Instagram
+          <Instagram size={13} /> Follow @vacancyera
         </a>
       </div>
 
