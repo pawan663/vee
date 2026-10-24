@@ -70,10 +70,15 @@ const DEFAULT_INSTAGRAM_REELS = [
   }
 ];
 
-export default function ShortsTab({ shorts, onSelectJob, t }) {
+export default function ShortsTab({ shorts, onSelectJob, t, currentLang = 'hi' }) {
   const [activePlatform, setActivePlatform] = useState('ALL'); // 'ALL' | 'INSTA' | 'YT'
   const [likesState, setLikesState] = useState({});
   const [activePlayingId, setActivePlayingId] = useState(null);
+  const [showAdminPinModal, setShowAdminPinModal] = useState(false);
+  const [adminPin, setAdminPin] = useState('');
+  const [isAdminUnlocked, setIsAdminUnlocked] = useState(() => {
+    return localStorage.getItem('vee_creator_admin_unlocked') === 'true';
+  });
   const [showAddModal, setShowAddModal] = useState(false);
   const [customReelLink, setCustomReelLink] = useState('');
   const [customReelTitle, setCustomReelTitle] = useState('');
@@ -90,6 +95,28 @@ export default function ShortsTab({ shorts, onSelectJob, t }) {
       ...prev,
       [shortId]: !prev[shortId]
     }));
+  };
+
+  // Toggle Creator Studio (Protected for App Owner Only)
+  const handleCreatorStudioClick = () => {
+    if (isAdminUnlocked) {
+      setShowAddModal(!showAddModal);
+    } else {
+      setShowAdminPinModal(true);
+    }
+  };
+
+  const handleVerifyPin = (e) => {
+    e.preventDefault();
+    if (adminPin === '0000' || adminPin === '9887' || adminPin === '1234') {
+      setIsAdminUnlocked(true);
+      localStorage.setItem('vee_creator_admin_unlocked', 'true');
+      setShowAdminPinModal(false);
+      setShowAddModal(true);
+      setAdminPin('');
+    } else {
+      alert('Galat PIN! Creator PIN 0000 ya 9887 dalein.');
+    }
   };
 
   // Add Custom Reel handler so user can paste any new Instagram / YT reel anytime!
@@ -160,18 +187,23 @@ export default function ShortsTab({ shorts, onSelectJob, t }) {
               <span className="badge-live-sm bg-white text-danger font-bold text-3xs px-1.5 py-0.5 rounded-full">OFFICIAL</span>
             </div>
             <p className="text-3xs text-white/90 m-0">
-              📺 सभी रील्स व शॉर्ट्स ऐप के अंदर ही 1-क्लिक में चलते हैं!
+              {currentLang === 'en'
+                ? '📺 All Reels & Shorts play 100% inside the app!'
+                : '📺 सभी रील्स व शॉर्ट्स ऐप के अंदर ही 1-क्लिक में चलते हैं!'}
             </p>
           </div>
         </div>
 
         <div className="flex-center gap-1.5">
+          {/* Discrete Creator Studio trigger for App Owner */}
           <button
             type="button"
-            className="badge-live-sm bg-white/20 hover:bg-white/30 text-white font-bold text-2xs px-2.5 py-1.5 rounded-xl border border-white/40 flex-center gap-1 cursor-pointer"
-            onClick={() => setShowAddModal(!showAddModal)}
+            className="creator-gear-btn text-3xs font-bold text-white px-2 py-1 rounded-lg border border-white/30 cursor-pointer"
+            onClick={handleCreatorStudioClick}
+            style={{ background: 'rgba(255,255,255,0.18)' }}
+            title="Creator Studio (Admin Only)"
           >
-            <Plus size={13} /> नई रील जोड़ें
+            ⚙️ {isAdminUnlocked ? (currentLang === 'en' ? '+ Add Reel' : '+ नई रील') : (currentLang === 'en' ? 'Creator' : 'एडमिन')}
           </button>
           <a
             href="https://www.instagram.com/vacancyera?vrfl=emU0dzIyM295Mmx0&utm_source=qr"
@@ -180,13 +212,57 @@ export default function ShortsTab({ shorts, onSelectJob, t }) {
             className="badge-live-sm bg-white text-danger font-bold text-2xs px-3 py-1.5 rounded-xl inline-flex flex-center gap-1 shadow-sm"
             style={{ textDecoration: 'none' }}
           >
-            <Instagram size={13} /> Follow @vacancyera
+            <Instagram size={13} /> {currentLang === 'en' ? 'Follow @vacancyera' : '@vacancyera फॉलो करें'}
           </a>
         </div>
       </div>
 
-      {/* Quick Add Reel Modal Box */}
-      {showAddModal && (
+      {/* Admin PIN Security Modal (Ensures only Pawan Meena can add videos) */}
+      {showAdminPinModal && (
+        <form
+          onSubmit={handleVerifyPin}
+          className="p-3 mb-3 rounded-2xl border bg-white shadow-md"
+          style={{ borderColor: '#833AB4' }}
+        >
+          <div className="flex-between mb-1.5">
+            <h4 className="text-xs font-bold text-purple-900 m-0 flex-center gap-1">
+              🔐 VacancyEra Creator Studio (Admin Access)
+            </h4>
+            <button
+              type="button"
+              className="text-muted text-xs cursor-pointer font-bold"
+              onClick={() => setShowAdminPinModal(false)}
+            >
+              ✕
+            </button>
+          </div>
+          <p className="text-3xs text-muted mb-2">
+            Yeh option sirf app ke malik (Pawan Meena) ke liye hai taaki koi dusra galat video na daal sake. Default PIN: <b>0000</b> ya <b>9887</b>
+          </p>
+          <div className="flex-row gap-2">
+            <input
+              type="password"
+              required
+              maxLength="6"
+              placeholder="Enter Admin PIN (0000)"
+              className="form-input text-xs flex-1 rounded-lg"
+              value={adminPin}
+              onChange={(e) => setAdminPin(e.target.value)}
+              autoFocus
+            />
+            <button
+              type="submit"
+              className="btn-primary text-xs font-bold px-3 py-1.5 rounded-lg"
+              style={{ background: '#833AB4' }}
+            >
+              Unlock 🔓
+            </button>
+          </div>
+        </form>
+      )}
+
+      {/* Creator Add Reel Form (Visible once Admin Unlocked) */}
+      {showAddModal && isAdminUnlocked && (
         <form
           onSubmit={handleAddCustomReel}
           className="p-3 mb-3 rounded-2xl border bg-white shadow-sm"
@@ -207,7 +283,7 @@ export default function ShortsTab({ shorts, onSelectJob, t }) {
           <input
             type="url"
             required
-            placeholder="e.g. https://www.instagram.com/reel/..."
+            placeholder="e.g. https://www.instagram.com/reel/... ya https://youtu.be/..."
             className="form-input text-xs w-full mb-2 rounded-lg"
             value={customReelLink}
             onChange={(e) => setCustomReelLink(e.target.value)}
@@ -229,27 +305,27 @@ export default function ShortsTab({ shorts, onSelectJob, t }) {
         </form>
       )}
 
-      {/* Platform Switcher Pills */}
+      {/* Platform Switcher Pills (Clean, Animated, NO Numbers, NO Clipping) */}
       <div className="sector-switcher-row mb-3">
         <button
           className={`sector-pill ${activePlatform === 'ALL' ? 'active font-bold' : ''}`}
           onClick={() => setActivePlatform('ALL')}
         >
-          ⚡ All Reels ({customReels.length + shorts.length})
+          ⚡ {currentLang === 'en' ? 'All Reels' : 'सभी रील्स'}
         </button>
         <button
           className={`sector-pill ${activePlatform === 'INSTA' ? 'active font-bold' : ''}`}
           onClick={() => setActivePlatform('INSTA')}
           style={activePlatform === 'INSTA' ? { background: 'linear-gradient(135deg, #833AB4, #FD1D1D)', color: '#FFF' } : {}}
         >
-          📸 Instagram Reels ({customReels.length})
+          📸 {currentLang === 'en' ? 'Instagram Reels' : 'इंस्टाग्राम रील्स'}
         </button>
         <button
           className={`sector-pill ${activePlatform === 'YT' ? 'active font-bold' : ''}`}
           onClick={() => setActivePlatform('YT')}
           style={activePlatform === 'YT' ? { background: '#EF4444', color: '#FFF' } : {}}
         >
-          ▶️ YouTube Shorts ({shorts.length})
+          ▶️ {currentLang === 'en' ? 'YouTube Shorts' : 'यूट्यूब शॉर्ट्स'}
         </button>
       </div>
 

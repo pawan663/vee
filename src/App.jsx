@@ -427,6 +427,7 @@ export default function App() {
                 const targetJob = jobs.find((j) => j.id === jobId);
                 if (targetJob) setSelectedDetailJob(targetJob);
               }}
+              currentLang={currentLang}
               t={t}
             />
           )}

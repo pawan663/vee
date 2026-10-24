@@ -158,7 +158,7 @@ export default function JobsTab({
   // Localized Dropdown Option Dictionaries for 5 Languages
   const qualLabels = {
     en: {
-      ALL: '🎓 All Qualifications',
+      ALL: '🎓 Qualification',
       '8th': '🎓 8th Pass',
       '10th': '🎓 10th Pass (Matric)',
       '12th': '📘 12th Pass (10+2)',
@@ -175,7 +175,7 @@ export default function JobsTab({
       Law: '⚖️ Law (LLB / LLM)'
     },
     hi: {
-      ALL: '🎓 सभी योग्यता',
+      ALL: '🎓 योग्यता',
       '8th': '🎓 8वीं पास',
       '10th': '🎓 10वीं पास (मैट्रिक)',
       '12th': '📘 12वीं पास (इंटरमीडिएट)',
@@ -192,7 +192,7 @@ export default function JobsTab({
       Law: '⚖️ विधि / कानून (LLB)'
     },
     hinglish: {
-      ALL: '🎓 Sabhi Yogyata',
+      ALL: '🎓 Qualification',
       '8th': '🎓 8th Pass',
       '10th': '🎓 10th Pass',
       '12th': '📘 12th Pass',
@@ -246,7 +246,7 @@ export default function JobsTab({
 
   const deptLabels = {
     en: {
-      ALL: '🏛️ All Departments',
+      ALL: '🏛️ Department',
       SSC: '📝 SSC (CGL / CHSL / MTS / GD)',
       RAILWAY: '🚆 Railway (RRB / ALP / Group D)',
       BANK: '🏦 Banking (IBPS / SBI / RBI)',
@@ -274,7 +274,7 @@ export default function JobsTab({
       PRIVATE: '💼 Private MNC & Apprentice'
     },
     hi: {
-      ALL: '🏛️ सभी विभाग',
+      ALL: '🏛️ विभाग',
       SSC: '📝 एसएससी (CGL / CHSL / MTS / GD)',
       RAILWAY: '🚆 रेलवे (RRB / ALP / ग्रुप डी / NTPC)',
       BANK: '🏦 बैंकिंग (IBPS / SBI / RBI)',
@@ -302,7 +302,7 @@ export default function JobsTab({
       PRIVATE: '💼 प्राइवेट एमएनसी और अप्रेंटिस'
     },
     hinglish: {
-      ALL: '🏛️ Sabhi Vibhag',
+      ALL: '🏛️ Department',
       SSC: '📝 SSC (CGL / CHSL / GD / MTS)',
       RAILWAY: '🚆 Railway (RRB / ALP / Group D)',
       BANK: '🏦 Banking (IBPS / SBI / RBI)',
@@ -333,7 +333,7 @@ export default function JobsTab({
 
   const stateLabels = {
     en: {
-      ALL: '📍 All States / All India',
+      ALL: '📍 State',
       'All India': '🇮🇳 Central Govt (All India)',
       Rajasthan: '🏜️ Rajasthan',
       'Uttar Pradesh': '🏛️ Uttar Pradesh',
@@ -359,7 +359,7 @@ export default function JobsTab({
       'Jammu & Kashmir': '🏔️ Jammu & Kashmir'
     },
     hi: {
-      ALL: '📍 सभी राज्य / ऑल इंडिया',
+      ALL: '📍 राज्य',
       'All India': '🇮🇳 केंद्र सरकार (ऑल इंडिया)',
       Rajasthan: '🏜️ राजस्थान',
       'Uttar Pradesh': '🏛️ उत्तर प्रदेश',
@@ -821,20 +821,19 @@ export default function JobsTab({
             🏢 {t.filterPrivate || 'Private'}
           </button>
           <button
-            className={`sector-pill sector-apprentice ${activeCategory === 'APPRENTICE' ? 'active font-bold' : ''}`}
-            onClick={() => setActiveCategory('APPRENTICE')}
-            style={activeCategory === 'APPRENTICE' ? { background: 'linear-gradient(135deg, #F59E0B, #D97706)', color: '#FFFFFF', borderColor: '#D97706', boxShadow: '0 2px 8px rgba(245, 158, 11, 0.4)' } : {}}
-          >
-            🛠️ अप्रेंटिस ({apprenticeCount})
-          </button>
-          <button
-            className={`sector-pill sector-news news-pill-btn ${activeCategory === 'NEWS' ? 'active text-danger' : ''}`}
+            className={`sector-pill sector-news news-pill-btn ${activeCategory === 'NEWS' ? 'active' : ''}`}
             onClick={() => setActiveCategory('NEWS')}
           >
             <span className="relative inline-flex items-center gap-1">
               <span className="live-pill-indicator"></span>
-              📰 {t.filterLiveNews || 'News'} ({liveNews ? liveNews.length : 0})
+              📰 {t.filterLiveNews || 'News'}
             </span>
+          </button>
+          <button
+            className={`sector-pill sector-apprentice ${activeCategory === 'APPRENTICE' ? 'active' : ''}`}
+            onClick={() => setActiveCategory('APPRENTICE')}
+          >
+            🛠️ {t.filterApprentice || 'Apprentice'}
           </button>
         </div>
       )}
@@ -1196,23 +1195,36 @@ export default function JobsTab({
             </div>
           )}
 
-          {/* Smart Job Matcher Banner */}
+          {/* Smart AI Job Matcher Banner */}
           <div className="smart-matcher-card mb-3 p-3">
             <div className="flex-between">
-              <div className="flex-center gap-1.5">
-                <Sparkles size={16} className="text-warning" />
-                <h4 className="font-bold text-xs text-accent">{t.smartMatcherTitle}</h4>
+              <div className="flex-center gap-2">
+                <div className="smart-matcher-icon-glow">
+                  <Sparkles size={18} className="text-warning" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-xs text-accent leading-tight m-0">
+                    {t.smartMatcherTitle || 'Smart Job Matcher (My Job)'}
+                  </h4>
+                  <p className="text-3xs text-muted m-0 mt-0.5">
+                    {currentLang === 'en'
+                      ? 'Find 100% verified jobs for your qualification & age'
+                      : 'अपनी योग्यता और उम्र के अनुसार बिल्कुल सही नौकरी ढूंढें'}
+                  </p>
+                </div>
               </div>
               <button
-                className="btn-accent-xs"
+                className="btn-matcher-action"
                 onClick={() => setIsMatcherOpen(!isMatcherOpen)}
               >
-                {isMatcherOpen ? t.smartMatcherClose : t.smartMatcherBtn}
+                {isMatcherOpen
+                  ? (t.smartMatcherClose || 'Close ✕')
+                  : (currentLang === 'en' ? 'Match 🔍' : 'ढूंढें 🔍')}
               </button>
             </div>
 
             {isMatcherOpen && (
-              <div className="matcher-controls mt-2 pt-2 border-top">
+              <div className="matcher-controls mt-2.5 pt-2.5 border-top">
                 <div className="flex-row gap-2">
                   <div className="flex-1">
                     <label className="text-3xs font-semibold text-muted">{t.yourQualification}</label>
@@ -1239,7 +1251,7 @@ export default function JobsTab({
                     />
                   </div>
                 </div>
-                <p className="text-3xs text-success font-semibold mt-1.5">
+                <p className="text-3xs text-success font-semibold mt-1.5 m-0">
                   ✅ {filteredJobs.length} {t.matchedVacancies}
                 </p>
               </div>
@@ -1251,10 +1263,14 @@ export default function JobsTab({
             <div className="apprentice-banner p-3 mb-3 rounded-xl border flex-between" style={{ background: 'linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)', borderColor: '#F59E0B' }}>
               <div>
                 <h4 className="text-xs font-bold text-amber-900 flex-center-start gap-1" style={{ margin: 0 }}>
-                  🛠️ ऑल इंडिया अप्रेंटिसशिप स्पेशल भर्ती (Apprentice Special)
+                  {currentLang === 'en'
+                    ? '🛠️ All India Apprentice Recruitment Special'
+                    : '🛠️ ऑल इंडिया अप्रेंटिसशिप स्पेशल भर्ती'}
                 </h4>
                 <p className="text-3xs text-amber-800 m-0 mt-0.5">
-                  रेलवे, बैंक, IOCL, ONGC, SAIL & PSU अप्रेंटिस — सीधी मेरिट भर्ती (बिना परीक्षा) + मासिक स्टाइपेंड (₹7,000 - ₹12,500/माह)
+                  {currentLang === 'en'
+                    ? 'Railway, Bank, IOCL & PSU Apprentices — Direct Merit (No Exam) + Stipend (₹7,000 - ₹12,500/mo)'
+                    : 'रेलवे, बैंक, IOCL, ONGC, SAIL & PSU अप्रेंटिस — सीधी मेरिट भर्ती (बिना परीक्षा) + मासिक स्टाइपेंड (₹7,000 - ₹12,500/माह)'}
                 </p>
               </div>
               <span className="badge-live-sm bg-amber-600 text-white text-3xs font-bold px-2 py-0.5 rounded-full">

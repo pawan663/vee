@@ -322,105 +322,142 @@ iframe[title*="Netlify"],
 }
 
 .sector-switcher-row {
-  display: flex;
-  background: #F1F5F9;
-  border: 1px solid #CBD5E1;
-  padding: 3px;
-  border-radius: 12px;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
-  gap: 3px;
-  overflow-x: auto;
-  white-space: nowrap;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  -webkit-overflow-scrolling: touch;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+  background: var(--bg-card, #FFFFFF);
+  border: 1.5px solid #E2E8F0;
+  padding: 5px;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   width: 100%;
   box-sizing: border-box;
 }
 
-.sector-switcher-row::-webkit-scrollbar {
-  display: none;
+@media (max-width: 380px) {
+  .sector-switcher-row {
+    gap: 3px;
+    padding: 4px;
+  }
 }
 
 .dark-theme .sector-switcher-row {
   background: #0F172A;
   border-color: #334155;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-/* Colorful Sector Pills (Jobs Category Switcher) */
-.sub-sector-row {
-  display: flex;
-  background: var(--bg-card);
-  padding: 4px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  gap: 6px;
-}
-
+/* 3D Animated Colorful Sector Boxes (All Jobs, Govt, Private, News, Apprentice) */
 .sector-pill {
-  border: 1px solid transparent;
-  padding: 7px 10px;
-  border-radius: 9px;
+  border-radius: 10px;
+  padding: 8px 3px;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
   text-align: center;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 3px;
   white-space: nowrap;
-  flex: 1 1 0px;
+  border: 1.5px solid transparent;
+  border-bottom: 3px solid rgba(0, 0, 0, 0.14);
+  user-select: none;
+  width: 100%;
+  box-sizing: border-box;
 }
 
+@media (max-width: 380px) {
+  .sector-pill {
+    font-size: 10px;
+    padding: 7px 2px;
+  }
+}
+
+.sector-pill:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.sector-pill:active {
+  transform: translateY(1px);
+  border-bottom-width: 1.5px;
+}
+
+/* 1. All Jobs (Deep Electric Blue) */
 .sector-pill.sector-all {
-  background: rgba(37, 99, 235, 0.08);
-  border-color: rgba(37, 99, 235, 0.22);
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+  border-color: #BFDBFE;
+  border-bottom-color: #3B82F6;
   color: #1D4ED8;
 }
 .sector-pill.sector-all.active {
   background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
-  border-color: #1D4ED8 !important;
+  border-color: #1E40AF !important;
+  border-bottom-color: #172554 !important;
   color: #FFFFFF !important;
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.42);
 }
 
+/* 2. Govt (Royal Indigo) */
 .sector-pill.sector-govt {
-  background: rgba(79, 70, 229, 0.08);
-  border-color: rgba(79, 70, 229, 0.22);
+  background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+  border-color: #C7D2FE;
+  border-bottom-color: #6366F1;
   color: #4338CA;
 }
 .sector-pill.sector-govt.active {
   background: linear-gradient(135deg, #4F46E5 0%, #3730A3 100%) !important;
-  border-color: #3730A3 !important;
+  border-color: #312E81 !important;
+  border-bottom-color: #1E1B4B !important;
   color: #FFFFFF !important;
-  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.35);
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.42);
 }
 
+/* 3. Private (Regal Purple) */
 .sector-pill.sector-private {
-  background: rgba(139, 92, 246, 0.08);
-  border-color: rgba(139, 92, 246, 0.22);
-  color: #7C3AED;
+  background: linear-gradient(135deg, #FAF5FF 0%, #F3E8FF 100%);
+  border-color: #E9D5FF;
+  border-bottom-color: #A855F7;
+  color: #7E22CE;
 }
 .sector-pill.sector-private.active {
   background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%) !important;
-  border-color: #6D28D9 !important;
+  border-color: #581C87 !important;
+  border-bottom-color: #3B0764 !important;
   color: #FFFFFF !important;
-  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.35);
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.42);
 }
 
+/* 4. News (Crimson Red) */
 .sector-pill.sector-news {
-  background: rgba(239, 68, 68, 0.08);
-  border-color: rgba(239, 68, 68, 0.22);
+  background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%);
+  border-color: #FECDD3;
+  border-bottom-color: #EF4444;
   color: #DC2626;
 }
 .sector-pill.sector-news.active {
   background: linear-gradient(135deg, #EF4444 0%, #B91C1C 100%) !important;
-  border-color: #B91C1C !important;
+  border-color: #991B1B !important;
+  border-bottom-color: #7F1D1D !important;
   color: #FFFFFF !important;
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.35);
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.42);
+}
+
+/* 5. Apprentice (Vibrant Amber/Gold) */
+.sector-pill.sector-apprentice {
+  background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+  border-color: #FDE68A;
+  border-bottom-color: #F59E0B;
+  color: #B45309;
+}
+.sector-pill.sector-apprentice.active {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%) !important;
+  border-color: #B45309 !important;
+  border-bottom-color: #78350F !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.42);
 }
 
 /* Dark theme colorful sector pills */
@@ -428,6 +465,26 @@ iframe[title*="Netlify"],
   background: rgba(37, 99, 235, 0.18);
   border-color: rgba(59, 130, 246, 0.4);
   color: #93C5FD;
+}
+.dark-theme .sector-pill.sector-govt {
+  background: rgba(79, 70, 229, 0.18);
+  border-color: rgba(99, 102, 241, 0.4);
+  color: #A5B4FC;
+}
+.dark-theme .sector-pill.sector-private {
+  background: rgba(139, 92, 246, 0.18);
+  border-color: rgba(168, 85, 247, 0.4);
+  color: #C084FC;
+}
+.dark-theme .sector-pill.sector-news {
+  background: rgba(239, 68, 68, 0.18);
+  border-color: rgba(248, 113, 113, 0.4);
+  color: #FCA5A5;
+}
+.dark-theme .sector-pill.sector-apprentice {
+  background: rgba(245, 158, 11, 0.18);
+  border-color: rgba(251, 191, 36, 0.4);
+  color: #FCD34D;
 }
 .dark-theme .sector-pill.sector-govt {
   background: rgba(79, 70, 229, 0.18);
@@ -1622,10 +1679,11 @@ iframe[title*="Netlify"],
   font-weight: 800;
   padding: 4px 8px;
   border-radius: 6px;
-  z-index: 5;
-  box-shadow: 0 2px 5px rgba(220, 38, 38, 0.3);
+  z-index: 10;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.16);
   letter-spacing: 0.3px;
   white-space: nowrap;
+  margin-right: 10px;
 }
 
 .ticker-live-dot {
@@ -2944,31 +3002,39 @@ iframe[title*="Netlify"],
 }
 
 /* --------------------------------------------------------------------------
-   3 Pillars Quick Nav (Compact, Vibrant & Colorful App Aesthetic)
+   3 Pillars Quick Nav (Animated, 3D, Vibrant & Realistic Glassmorphism)
    -------------------------------------------------------------------------- */
 .three-pillars-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
+  gap: 8px;
 }
 
 .pillar-card {
   position: relative;
-  border-radius: 10px;
-  padding: 6px 7px 5px;
-  height: 48px;
+  border-radius: 12px;
+  padding: 8px 9px 7px;
+  height: 56px;
   box-sizing: border-box;
   text-align: left;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  border: 1.5px solid transparent;
+  border-bottom: 3.5px solid rgba(0, 0, 0, 0.15);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+}
+
+.pillar-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
 }
 
 .pillar-card:active {
-  transform: scale(0.97);
+  transform: translateY(1px);
+  border-bottom-width: 1.5px;
 }
 
 .pillar-compact-header {
@@ -2979,20 +3045,21 @@ iframe[title*="Netlify"],
 }
 
 .pillar-mini-icon {
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1;
 }
 
 .pillar-compact-badge {
-  font-size: 8.5px;
+  font-size: 9px;
   font-weight: 800;
-  padding: 1px 5px;
-  border-radius: 5px;
+  padding: 2px 6px;
+  border-radius: 6px;
   line-height: 1.2;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
 .pillar-compact-title {
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 800;
   line-height: 1.15;
   white-space: nowrap;
@@ -3001,67 +3068,92 @@ iframe[title*="Netlify"],
   width: 100%;
 }
 
-/* 1. Vacancies Box (Royal Blue / Indigo) */
+/* 1. Vacancies Box (Royal Blue) */
 .pillar-card.pillar-vacancies {
-  background: linear-gradient(145deg, #F0F7FF 0%, #E0EEFD 100%);
-  border: 1.5px solid #BFDBFE;
+  background: linear-gradient(135deg, #F0F7FF 0%, #DBEAFE 100%);
+  border-color: #BFDBFE;
+  border-bottom-color: #3B82F6;
 }
 .pillar-card.pillar-vacancies .pillar-compact-title {
   color: #1D4ED8;
 }
 .pillar-card.pillar-vacancies .pillar-compact-badge {
-  background: #DBEAFE;
-  color: #1D4ED8;
+  background: #BFDBFE;
+  color: #1E40AF;
 }
 .pillar-card.pillar-vacancies.active-pillar {
-  border: 2px solid #2563EB;
-  background: linear-gradient(145deg, #DBEAFE 0%, #BFDBFE 100%);
-  box-shadow: 0 3px 10px rgba(37, 99, 235, 0.22);
-  transform: translateY(-1px);
+  border-color: #1E40AF;
+  border-bottom-color: #172554;
+  background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45);
+}
+.pillar-card.pillar-vacancies.active-pillar .pillar-compact-title {
+  color: #FFFFFF;
+}
+.pillar-card.pillar-vacancies.active-pillar .pillar-compact-badge {
+  background: rgba(255, 255, 255, 0.25);
+  color: #FFFFFF;
 }
 
-/* 2. Admit Card Box (Warm Tangerine / Amber) */
+/* 2. Admit Card Box (Warm Tangerine) */
 .pillar-card.pillar-admit {
-  background: linear-gradient(145deg, #FFF9F2 0%, #FFEDD5 100%);
-  border: 1.5px solid #FED7AA;
+  background: linear-gradient(135deg, #FFF9F2 0%, #FFEDD5 100%);
+  border-color: #FED7AA;
+  border-bottom-color: #EA580C;
 }
 .pillar-card.pillar-admit .pillar-compact-title {
   color: #C2410C;
 }
 .pillar-card.pillar-admit .pillar-compact-badge {
-  background: #FFEDD5;
-  color: #C2410C;
+  background: #FED7AA;
+  color: #9A3412;
 }
 .pillar-card.pillar-admit.active-pillar {
-  border: 2px solid #EA580C;
-  background: linear-gradient(145deg, #FED7AA 0%, #FDBA74 100%);
-  box-shadow: 0 3px 10px rgba(234, 88, 12, 0.22);
-  transform: translateY(-1px);
+  border-color: #C2410C;
+  border-bottom-color: #7C2D12;
+  background: linear-gradient(135deg, #FB923C 0%, #EA580C 100%);
+  box-shadow: 0 6px 18px rgba(234, 88, 12, 0.45);
+}
+.pillar-card.pillar-admit.active-pillar .pillar-compact-title {
+  color: #FFFFFF;
+}
+.pillar-card.pillar-admit.active-pillar .pillar-compact-badge {
+  background: rgba(255, 255, 255, 0.25);
+  color: #FFFFFF;
 }
 
-/* 3. Results Box (Emerald / Mint) */
+/* 3. Results Box (Emerald Green) */
 .pillar-card.pillar-results {
-  background: linear-gradient(145deg, #F0FDF4 0%, #DCFCE7 100%);
-  border: 1.5px solid #BBF7D0;
+  background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
+  border-color: #BBF7D0;
+  border-bottom-color: #10B981;
 }
 .pillar-card.pillar-results .pillar-compact-title {
   color: #047857;
 }
 .pillar-card.pillar-results .pillar-compact-badge {
-  background: #DCFCE7;
-  color: #047857;
+  background: #BBF7D0;
+  color: #065F46;
 }
 .pillar-card.pillar-results.active-pillar {
-  border: 2px solid #059669;
-  background: linear-gradient(145deg, #BBF7D0 0%, #86EFAC 100%);
-  box-shadow: 0 3px 10px rgba(16, 185, 129, 0.22);
-  transform: translateY(-1px);
+  border-color: #047857;
+  border-bottom-color: #064E3B;
+  background: linear-gradient(135deg, #34D399 0%, #059669 100%);
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
+}
+.pillar-card.pillar-results.active-pillar .pillar-compact-title {
+  color: #FFFFFF;
+}
+.pillar-card.pillar-results.active-pillar .pillar-compact-badge {
+  background: rgba(255, 255, 255, 0.25);
+  color: #FFFFFF;
 }
 
 /* Dark Theme Overrides for 3 Pillars */
 .dark-theme .pillar-card.pillar-vacancies {
   background: linear-gradient(145deg, rgba(37,99,235,0.18) 0%, rgba(30,58,138,0.25) 100%);
   border-color: rgba(96,165,250,0.4);
+  border-bottom-color: #2563EB;
 }
 .dark-theme .pillar-card.pillar-vacancies .pillar-compact-title {
   color: #93C5FD;
@@ -3074,6 +3166,7 @@ iframe[title*="Netlify"],
 .dark-theme .pillar-card.pillar-admit {
   background: linear-gradient(145deg, rgba(234,88,12,0.18) 0%, rgba(154,52,18,0.25) 100%);
   border-color: rgba(251,146,60,0.4);
+  border-bottom-color: #EA580C;
 }
 .dark-theme .pillar-card.pillar-admit .pillar-compact-title {
   color: #FDBA74;
@@ -3086,6 +3179,7 @@ iframe[title*="Netlify"],
 .dark-theme .pillar-card.pillar-results {
   background: linear-gradient(145deg, rgba(16,185,129,0.18) 0%, rgba(6,95,70,0.25) 100%);
   border-color: rgba(52,211,153,0.4);
+  border-bottom-color: #10B981;
 }
 .dark-theme .pillar-card.pillar-results .pillar-compact-title {
   color: #A7F3D0;
@@ -3432,4 +3526,66 @@ iframe[title*="Netlify"],
   button {
     display: none !important;
   }
+}
+
+
+/* ==========================================================================
+   SMART AI JOB MATCHER (3D ANIMATED VIBRANT CARD)
+   ========================================================================== */
+.smart-matcher-card {
+  background: linear-gradient(135deg, #FAF5FF 0%, #F3E8FF 50%, #EDE9FE 100%);
+  border: 1.5px solid #DDD6FE;
+  border-bottom: 3.5px solid #8B5CF6;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.12);
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.smart-matcher-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(139, 92, 246, 0.18);
+}
+
+.smart-matcher-icon-glow {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #EDE9FE, #DDD6FE);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid #C4B5FD;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.25);
+  flex-shrink: 0;
+}
+
+.btn-matcher-action {
+  background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%);
+  color: #FFFFFF !important;
+  font-weight: 800;
+  font-size: 11px;
+  padding: 7px 14px;
+  border-radius: 10px;
+  border: none;
+  border-bottom: 2.5px solid #4C1D95;
+  box-shadow: 0 3px 8px rgba(109, 40, 217, 0.35);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  white-space: nowrap;
+}
+
+.btn-matcher-action:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 14px rgba(109, 40, 217, 0.45);
+}
+
+.btn-matcher-action:active {
+  transform: translateY(1px);
+  border-bottom-width: 1px;
+}
+
+.dark-theme .smart-matcher-card {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(109, 40, 217, 0.2) 100%);
+  border-color: rgba(168, 85, 247, 0.4);
+  border-bottom-color: #7C3AED;
 }
