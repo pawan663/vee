@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, FileText, Send, Video, Share2, Bookmark, Calendar, Building, DollarSign, Users, Award, ExternalLink, Globe, Play } from 'lucide-react';
+import { X, FileText, Send, Video, Share2, Bookmark, Calendar, Building, DollarSign, Users, Award, ExternalLink, Globe, Play, Printer } from 'lucide-react';
 import { getJobVideo } from '../data/videoRegistry';
 
 export default function JobDetailModal({ isOpen, job, onClose, onOpenApply, onOpenReader, isSaved, onToggleSave, t }) {
@@ -224,6 +224,48 @@ export default function JobDetailModal({ isOpen, job, onClose, onOpenApply, onOp
                   {job.category === 'Private' ? 'View Details' : (isDirectPdf ? 'Open PDF' : 'Notice')} <ExternalLink size={10} />
                 </span>
               </a>
+
+              {/* Clean Official PDF / Print Generator */}
+              <button
+                type="button"
+                className="official-link-row flex-between p-2.5 rounded w-full cursor-pointer text-left"
+                style={{ background: 'var(--card-bg, #FFFFFF)', border: '1px solid var(--border-color, #CBD5E1)' }}
+                onClick={() => {
+                  if (onOpenReader) {
+                    onOpenReader({
+                      id: job.id,
+                      title: job.title,
+                      dept: job.dept,
+                      posts: job.posts,
+                      qualification: job.qualification,
+                      salary: job.salary,
+                      lastDate: job.lastDate,
+                      fee: job.fee,
+                      ageLimit: job.ageLimit,
+                      source: job.source || job.dept,
+                      url: job.pdfUrl || validApplyUrl,
+                      applyUrl: validApplyUrl,
+                      isPdf: isDirectPdf,
+                      timeAgo: isDirectPdf ? 'Official PDF Notification' : 'Official Portal Notice'
+                    });
+                  }
+                }}
+              >
+                <div className="flex-center gap-2">
+                  <span className="text-base">🖨️</span>
+                  <div>
+                    <p className="text-xs font-bold" style={{ color: 'var(--text-color, #1E293B)', margin: 0 }}>
+                      Clean Official Notice & PDF Generator
+                    </p>
+                    <p className="text-3xs text-muted" style={{ margin: 0 }}>
+                      Bina advertisement ke poori soochna dekhein aur 1-tap Clean PDF save karein
+                    </p>
+                  </div>
+                </div>
+                <span className="btn-accent-xs font-bold text-3xs inline-flex flex-center gap-0.5 px-2 py-1 rounded" style={{ background: '#059669', color: '#FFFFFF' }}>
+                  Generate PDF <Printer size={10} />
+                </span>
+              </button>
 
               {/* 2. Official Apply Portal */}
               <a

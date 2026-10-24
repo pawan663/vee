@@ -624,7 +624,7 @@ export async function scrapeFreeJobAlert() {
   if (latestTableHtml) {
     const $ = cheerio.load(latestTableHtml);
     $('table tr').each((i, tr) => {
-      if (jobs.length >= 80) return;
+      if (jobs.length >= 135) return;
       const tds = $(tr).find('td');
       if (tds.length >= 6) {
         const postDate = $(tds[0]).text().trim();

@@ -96,6 +96,37 @@ const STATE_RULES = {
   }
 };
 
+// Hindi-to-English Synonyms & Keywords Dictionary for Multi-Lingual Search
+const HINDI_SYNONYMS = {
+  'रेलवे': ['railway', 'rrb', 'rrc', 'alp', 'ntpc', 'rail', 'technician'],
+  'रेल': ['railway', 'rrb', 'rrc', 'alp', 'rail'],
+  'पुलिस': ['police', 'constable', 'si', 'daroga', 'sub inspector'],
+  'दरोगा': ['si', 'sub inspector', 'police'],
+  'सिपाही': ['constable', 'police', 'sepoy'],
+  'बैंक': ['bank', 'ibps', 'sbi', 'rbi', 'pnb', 'bob', 'clerk', 'po'],
+  'बैंकिंग': ['bank', 'ibps', 'sbi', 'banking'],
+  'शिक्षक': ['teacher', 'teaching', 'prt', 'tgt', 'pgt', 'tet', 'ctet', 'bed', 'faculty'],
+  'टीचर': ['teacher', 'teaching', 'prt', 'tgt', 'pgt'],
+  'अप्रेंटिस': ['apprentice', 'apprenticeship', 'training', 'iti apprentice'],
+  'पटवारी': ['patwari', 'lekhpal', 'revenue', 'kanungo'],
+  'लेखपाल': ['lekhpal', 'patwari', 'revenue'],
+  'सेना': ['army', 'navy', 'air force', 'defence', 'military', 'agniveer'],
+  'आर्मी': ['army', 'military', 'agniveer', 'soldier'],
+  'डिफेंस': ['defence', 'defense', 'army', 'navy', 'military'],
+  'डाक': ['post office', 'dak', 'gds', 'postal', 'india post'],
+  'डाकघर': ['post office', 'postal', 'gds', 'dak'],
+  'जीडीएस': ['gds', 'gramin dak sevak', 'post office'],
+  'बिजली': ['electricity', 'power', 'uppcl', 'rvunl', 'discom', 'energy'],
+  'स्वास्थ्य': ['health', 'aiims', 'medical', 'nurse', 'hospital'],
+  'नर्स': ['nurse', 'nursing', 'gnm', 'anm'],
+  'डॉक्टर': ['doctor', 'mbbs', 'medical', 'physician'],
+  'क्लर्क': ['clerk', 'assistant', 'ldc', 'udc'],
+  'चपरासी': ['peon', 'attendant', 'group d', 'helper', 'sevadar'],
+  'असिस्टेंट': ['assistant', 'clerk'],
+  'इंजीनियर': ['engineer', 'b.tech', 'polytechnic', 'diploma', 'je', 'ae'],
+  'डिप्लोमा': ['diploma', 'polytechnic']
+};
+
 export default function JobsTab({
   jobs,
   liveNews,
@@ -385,21 +416,38 @@ export default function JobsTab({
   const activeDeptMap = deptLabels[currentLang] || deptLabels.hi || deptLabels.en;
   const activeStateMap = stateLabels[currentLang] || stateLabels.hi || stateLabels.en;
 
+  // Real-time Apprentice Vacancies Count
+  const apprenticeCount = useMemo(() => {
+    return (jobs || []).filter((j) => {
+      if (isJobExpired(j.lastDate, todayStr)) return false;
+      const combined = `${j.title || ''} ${j.dept || ''} ${j.type || ''} ${j.qualification || ''}`.toLowerCase();
+      return /apprentice|अप्रेंटिस/i.test(combined);
+    }).length;
+  }, [jobs, todayStr]);
+
   const filteredJobs = useMemo(() => {
     return jobs.filter((job) => {
     // Expiry check - strictly purge any job whose last date has passed
     if (isJobExpired(job.lastDate, todayStr)) return false;
 
-    // Multi-token Smart Search (matches keywords in any order across all fields)
+    // Multi-token Smart Search (matches keywords in any order across all fields with Hindi synonyms)
     if (searchTerm.trim()) {
       const tokens = searchTerm.toLowerCase().trim().split(/\s+/);
       const combinedText = `${job.title || ''} ${job.dept || ''} ${job.qualification || ''} ${job.state || ''} ${job.category || ''} ${job.posts || ''} ${job.type || ''}`.toLowerCase();
-      const matchSearch = tokens.every((token) => combinedText.includes(token));
+      const matchSearch = tokens.every((token) => {
+        if (combinedText.includes(token)) return true;
+        const syns = HINDI_SYNONYMS[token];
+        if (syns && syns.some((s) => combinedText.includes(s))) return true;
+        return false;
+      });
       if (!matchSearch) return false;
     }
 
-    // Category (Govt vs Private)
-    if (activeCategory !== 'ALL' && activeCategory !== 'NEWS' && activeCategory !== 'RESULTS' && activeCategory !== 'ADMIT' && job.category !== activeCategory) {
+    // Category (Govt vs Private vs Apprentice)
+    if (activeCategory === 'APPRENTICE') {
+      const isApp = /apprentice|अप्रेंटिस/i.test(`${job.title || ''} ${job.dept || ''} ${job.type || ''} ${job.qualification || ''}`);
+      if (!isApp) return false;
+    } else if (activeCategory !== 'ALL' && activeCategory !== 'NEWS' && activeCategory !== 'RESULTS' && activeCategory !== 'ADMIT' && job.category !== activeCategory) {
       return false;
     }
 
@@ -771,6 +819,13 @@ export default function JobsTab({
             onClick={() => setActiveCategory('Private')}
           >
             🏢 {t.filterPrivate || 'Private'}
+          </button>
+          <button
+            className={`sector-pill sector-apprentice ${activeCategory === 'APPRENTICE' ? 'active font-bold' : ''}`}
+            onClick={() => setActiveCategory('APPRENTICE')}
+            style={activeCategory === 'APPRENTICE' ? { background: 'linear-gradient(135deg, #F59E0B, #D97706)', color: '#FFFFFF', borderColor: '#D97706', boxShadow: '0 2px 8px rgba(245, 158, 11, 0.4)' } : {}}
+          >
+            🛠️ अप्रेंटिस ({apprenticeCount})
           </button>
           <button
             className={`sector-pill sector-news news-pill-btn ${activeCategory === 'NEWS' ? 'active text-danger' : ''}`}
@@ -1190,6 +1245,23 @@ export default function JobsTab({
               </div>
             )}
           </div>
+
+          {/* Apprentice Special Highlight Banner */}
+          {activeCategory === 'APPRENTICE' && (
+            <div className="apprentice-banner p-3 mb-3 rounded-xl border flex-between" style={{ background: 'linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)', borderColor: '#F59E0B' }}>
+              <div>
+                <h4 className="text-xs font-bold text-amber-900 flex-center-start gap-1" style={{ margin: 0 }}>
+                  🛠️ ऑल इंडिया अप्रेंटिसशिप स्पेशल भर्ती (Apprentice Special)
+                </h4>
+                <p className="text-3xs text-amber-800 m-0 mt-0.5">
+                  रेलवे, बैंक, IOCL, ONGC, SAIL & PSU अप्रेंटिस — सीधी मेरिट भर्ती (बिना परीक्षा) + मासिक स्टाइपेंड (₹7,000 - ₹12,500/माह)
+                </p>
+              </div>
+              <span className="badge-live-sm bg-amber-600 text-white text-3xs font-bold px-2 py-0.5 rounded-full">
+                {displayJobs.length} Live
+              </span>
+            </div>
+          )}
 
           {/* Jobs List Header & Counter */}
           <div className="jobs-count-row flex-between text-2xs text-muted mb-2 px-1">

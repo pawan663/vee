@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, ArrowLeft, ExternalLink, Share2, Copy, CheckCircle2, ShieldCheck, Globe, BookOpen, Smartphone, FileText, Download, Building, Users, Calendar, Award, DollarSign, Send } from 'lucide-react';
+import { X, ArrowLeft, ExternalLink, Share2, Copy, CheckCircle2, ShieldCheck, Globe, BookOpen, Smartphone, FileText, Download, Building, Users, Calendar, Award, DollarSign, Send, Printer } from 'lucide-react';
 
 export default function InAppReaderModal({ isOpen, item, onClose }) {
   const [copied, setCopied] = useState(false);
@@ -17,6 +17,10 @@ export default function InAppReaderModal({ isOpen, item, onClose }) {
     navigator.clipboard.writeText(item.url || '');
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handlePrintPdf = () => {
+    window.print();
   };
 
   const handleShare = () => {
@@ -64,6 +68,9 @@ export default function InAppReaderModal({ isOpen, item, onClose }) {
             <Smartphone size={14} />
           </button>
 
+          <button className="icon-btn-sm" onClick={handlePrintPdf} title="Clean Print / Save as PDF">
+            <Printer size={16} />
+          </button>
           <button className="icon-btn-sm" onClick={handleCopy} title="Copy Link">
             {copied ? <CheckCircle2 size={16} className="text-success" /> : <Copy size={16} />}
           </button>
@@ -182,6 +189,16 @@ export default function InAppReaderModal({ isOpen, item, onClose }) {
                 </div>
 
                 <div className="reader-actions flex-column gap-2 mt-4">
+                  {/* Clean PDF Generator Button */}
+                  <button
+                    type="button"
+                    className="btn-success w-full text-center flex-center justify-center gap-1.5 text-xs font-bold py-2.5 shadow-sm"
+                    onClick={handlePrintPdf}
+                    style={{ background: 'linear-gradient(135deg, #059669, #10B981)', color: '#FFFFFF', border: 'none', borderRadius: '8px' }}
+                  >
+                    <Printer size={15} /> 🖨️ Is Notice Ka Clean PDF Download / Save Karein
+                  </button>
+
                   {/* Direct Apply or Portal Link */}
                   {item.applyUrl && (
                     <a
