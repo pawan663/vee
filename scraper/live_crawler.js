@@ -1876,10 +1876,34 @@ export async function aggregateAllLiveData() {
     }
 
     let matchedVid = null;
+
+    // A. Match against specific organization rules first
     for (const rule of orgVideoRules) {
       if (rule.re.test(jobText)) {
         matchedVid = allVideos.find(v => rule.re.test(v.title || ''));
         if (matchedVid) break;
+      }
+    }
+
+    // B. Automatic Smart Semantic Matcher for ANY newly uploaded YouTube video from channel:
+    // If you upload a video on YouTube for Railway, Police, ITBP, Bank, SSC, Apprentice, etc.,
+    // it will automatically pair with the corresponding job in the app!
+    if (!matchedVid && allVideos.length > 0) {
+      const cleanTokens = (job.title || '')
+        .replace(/2026|2025|Recruitment|Bharti|Online Form|Notification|\d+[\s,]*Posts|\d+[\s,]*Vacanc(y|ies)/gi, '')
+        .replace(/[^\w\s\u0900-\u097F]/gi, ' ')
+        .trim()
+        .toLowerCase()
+        .split(/\s+/)
+        .filter(w => w.length >= 3 && !/^(for|and|the|all|new|post|apply|date|govt|jobs|india)$/i.test(w));
+
+      if (cleanTokens.length > 0) {
+        matchedVid = allVideos.find(v => {
+          const vTitle = (v.title || '').toLowerCase();
+          const matches = cleanTokens.filter(token => vTitle.includes(token));
+          // Matches if at least 2 key tokens match, or 1 strong specific acronym like rrb, bssc, uppsc, itbp, crpf, bsf
+          return matches.length >= 2 || (matches.length >= 1 && matches.some(m => m.length >= 4));
+        });
       }
     }
 

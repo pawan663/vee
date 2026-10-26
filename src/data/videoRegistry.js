@@ -143,9 +143,19 @@ export const VIDEO_REGISTRY = [
 export function getJobVideo(job) {
   if (!job) return null;
 
+  // 1. If job has videoId directly attached by crawler from live YouTube channel feed:
+  if (job.videoId) {
+    return {
+      videoId: job.videoId,
+      videoUrl: job.videoUrl || `https://youtu.be/${job.videoId}`,
+      title: job.videoTitle || `${job.title} - Vacancy Era Education Official Video`,
+      channel: job.channel || '@vacancyeraeducation'
+    };
+  }
+
   const text = `${job.title || ''} ${job.dept || ''}`;
 
-  // 1. Strictly match against registered videos using word boundaries
+  // 2. Strictly match against registered videos using word boundaries
   for (const item of VIDEO_REGISTRY) {
     if (item.match.test(text)) {
       return item;
