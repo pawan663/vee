@@ -127,6 +127,15 @@ const HINDI_SYNONYMS = {
   'डिप्लोमा': ['diploma', 'polytechnic']
 };
 
+function formatSyncTime(date, lang) {
+  if (!date) return lang === 'en' ? 'Just Now' : 'अभी-अभी';
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return lang === 'en' ? 'Just Now' : 'अभी-अभी';
+  const timeStr = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+  const dateStr = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+  return `${dateStr}, ${timeStr}`;
+}
+
 export default function JobsTab({
   jobs,
   liveNews,
@@ -617,9 +626,53 @@ export default function JobsTab({
     });
   }, [jobs, todayStr, searchTerm, activeCategory, filterQual, filterDept, filterState, isMatcherOpen, matchQual]);
 
-  // Sort displayJobs so state-specific vacancies appear at the very top when state filter is active
+  // Smart Priority Scoring: Major flagship recruitments (Railway, SSC, Police, Army, Apprentice, PSUs, 100+ posts)
+  // appear at the top, while small 1-2 post watchman/gardener jobs appear lower down.
+  const getJobPriorityScore = (job) => {
+    let score = 0;
+    const title = (job.title || '').toLowerCase();
+    const dept = (job.dept || '').toLowerCase();
+    const cat = (job.category || '').toLowerCase();
+    const postsText = (job.posts || '').toLowerCase();
+
+    // Flagship major government recruiters
+    if (/railway|rrb|rrc|irctc|metro/i.test(dept) || /railway|rrb/i.test(title)) score += 60;
+    if (/ssc|staff selection/i.test(dept) || /\bssc\b/i.test(title)) score += 55;
+    if (/police|constable|daroga|sub inspector/i.test(title) || /police/i.test(dept)) score += 50;
+    if (/army|defence|navy|air force|agniveer/i.test(title) || /defence|army/i.test(dept)) score += 50;
+    if (/apprentice/i.test(cat) || /apprentice/i.test(title) || /apprentice/i.test(dept)) score += 45;
+    if (/bhel|ongc|iocl|ntpc|sail|isro|drdo|hal|bel|power grid/i.test(dept) || /bhel|ongc|iocl/i.test(title)) score += 40;
+    if (/bank|sbi|ibps|rbi/i.test(dept) || /sbi|ibps|po\b/i.test(title)) score += 35;
+
+    // New badge bonus
+    if (job.isNew) score += 20;
+
+    // Post count bonus
+    const postNumMatch = postsText.match(/(\d+[\d,]*)/);
+    if (postNumMatch) {
+      const num = parseInt(postNumMatch[1].replace(/,/g, ''), 10);
+      if (!isNaN(num)) {
+        if (num >= 5000) score += 35;
+        else if (num >= 1000) score += 30;
+        else if (num >= 500) score += 25;
+        else if (num >= 100) score += 20;
+        else if (num >= 20) score += 10;
+        else if (num <= 3) score -= 25; // De-prioritize 1-2 post gardener/watchman jobs from hero spot
+      }
+    }
+
+    // De-prioritize watchman / gardener / peon / mali from #1 hero spot
+    if (/gardener|watchman|mali|peon|chaprasi/i.test(title)) {
+      score -= 40;
+    }
+
+    return score;
+  };
+
+  // Sort displayJobs so major, high-impact recruitments appear at the top
   const displayJobs = useMemo(() => {
     return [...filteredJobs].sort((a, b) => {
+      // 1. If state filter is active, prioritize that state
       if (filterState !== 'ALL' && filterState !== 'All India') {
         const stateWord = filterState.toLowerCase();
         const aState = `${a.state || ''} ${a.title || ''} ${a.dept || ''} ${a.location || ''}`.toLowerCase().includes(stateWord);
@@ -627,6 +680,18 @@ export default function JobsTab({
         if (aState && !bState) return -1;
         if (!aState && bState) return 1;
       }
+
+      // 2. High-impact Flagship Major Recruitments first (Railway, SSC, Defence, Apprentice, 100+ posts)
+      const scoreA = getJobPriorityScore(a);
+      const scoreB = getJobPriorityScore(b);
+      if (scoreA !== scoreB) {
+        return scoreB - scoreA;
+      }
+
+      // 3. Newest / Active forms first
+      if (a.isNew && !b.isNew) return -1;
+      if (!a.isNew && b.isNew) return 1;
+
       return 0;
     });
   }, [filteredJobs, filterState]);
@@ -1279,16 +1344,46 @@ export default function JobsTab({
             </div>
           )}
 
-          {/* Jobs List Header & Counter */}
-          <div className="jobs-count-row flex-between text-2xs text-muted mb-2 px-1">
-            <span>{t.liveVerifiedVacancies} <b>{displayJobs.length}</b></span>
-            <span
-              className="text-success font-semibold flex-center gap-1 cursor-pointer"
+          {/* Live Sync Status Banner & Refresh Action */}
+          <div
+            className="jobs-sync-status-bar mb-2.5 px-3 py-2 rounded-xl flex-between items-center text-xs"
+            style={{
+              background: 'linear-gradient(135deg, rgba(239, 246, 255, 0.95) 0%, rgba(240, 253, 244, 0.95) 100%)',
+              border: '1px solid rgba(147, 197, 253, 0.7)',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.03)'
+            }}
+          >
+            <div className="flex-center-start gap-2 min-w-0">
+              <span className={`live-dot-pulse ${isSyncing ? 'animate-spin' : ''}`} style={{ background: '#10B981', width: '8px', height: '8px' }}></span>
+              <div className="flex-column">
+                <span className="font-extrabold text-slate-800 flex-center-start gap-1.5 leading-tight" style={{ fontSize: '11.5px' }}>
+                  <span>{currentLang === 'en' ? 'Live Auto-Sync Active' : 'लाइव ऑटो-सिंक सक्रिय'}</span>
+                  <span className="badge-live-sm px-1.5 py-0.2 rounded text-3xs font-black bg-emerald-600 text-white">
+                    {displayJobs.length} {currentLang === 'en' ? 'Jobs Active' : 'भर्तियां'}
+                  </span>
+                </span>
+                <span className="text-3xs text-slate-500 font-medium mt-0.5">
+                  {currentLang === 'en' ? 'Last Updated:' : 'अंतिम अपडेट:'} <b className="text-blue-700">{formatSyncTime(lastSyncedTime, currentLang)}</b> • FreeJobAlert & 12+ Portals
+                </span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className="btn-sync-refresh flex-center gap-1 px-2.5 py-1.5 rounded-lg font-bold text-xs cursor-pointer shadow-xs"
               onClick={() => onManualSync && onManualSync(true)}
-              title="Official Portals Synced"
+              disabled={isSyncing}
+              title={currentLang === 'en' ? 'Check for latest vacancies now' : 'ताज़ा भर्तियां अभी सिंक करें'}
+              style={{
+                background: '#FFFFFF',
+                border: '1.5px solid #93C5FD',
+                color: '#1D4ED8',
+                transition: 'all 0.15s ease'
+              }}
             >
-              <span className={`live-dot-pulse ${isSyncing ? 'animate-spin' : ''}`}></span> {t.syncedOfficial}
-            </span>
+              <RefreshCw size={12} className={isSyncing ? 'animate-spin text-blue-600' : 'text-blue-600'} />
+              <span>{isSyncing ? (currentLang === 'en' ? 'Syncing...' : 'सिंक हो रहा...') : (currentLang === 'en' ? 'Sync Now' : 'अपडेट करें')}</span>
+            </button>
           </div>
 
           {/* Jobs List */}

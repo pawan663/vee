@@ -3805,4 +3805,16 @@ iframe[title*="Netlify"],
   border-color: rgba(71, 85, 105, 0.6);
 }
 
+.dark-theme .jobs-sync-status-bar {
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.25) 0%, rgba(6, 95, 70, 0.25) 100%) !important;
+  border-color: rgba(59, 130, 246, 0.4) !important;
+}
+
+.dark-theme .btn-sync-refresh {
+  background: #1E293B !important;
+  border-color: #3B82F6 !important;
+  color: #93C5FD !important;
+}
+
+
 
