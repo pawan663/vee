@@ -1823,6 +1823,12 @@ export async function aggregateAllLiveData() {
   console.log(`📺 Total Channel Videos Synced: ${allVideos.length}`);
   console.log(`🗓️ Current Affairs Active Edition: ${currentAffairsEdition}`);
 
+  // Circuit breaker: Never wipe good existing data if crawler was offline or 0 jobs were scraped
+  if (allFreshJobs.length === 0) {
+    console.warn("⚠️ [Safety Guard] 0 jobs scraped (network offline or blocked). Preserving existing live data!");
+    return;
+  }
+
   const payload = {
     lastUpdated: new Date().toISOString(),
     status: "LIVE_SYNC_OK",
