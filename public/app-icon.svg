@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#091325" />
+      <stop offset="50%" stop-color="#1E3A8A" />
+      <stop offset="100%" stop-color="#2563EB" />
+    </linearGradient>
+
+    <!-- Gold Foil Gradient -->
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FEF08A" />
+      <stop offset="40%" stop-color="#F59E0B" />
+      <stop offset="70%" stop-color="#D97706" />
+      <stop offset="100%" stop-color="#B45309" />
+    </linearGradient>
+
+    <!-- Flame Gradient -->
+    <linearGradient id="flameGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FEF08A" />
+      <stop offset="50%" stop-color="#F97316" />
+      <stop offset="100%" stop-color="#EF4444" />
+    </linearGradient>
+
+    <!-- Shield Glow Filter -->
+    <filter id="goldGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#F59E0B" flood-opacity="0.45" />
+    </filter>
+  </defs>
+
+  <!-- Squircle App Icon Base -->
+  <rect x="16" y="16" width="480" height="480" rx="108" fill="url(#bgGrad)" stroke="url(#goldGrad)" stroke-width="12" />
+
+  <!-- Inner Gold Filigree Ring -->
+  <circle cx="256" cy="256" r="210" fill="none" stroke="url(#goldGrad)" stroke-width="4" stroke-dasharray="14 8" opacity="0.85" />
+  <circle cx="256" cy="256" r="195" fill="none" stroke="url(#goldGrad)" stroke-width="2" opacity="0.4" />
+
+  <!-- Decorative Corner Stars -->
+  <g fill="url(#goldGrad)" opacity="0.9">
+    <path d="M96 106 l4 10 l10 4 l-10 4 l-4 10 l-4 -10 l-10 -4 l10 -4 z" />
+    <path d="M416 106 l4 10 l10 4 l-10 4 l-4 10 l-4 -10 l-10 -4 l10 -4 z" />
+    <path d="M96 406 l4 10 l10 4 l-10 4 l-4 10 l-4 -10 l-10 -4 l10 -4 z" />
+    <path d="M416 406 l4 10 l10 4 l-10 4 l-4 10 l-4 -10 l-10 -4 l10 -4 z" />
+  </g>
+
+  <!-- Soaring Career Rocket Graphic -->
+  <g filter="url(#goldGlow)">
+    <path d="M256 260 C238 290 232 330 256 365 C280 330 274 290 256 260 Z" fill="url(#flameGrad)" />
+    <path d="M256 280 C246 300 244 322 256 345 C268 322 266 300 256 280 Z" fill="#FFFFFF" opacity="0.9" />
+
+    <path d="M196 230 C190 270 210 295 228 300 L236 265 Z" fill="url(#goldGrad)" />
+    <path d="M316 230 C322 270 302 295 284 300 L276 265 Z" fill="url(#goldGrad)" />
+
+    <path d="M256 100 C220 155 220 250 228 280 L284 280 C292 250 292 155 256 100 Z" fill="#FFFFFF" />
+    <path d="M256 100 C238 128 232 150 230 162 L282 162 C280 150 274 128 256 100 Z" fill="url(#goldGrad)" />
+
+    <circle cx="256" cy="195" r="22" fill="#1E3A8A" stroke="url(#goldGrad)" stroke-width="4" />
+    <circle cx="256" cy="195" r="14" fill="#38BDF8" />
+    <circle cx="252" cy="191" r="5" fill="#FFFFFF" opacity="0.8" />
+  </g>
+
+  <!-- Prominent "VEE" Wordmark Banner -->
+  <g>
+    <rect x="116" y="380" width="280" height="66" rx="20" fill="#0B132B" stroke="url(#goldGrad)" stroke-width="4" />
+    <text x="256" y="428" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="44" font-weight="900" fill="url(#goldGrad)" text-anchor="middle" letter-spacing="6">VEE</text>
+    <text x="256" y="468" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="800" fill="#E2E8F0" text-anchor="middle" letter-spacing="3" opacity="0.95">VACANCY ERA EDUCATION</text>
+  </g>
+</svg>

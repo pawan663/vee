@@ -1,0 +1,25 @@
+{
+  "name": "Vacancy Era Education - VEE",
+  "short_name": "VEE App",
+  "description": "भारत का #1 रियल-टाइम सरकारी व प्राइवेट भर्ती पोर्टल - 100% सत्यापित भर्तियां, एडमिट कार्ड, रिजल्ट और वीडियो गाइड्स",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0F172A",
+  "theme_color": "#1E3A8A",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/app-icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "news", "productivity"]
+}
