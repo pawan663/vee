@@ -3805,15 +3805,180 @@ iframe[title*="Netlify"],
   border-color: rgba(71, 85, 105, 0.6);
 }
 
-.dark-theme .jobs-sync-status-bar {
-  background: linear-gradient(135deg, rgba(30, 58, 138, 0.25) 0%, rgba(6, 95, 70, 0.25) 100%) !important;
-  border-color: rgba(59, 130, 246, 0.4) !important;
+/* --------------------------------------------------------------------------
+   3D Animated Book Opening Login Modal (रोज़गार भर्ती डायरी)
+   -------------------------------------------------------------------------- */
+.book-auth-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(6, 11, 25, 0.82);
+  backdrop-filter: blur(8px);
+  z-index: 1050;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 14px;
+  perspective: 1600px;
+  overflow-y: auto;
 }
 
-.dark-theme .btn-sync-refresh {
-  background: #1E293B !important;
-  border-color: #3B82F6 !important;
-  color: #93C5FD !important;
+.book-3d-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 435px;
+  min-height: 520px;
+  transform-style: preserve-3d;
+  margin: auto;
+}
+
+/* 3D Flipping Book Front Cover */
+.book-cover-3d {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  border-radius: 16px 24px 24px 16px;
+  background: linear-gradient(135deg, #091325 0%, #172E5D 50%, #1E3A8A 100%);
+  border: 2.5px solid #F59E0B;
+  box-shadow: 
+    -14px 16px 45px rgba(0, 0, 0, 0.65),
+    inset 0 0 0 2px rgba(254, 240, 138, 0.5),
+    inset 16px 0 22px rgba(0, 0, 0, 0.6);
+  transform-origin: left center;
+  transition: transform 0.85s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.45s ease 0.35s, visibility 0.85s;
+  cursor: pointer;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 24px 20px;
+}
+
+.book-cover-3d.book-open {
+  transform: rotateY(-135deg) translateZ(8px) scale(0.95);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Left Book Spine Ridge */
+.book-spine-ridge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 20px;
+  background: linear-gradient(90deg, rgba(0,0,0,0.65) 0%, rgba(255,255,255,0.12) 35%, rgba(0,0,0,0.45) 100%);
+  border-right: 1.5px solid rgba(245, 158, 11, 0.7);
+  box-shadow: inset 1px 0 3px rgba(0,0,0,0.4);
+}
+
+/* Hanging Crimson Silk Bookmark Ribbon */
+.book-ribbon-tag {
+  position: absolute;
+  top: -4px;
+  right: 28px;
+  width: 22px;
+  height: 48px;
+  background: linear-gradient(180deg, #DC2626 0%, #B91C1C 75%, #991B1B 100%);
+  box-shadow: 0 4px 10px rgba(185, 28, 28, 0.45);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%);
+  z-index: 25;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 6px;
+}
+
+.book-ribbon-tag::after {
+  content: '★';
+  color: #FEF08A;
+  font-size: 10px;
+}
+
+/* Interior Open Book Page */
+.book-page-interior {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  border-radius: 14px 22px 22px 14px;
+  background: #FFFFFF;
+  box-shadow: 
+    -10px 14px 40px rgba(0, 0, 0, 0.45),
+    inset 16px 0 18px rgba(0, 0, 0, 0.05);
+  border: 1.5px solid #CBD5E1;
+  border-left: 10px solid #1E3A8A;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: 88vh;
+  animation: bookPageReveal 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes bookPageReveal {
+  0% {
+    transform: scale(0.93) rotateY(12deg);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1) rotateY(0deg);
+    opacity: 1;
+  }
+}
+
+/* Notebook Binder Stitch Accents */
+.book-binder-stitch {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 3px;
+  width: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  pointer-events: none;
+  z-index: 15;
+}
+
+.stitch-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #64748B;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.5), 0 0 1px rgba(255,255,255,0.8);
+}
+
+/* Registered Aspirant Pass Card (When user has existing data) */
+.aspirant-pass-card {
+  background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 50%, #FDE68A 100%);
+  border: 1.5px solid #F59E0B;
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow: 0 4px 16px rgba(217, 119, 6, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.aspirant-pass-card::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  width: 70px;
+  height: 70px;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.2) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.dark-theme .book-page-interior {
+  background: #0F172A;
+  border-color: #334155;
+  border-left-color: #3B82F6;
+  box-shadow: -10px 14px 40px rgba(0, 0, 0, 0.7);
+}
+
+.dark-theme .aspirant-pass-card {
+  background: linear-gradient(135deg, #1E293B 0%, #262E3D 100%);
+  border-color: #D97706;
 }
 
 

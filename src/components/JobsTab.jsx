@@ -1381,50 +1381,6 @@ export default function JobsTab({
             </div>
           )}
 
-          {/* Live Sync Status Banner & Refresh Action */}
-          <div
-            className="jobs-sync-status-bar mb-2.5 px-3 py-2 rounded-xl flex-between items-center text-xs"
-            style={{
-              background: 'linear-gradient(135deg, rgba(239, 246, 255, 0.95) 0%, rgba(240, 253, 244, 0.95) 100%)',
-              border: '1px solid rgba(147, 197, 253, 0.7)',
-              boxShadow: '0 2px 6px rgba(0,0,0,0.03)'
-            }}
-          >
-            <div className="flex-center-start gap-2 min-w-0">
-              <span className={`live-dot-pulse ${isSyncing ? 'animate-spin' : ''}`} style={{ background: '#10B981', width: '8px', height: '8px' }}></span>
-              <div className="flex-column">
-                <span className="font-extrabold text-slate-800 flex-center-start gap-1.5 leading-tight flex-wrap" style={{ fontSize: '11.5px' }}>
-                  <span>{currentLang === 'en' ? '24x7 Cloud Auto-Sync Active' : '24x7 क्लाउड ऑटो-सिंक सक्रिय'}</span>
-                  <span className="badge-live-sm px-1.5 py-0.2 rounded text-3xs font-black bg-emerald-600 text-white">
-                    {displayJobs.length} {currentLang === 'en' ? 'Jobs Active' : 'भर्तियां'}
-                  </span>
-                  <span className="badge-live-sm px-1.5 py-0.2 rounded text-3xs font-bold bg-amber-500 text-white">
-                    ⚡ {currentLang === 'en' ? 'Dynamic Rotating Feed' : 'डायनामिक रोटेटिंग फ़ीड'}
-                  </span>
-                </span>
-                <span className="text-3xs text-slate-500 font-medium mt-0.5">
-                  {currentLang === 'en' ? 'Last Updated:' : 'अंतिम अपडेट:'} <b className="text-blue-700">{formatSyncTime(lastSyncedTime, currentLang)}</b> • 14+ States & FreeJobAlert
-                </span>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              className="btn-sync-refresh flex-center gap-1 px-2.5 py-1.5 rounded-lg font-bold text-xs cursor-pointer shadow-xs"
-              onClick={() => onManualSync && onManualSync(true)}
-              disabled={isSyncing}
-              title={currentLang === 'en' ? 'Check for latest vacancies now' : 'ताज़ा भर्तियां अभी सिंक करें'}
-              style={{
-                background: '#FFFFFF',
-                border: '1.5px solid #93C5FD',
-                color: '#1D4ED8',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <RefreshCw size={12} className={isSyncing ? 'animate-spin text-blue-600' : 'text-blue-600'} />
-              <span>{isSyncing ? (currentLang === 'en' ? 'Syncing...' : 'सिंक हो रहा...') : (currentLang === 'en' ? 'Sync Now' : 'अपडेट करें')}</span>
-            </button>
-          </div>
 
           {/* Jobs List */}
           <div className="jobs-list">
