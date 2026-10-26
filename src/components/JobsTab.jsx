@@ -161,6 +161,21 @@ export default function JobsTab({
   const [matchQual, setMatchQual] = useState('ITI');
   const [matchAge, setMatchAge] = useState(22);
 
+  // Session Open Counter (Increments on every fresh session open so feed is always dynamic!)
+  const [sessionCount] = useState(() => {
+    try {
+      const stored = parseInt(sessionStorage.getItem('vee_session_open_count') || '0', 10);
+      const next = stored + 1;
+      sessionStorage.setItem('vee_session_open_count', next.toString());
+      return next;
+    } catch (e) {
+      return 1;
+    }
+  });
+
+  // Dynamic hour seed for hourly spotlight rotation (0-23 hours)
+  const currentHour = new Date().getHours();
+
   // Auto-Expiry check: Filter out any job where lastDate < today
   const todayStr = new Date().toISOString().split('T')[0];
 
@@ -628,6 +643,7 @@ export default function JobsTab({
 
   // Smart Priority Scoring: Major flagship recruitments (Railway, SSC, Police, Army, Apprentice, PSUs, 100+ posts)
   // appear at the top, while small 1-2 post watchman/gardener jobs appear lower down.
+  // Dynamic Hourly Spotlight & Session Shuffle guarantees fresh discoveries every time the app is opened!
   const getJobPriorityScore = (job) => {
     let score = 0;
     const title = (job.title || '').toLowerCase();
@@ -635,7 +651,7 @@ export default function JobsTab({
     const cat = (job.category || '').toLowerCase();
     const postsText = (job.posts || '').toLowerCase();
 
-    // Flagship major government recruiters
+    // Flagship major government recruiters base weights
     if (/railway|rrb|rrc|irctc|metro/i.test(dept) || /railway|rrb/i.test(title)) score += 60;
     if (/ssc|staff selection/i.test(dept) || /\bssc\b/i.test(title)) score += 55;
     if (/police|constable|daroga|sub inspector/i.test(title) || /police/i.test(dept)) score += 50;
@@ -644,8 +660,29 @@ export default function JobsTab({
     if (/bhel|ongc|iocl|ntpc|sail|isro|drdo|hal|bel|power grid/i.test(dept) || /bhel|ongc|iocl/i.test(title)) score += 40;
     if (/bank|sbi|ibps|rbi/i.test(dept) || /sbi|ibps|po\b/i.test(title)) score += 35;
 
-    // New badge bonus
-    if (job.isNew) score += 20;
+    // Brand new announcement bonus - always elevated to top hero spots
+    if (job.isNew) score += 80;
+
+    // Hourly Spotlight Category Rotation:
+    // Changes every hour (0-23) so regular app visitors see diverse categories in the hero slots
+    const rotationSlot = currentHour % 4;
+    if (rotationSlot === 0 && (/apprentice/i.test(cat) || /railway|rrb/i.test(dept) || /railway|rrb/i.test(title))) {
+      score += 25; // Apprentice & Railway hour
+    } else if (rotationSlot === 1 && (/police|constable|sub inspector/i.test(title) || /army|defence|agniveer/i.test(title))) {
+      score += 25; // Defence & Police hour
+    } else if (rotationSlot === 2 && (/bank|sbi|ibps|rbi/i.test(dept) || /ssc|cgl|chsl|mts/i.test(title))) {
+      score += 25; // Banking & SSC hour
+    } else if (rotationSlot === 3 && (/psc|upsc|uppsc|bpsc|rpsc|mppsc/i.test(dept) || cat === 'private')) {
+      score += 25; // State PSC & Corporate hour
+    }
+
+    // Dynamic Session Shuffle:
+    // When a user opens or refreshes the app within the same hour, jobs within similar score brackets
+    // receive a subtle deterministic pseudo-random offset based on sessionCount.
+    // This ensures returning users discover DIFFERENT vacancies instead of the exact same static cards!
+    const idSeed = (job.id ? String(job.id) : title).split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+    const sessionOffset = (idSeed + sessionCount * 13) % 18;
+    score += sessionOffset;
 
     // Post count bonus
     const postNumMatch = postsText.match(/(\d+[\d,]*)/);
@@ -657,7 +694,7 @@ export default function JobsTab({
         else if (num >= 500) score += 25;
         else if (num >= 100) score += 20;
         else if (num >= 20) score += 10;
-        else if (num <= 3) score -= 25; // De-prioritize 1-2 post gardener/watchman jobs from hero spot
+        else if (num <= 3) score -= 30; // De-prioritize 1-2 post gardener/watchman jobs from hero spot
       }
     }
 
@@ -694,7 +731,7 @@ export default function JobsTab({
 
       return 0;
     });
-  }, [filteredJobs, filterState]);
+  }, [filteredJobs, filterState, currentHour, sessionCount]);
 
   const formatHeadline = (title) => {
     if (!title) return '';
@@ -1356,14 +1393,17 @@ export default function JobsTab({
             <div className="flex-center-start gap-2 min-w-0">
               <span className={`live-dot-pulse ${isSyncing ? 'animate-spin' : ''}`} style={{ background: '#10B981', width: '8px', height: '8px' }}></span>
               <div className="flex-column">
-                <span className="font-extrabold text-slate-800 flex-center-start gap-1.5 leading-tight" style={{ fontSize: '11.5px' }}>
-                  <span>{currentLang === 'en' ? 'Live Auto-Sync Active' : 'लाइव ऑटो-सिंक सक्रिय'}</span>
+                <span className="font-extrabold text-slate-800 flex-center-start gap-1.5 leading-tight flex-wrap" style={{ fontSize: '11.5px' }}>
+                  <span>{currentLang === 'en' ? '24x7 Cloud Auto-Sync Active' : '24x7 क्लाउड ऑटो-सिंक सक्रिय'}</span>
                   <span className="badge-live-sm px-1.5 py-0.2 rounded text-3xs font-black bg-emerald-600 text-white">
                     {displayJobs.length} {currentLang === 'en' ? 'Jobs Active' : 'भर्तियां'}
                   </span>
+                  <span className="badge-live-sm px-1.5 py-0.2 rounded text-3xs font-bold bg-amber-500 text-white">
+                    ⚡ {currentLang === 'en' ? 'Dynamic Rotating Feed' : 'डायनामिक रोटेटिंग फ़ीड'}
+                  </span>
                 </span>
                 <span className="text-3xs text-slate-500 font-medium mt-0.5">
-                  {currentLang === 'en' ? 'Last Updated:' : 'अंतिम अपडेट:'} <b className="text-blue-700">{formatSyncTime(lastSyncedTime, currentLang)}</b> • FreeJobAlert & 12+ Portals
+                  {currentLang === 'en' ? 'Last Updated:' : 'अंतिम अपडेट:'} <b className="text-blue-700">{formatSyncTime(lastSyncedTime, currentLang)}</b> • 14+ States & FreeJobAlert
                 </span>
               </div>
             </div>

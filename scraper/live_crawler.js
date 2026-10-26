@@ -1648,6 +1648,99 @@ export async function scrapeBusinessEconomyNews() {
   }
 }
 
+// 19. Dedicated All-India State Government Recruitment Crawler (UP, MP, Bihar, Rajasthan, Delhi, Odisha, Assam, etc.)
+export async function scrapeAllStateGovernmentJobs() {
+  console.log("🌐 [19/19] Scraping 14+ State Government Portals (UP, MP, Bihar, Rajasthan, Delhi, Odisha, Assam, Punjab, etc.)...");
+  const statePages = [
+    { state: 'Rajasthan', url: 'https://www.freejobalert.com/rajasthan-government-jobs/' },
+    { state: 'Uttar Pradesh', url: 'https://www.freejobalert.com/up-government-jobs/' },
+    { state: 'Bihar', url: 'https://www.freejobalert.com/bihar-government-jobs/' },
+    { state: 'Madhya Pradesh', url: 'https://www.freejobalert.com/mp-government-jobs/' },
+    { state: 'Delhi', url: 'https://www.freejobalert.com/delhi-jobs/' },
+    { state: 'Haryana', url: 'https://www.freejobalert.com/haryana-jobs/' },
+    { state: 'Jharkhand', url: 'https://www.freejobalert.com/jharkhand-jobs/' },
+    { state: 'Chhattisgarh', url: 'https://www.freejobalert.com/chhattisgarh-jobs/' },
+    { state: 'Punjab', url: 'https://www.freejobalert.com/punjab-government-jobs/' },
+    { state: 'Odisha', url: 'https://www.freejobalert.com/odisha-government-jobs/' },
+    { state: 'Assam', url: 'https://www.freejobalert.com/assam-government-jobs/' },
+    { state: 'Gujarat', url: 'https://www.freejobalert.com/gujarat-government-jobs/' },
+    { state: 'Maharashtra', url: 'https://www.freejobalert.com/maharashtra-government-jobs/' },
+    { state: 'West Bengal', url: 'https://www.freejobalert.com/west-bengal-government-jobs/' }
+  ];
+
+  const jobs = [];
+  const news = [];
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  await Promise.all(statePages.map(async (sp) => {
+    try {
+      const html = await fetchHtml(sp.url);
+      if (!html) return;
+      const $ = cheerio.load(html);
+      $('table tr').each((i, tr) => {
+        const tds = $(tr).find('td');
+        if (tds.length >= 6) {
+          const org = $(tds[1]).text().trim();
+          const postName = $(tds[2]).text().trim().replace(/\s+/g, ' ');
+          const qual = $(tds[3]).text().trim().replace(/\s+/g, ' ');
+          const lastDateRaw = $(tds[5]).text().trim();
+          const link = $(tr).find('a[href*="/articles/"]').attr('href') || $(tr).find('a').attr('href');
+
+          if (org && postName && link && !postName.toLowerCase().includes('post name')) {
+            const lastDate = parseFjaDate(lastDateRaw);
+            if (lastDate && lastDate >= todayStr) {
+              const q = detectFjaQual(qual, postName);
+              const title = `${org} ${postName} Recruitment 2026`;
+              if (!jobs.some(j => j.title.toLowerCase() === title.toLowerCase())) {
+                const details = enrichJobDetails(title, q.type);
+                let postCount = details.posts;
+                if (postCount === "Active Openings" && postName.includes('Posts')) {
+                  const parts = postName.split('–');
+                  if (parts.length > 1 && /\d+\s*posts/i.test(parts[parts.length - 1])) {
+                    postCount = parts[parts.length - 1].trim();
+                  }
+                }
+                jobs.push({
+                  id: `state-${sp.state.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}-${i}`,
+                  title: title,
+                  dept: org,
+                  posts: postCount,
+                  qualification: q.qual,
+                  state: sp.state,
+                  category: "Govt",
+                  type: q.type,
+                  lastDate: lastDate,
+                  isRealDate: true,
+                  ageLimit: details.ageLimit,
+                  fee: details.fee,
+                  pdfUrl: link,
+                  applyUrl: link,
+                  fallbackUrl: getOfficialPortalUrl(details.dept, title, link),
+                  source: `FreeJobAlert (${sp.state})`,
+                  isNew: true,
+                  isClosingSoon: isClosingWithinDays(lastDate, 7),
+                  status: "ACTIVE",
+                  viewsCount: Math.floor(18000 + Math.random() * 20000),
+                  salary: details.salary,
+                  selectionProcess: details.selectionProcess,
+                  videoId: details.videoId,
+                  videoUrl: details.videoUrl,
+                  videoTitle: details.videoTitle
+                });
+              }
+            }
+          }
+        }
+      });
+    } catch (e) {
+      console.warn(`[State Crawler] Error scraping ${sp.state}:`, e.message);
+    }
+  }));
+
+  console.log(`✅ [State Crawler] Extracted ${jobs.length} dedicated State Government vacancies across India!`);
+  return { jobs, news };
+}
+
 // Main Aggregator & Multi-Target Publisher
 export async function aggregateAllLiveData() {
   console.log("==================================================");
@@ -1695,7 +1788,8 @@ export async function aggregateAllLiveData() {
     drishtiData,
     gkTodayData,
     jagranGkData,
-    bizData
+    bizData,
+    stateData
   ] = await Promise.all([
     safeScrape(scrapeFreeJobAlert, 'FreeJobAlert'),
     safeScrape(scrapeJagranJosh, 'JagranJosh'),
@@ -1714,7 +1808,8 @@ export async function aggregateAllLiveData() {
     safeScrape(scrapeDrishtiHindiCurrentAffairs, 'DrishtiIASHindi'),
     safeScrape(scrapeGKTodayCurrentAffairs, 'GKToday'),
     safeScrape(scrapeJagranJoshGK, 'JagranJoshGK'),
-    safeScrape(scrapeBusinessEconomyNews, 'BusinessEconomyNews')
+    safeScrape(scrapeBusinessEconomyNews, 'BusinessEconomyNews'),
+    safeScrape(scrapeAllStateGovernmentJobs, 'StateGovernmentJobs')
   ]);
 
   // Combine news with intelligent deduplication (including Drishti IAS, GKToday, Jagran GK, FreeJobAlert, Business)
@@ -1741,6 +1836,7 @@ export async function aggregateAllLiveData() {
   const todayStr = new Date().toISOString().split('T')[0];
   const rawJobs = [
     ...(fjaData?.jobs || []),
+    ...(stateData?.jobs || []),
     ...(srComData?.jobs || []),
     ...(srCmData?.jobs || []),
     ...(rrData?.jobs || []),

@@ -2,8 +2,8 @@ name: VEE 24x7 Multi-Portal Cloud Auto-Sync
 
 on:
   schedule:
-    # Runs automatically 6 times a day (every 4 hours) in the cloud
-    - cron: '0 */4 * * *'
+    # Runs automatically every 60 minutes (24x7 non-stop) in the cloud
+    - cron: '0 * * * *'
   workflow_dispatch: # Allows 1-click manual sync anytime from GitHub UI
 
 permissions:
