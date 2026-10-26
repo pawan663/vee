@@ -1,15 +1,17 @@
 import React from 'react';
 import { X, FileText, Send, Video, Share2, Bookmark, Calendar, Building, DollarSign, Users, Award, ExternalLink, Globe, Play, Printer } from 'lucide-react';
 import { getJobVideo } from '../data/videoRegistry';
+import { cleanJobTitle, formatSafeQualification } from '../utils/textUtils';
 
 export default function JobDetailModal({ isOpen, job, onClose, onOpenApply, onOpenReader, isSaved, onToggleSave, t }) {
   if (!isOpen || !job) return null;
 
+  const displayTitle = cleanJobTitle(job.title);
   const isDirectPdf = job.pdfUrl && job.pdfUrl.toLowerCase().includes('.pdf');
 
   const formatQualification = (q) => {
-    if (!q) return '10th / 12th / ITI / Graduate (As per Official Notification)';
-    const clean = String(q).trim();
+    const safeQ = formatSafeQualification(q, job.title, job.type);
+    const clean = String(safeQ).trim();
     if (/^12th$/i.test(clean)) return '12th Pass (Intermediate / 10+2) in any stream from a recognized Board';
     if (/^10th$/i.test(clean)) return '10th Pass (Matriculation) from a recognized Board';
     if (/^iti$/i.test(clean)) return 'ITI Pass in relevant Trade (NCVT / SCVT recognized)';
@@ -24,7 +26,7 @@ export default function JobDetailModal({ isOpen, job, onClose, onOpenApply, onOp
     ? job.applyUrl
     : (job.pdfUrl && job.pdfUrl.startsWith('http'))
       ? job.pdfUrl
-      : `https://www.google.com/search?q=${encodeURIComponent((job.dept || '') + ' ' + (job.title || '') + ' official apply online')}`;
+      : `https://www.google.com/search?q=${encodeURIComponent((job.dept || '') + ' ' + displayTitle + ' official apply online')}`;
 
   const handleOpenPdfOrArticle = (e) => {
     e.preventDefault();
@@ -67,18 +69,18 @@ export default function JobDetailModal({ isOpen, job, onClose, onOpenApply, onOp
   const getYoutubeUrl = () => {
     if (matchedVideo?.videoUrl) return matchedVideo.videoUrl;
     if (matchedVideo?.videoId) return `https://youtu.be/${matchedVideo.videoId}`;
-    const cleanTopic = (job.title || '')
+    const cleanTopic = displayTitle
       .replace(/2026|Recruitment|Bharti|Online Form|\d+[\s,]*Posts|\d+[\s,]*Vacanc(y|ies)/gi, '')
       .replace(/[^\w\s\u0900-\u097F]/gi, ' ')
       .trim()
       .split(/\s+/)
       .slice(0, 4)
       .join(' ');
-    return `https://www.youtube.com/@vacancyeraeducation/search?query=${encodeURIComponent(cleanTopic || job.title)}`;
+    return `https://www.youtube.com/@vacancyeraeducation/search?query=${encodeURIComponent(cleanTopic || displayTitle)}`;
   };
 
   const handleShareWhatsApp = () => {
-    const text = `*${job.title}*\n🏢 ${t.tabJobs || 'Dept'}: ${job.dept}\n👥 ${t.totalPosts || 'Posts'}: ${job.posts}\n🎓 ${t.qualification || 'Qualification'}: ${job.qualification}\n⏳ ${t.lastDate || 'Last Date'}: ${job.lastDate}\n\n📲 Official PDF & Apply Online ke liye download karein *VEE App*!`;
+    const text = `*${displayTitle}*\n🏢 ${t.tabJobs || 'Dept'}: ${job.dept}\n👥 ${t.totalPosts || 'Posts'}: ${job.posts}\n🎓 ${t.qualification || 'Qualification'}: ${job.qualification}\n⏳ ${t.lastDate || 'Last Date'}: ${job.lastDate}\n\n📲 Official PDF & Apply Online ke liye download karein *VEE App*!`;
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
   };
@@ -117,7 +119,7 @@ export default function JobDetailModal({ isOpen, job, onClose, onOpenApply, onOp
               </button>
             </div>
           </div>
-          <h2 className="sheet-title mt-2 text-lg font-bold">{job.title}</h2>
+          <h2 className="sheet-title mt-2 text-lg font-bold">{displayTitle}</h2>
           <p className="text-xs text-muted flex-center-start gap-1 mt-1">
             <Building size={13} /> {job.dept}
           </p>
@@ -403,18 +405,59 @@ export default function JobDetailModal({ isOpen, job, onClose, onOpenApply, onOp
                 </div>
               </div>
             ) : (
-              <div className="video-embed-box">
-                <div className="video-placeholder flex-center flex-column text-center p-3">
-                  <Video size={36} className="text-danger mb-1" />
-                  <p className="text-xs font-bold">{t.videoGuideTitle || 'Vacancy Era Education Special Analysis'}</p>
-                  <p className="text-2xs text-muted">{t.videoGuideSub || 'How to fill form, syllabus & preparation strategy'}</p>
+              <div
+                className="video-channel-guide-card p-3 rounded-lg"
+                style={{
+                  background: 'linear-gradient(135deg, #1E1B4B 0%, #0F172A 100%)',
+                  border: '1px solid #312E81',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.12)'
+                }}
+              >
+                <div className="flex-center-start gap-2.5 mb-2">
+                  <div
+                    style={{
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '50%',
+                      background: '#DC2626',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#FFF',
+                      fontSize: '18px',
+                      flexShrink: 0
+                    }}
+                  >
+                    ▶
+                  </div>
+                  <div>
+                    <h5 className="text-xs font-bold text-white m-0">Vacancy Era Education Official Guide</h5>
+                    <p className="text-3xs text-slate-300 m-0">चैनल पर भर्ती का विश्लेषण, सिलेबस व फॉर्म भरने का तरीका देखें</p>
+                  </div>
+                </div>
+
+                <p className="text-2xs text-slate-300 leading-relaxed mb-3">
+                  इस भर्ती ({displayTitle.slice(0, 50)}...) का संपूर्ण ऑफिशियल वीडियो गाइड और नोटिफिकेशन अपडेट सीधे यूट्यूब चैनल पर उपलब्ध है।
+                </p>
+
+                <div className="flex-center gap-2 flex-wrap">
                   <a
                     href={getYoutubeUrl()}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="btn-danger-sm mt-2 inline-flex flex-center gap-1 font-bold"
+                    className="btn-danger-sm font-bold text-2xs inline-flex flex-center gap-1.5 px-3 py-1.5 rounded flex-1"
+                    style={{ background: '#DC2626', color: '#FFFFFF', textDecoration: 'none', justifyContent: 'center' }}
                   >
-                    ▶️ {t.playVideoBtn || 'Watch Video (YouTube)'}
+                    🔍 यूट्यूब पर सर्च करें <ExternalLink size={11} />
+                  </a>
+                  <a
+                    href="https://www.youtube.com/@vacancyeraeducation"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-secondary font-bold text-2xs inline-flex flex-center gap-1.5 px-3 py-1.5 rounded"
+                    style={{ background: '#334155', color: '#FFFFFF', textDecoration: 'none', border: '1px solid #475569' }}
+                  >
+                    📺 चैनल देखें
                   </a>
                 </div>
               </div>

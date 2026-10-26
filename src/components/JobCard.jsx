@@ -1,11 +1,12 @@
 import React from 'react';
 import { Calendar, Users, Bookmark, FileText, Send, Flame, Building, PlayCircle, Clock } from 'lucide-react';
 import { getJobVideo } from '../data/videoRegistry';
+import { cleanJobTitle, formatSafeQualification } from '../utils/textUtils';
 
 // Clean, compact qualification label so pills never get bloated or cut off
-function formatQualificationShort(q) {
-  if (!q) return '10th / 12th / Grad';
-  const clean = String(q).trim();
+function formatQualificationShort(q, title = '', type = '') {
+  const safe = formatSafeQualification(q, title, type);
+  const clean = String(safe).trim();
   if (/^12th/i.test(clean)) return '12th Pass';
   if (/^10th/i.test(clean)) return '10th Pass';
   if (/^iti/i.test(clean)) return 'ITI Pass';
@@ -22,6 +23,7 @@ function formatQualificationShort(q) {
 export default function JobCard({ job, onOpenDetail, onOpenApply, isSaved, onToggleSave, t, currentLang = 'hi' }) {
   const matchedVideo = getJobVideo(job);
   const hasVideo = Boolean(matchedVideo && matchedVideo.videoId);
+  const displayTitle = cleanJobTitle(job.title);
 
   const isApprentice = job.category === 'Apprentice' || (job.dept && job.dept.toLowerCase().includes('apprentice')) || (job.title && job.title.toLowerCase().includes('apprentice'));
   const sectorBorderClass = isApprentice ? 'job-border-apprentice' : (job.category === 'Private' ? 'job-border-private' : 'job-border-govt');
@@ -83,7 +85,7 @@ export default function JobCard({ job, onOpenDetail, onOpenApply, isSaved, onTog
       </div>
 
       {/* Main Title & Department */}
-      <h3 className="job-card-title font-bold text-sm mt-1 leading-snug text-slate-900">{job.title}</h3>
+      <h3 className="job-card-title font-bold text-sm mt-1 leading-snug text-slate-900">{displayTitle}</h3>
       <p className="job-card-dept text-2xs text-muted flex-center-start gap-1 mt-0.5">
         <Building size={12} /> {job.dept}
       </p>
@@ -94,7 +96,7 @@ export default function JobCard({ job, onOpenDetail, onOpenApply, isSaved, onTog
           <Users size={11} /> {job.posts || '1+ Posts'}
         </span>
         <span className="job-pill job-pill-qual text-3xs font-bold">
-          🎓 {formatQualificationShort(job.qualification)}
+          🎓 {formatQualificationShort(job.qualification, job.title, job.type)}
         </span>
         <span className="job-pill job-pill-state text-3xs font-bold">
           📍 {job.state || 'All India'}

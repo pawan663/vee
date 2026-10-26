@@ -56,6 +56,41 @@ function cleanTitle(raw) {
   return cleaned.trim();
 }
 
+// Master title cleaner: prevents duplicated spans, concatenations (PostsRRC), and repetitive loop phrases
+export function cleanJobTitle(rawTitle) {
+  if (!rawTitle) return '';
+  let title = String(rawTitle).trim();
+
+  // 1. Remove HTML tags, alt attributes, img tags
+  title = title.replace(/<[^>]*>/g, ' ');
+  title = title.replace(/alt=["'][^"']*["']/gi, ' ');
+  title = title.replace(/&quot;|&amp;|&lt;|&gt;|&#\d+;/g, ' ');
+
+  // 2. Fix concatenated words like "PostsRRC", "PostsRBI" (case sensitive: uppercase letter right after word)
+  title = title.replace(/\b(Posts?|Apprentice|Trainee|Officer|Clerk|Engineer|Manager|Doctor|Scientist)([A-Z])/g, '$1 - $2');
+
+  // 3. If title was formed by concatenating desktop + mobile spans (e.g. "X Posts - X Recruitment 2026"):
+  if (/\bPosts?\s*-\s*[A-Z]/.test(title)) {
+    const match = title.match(/^(.*?)\b(Posts?)\s*-\s*[A-Z].*$/);
+    if (match && match[1].trim().length >= 12) {
+      title = `${match[1].trim()} ${match[2]}`;
+    }
+  }
+
+  // 4. Clean up any duplicate suffixes
+  title = title.replace(/(Vacancy\s*202[5-7]\s*)+/gi, 'Vacancy 2026 ');
+  title = title.replace(/(Recruitment\s*202[5-7]\s*)+/gi, 'Recruitment 2026 ');
+  title = title.replace(/Vacancy\s*2026\s*Recruitment\s*2026/gi, 'Recruitment 2026');
+  title = title.replace(/Recruitment\s*2026\s*Recruitment\s*2026/gi, 'Recruitment 2026');
+  title = title.replace(/\s+/g, ' ').trim();
+
+  // 5. Fix double hyphens or trailing dashes
+  title = title.replace(/\s*[-–—]\s*[-–—]\s*/g, ' - ');
+  title = title.replace(/\s*[-–—]\s*$/g, '');
+
+  return title;
+}
+
 function detectQualification(text) {
   const t = (text || '').toLowerCase();
   if (/b\.tech|b\.e|mca|bca|m\.tech|engineering/i.test(t)) return { type: 'B.Tech', qual: 'B.Tech / B.E / Engineering' };
@@ -1680,34 +1715,81 @@ export async function scrapeAllStateGovernmentJobs() {
       $('table tr').each((i, tr) => {
         const tds = $(tr).find('td');
         if (tds.length >= 6) {
-          const org = $(tds[1]).text().trim();
-          const postName = $(tds[2]).text().trim().replace(/\s+/g, ' ');
-          const qual = $(tds[3]).text().trim().replace(/\s+/g, ' ');
-          const lastDateRaw = $(tds[5]).text().trim();
+          // Clean text helper removing hidden/mobile duplicate spans
+          const getCellText = (cell) => {
+            if (!cell || !cell.length) return '';
+            const clone = $(cell).clone();
+            clone.find('.kar-t-mob, script, style, noscript').remove();
+            return clone.text().trim().replace(/\s+/g, ' ');
+          };
+
+          const rawOrgCell = getCellText(tds[1]);
+          const postName = getCellText(tds[2]);
+          const col3Text = getCellText(tds[3]);
+          const col4Text = tds.length >= 7 ? getCellText(tds[4]) : '';
+          const col5Text = tds.length >= 7 ? getCellText(tds[5]) : getCellText(tds[4]);
           const link = $(tr).find('a[href*="/articles/"]').attr('href') || $(tr).find('a').attr('href');
 
-          if (org && postName && link && !postName.toLowerCase().includes('post name')) {
+          // FreeJobAlert state pages column layout:
+          // [0] Post Date | [1] Job Title | [2] Post Name | [3] Vacancies | [4] Qualification | [5] Last Date
+          let vacancyText = col3Text;
+          let qualText = col4Text;
+          let lastDateRaw = col5Text;
+
+          // If col3 does not contain post count but col2 does (standard 6-col table)
+          if (!/\bposts?\b/i.test(col3Text) && !/\d+/.test(col3Text)) {
+            qualText = col3Text;
+            lastDateRaw = col5Text || getCellText(tds[5]);
+            vacancyText = '';
+          }
+
+          if (rawOrgCell && postName && link && !postName.toLowerCase().includes('post name')) {
             const lastDate = parseFjaDate(lastDateRaw);
             if (lastDate && lastDate >= todayStr) {
-              const q = detectFjaQual(qual, postName);
-              const title = `${org} ${postName} Recruitment 2026`;
+              const q = detectFjaQual(qualText, `${postName} ${rawOrgCell}`);
+              let title = cleanJobTitle(rawOrgCell);
+              if (!title.toLowerCase().includes(postName.toLowerCase()) && postName.length > 2) {
+                title = `${title} - ${postName}`;
+              }
+              if (!/recruitment|vacancy|bharti/i.test(title)) {
+                title = `${title} Recruitment 2026`;
+              }
+              title = cleanJobTitle(title);
+
               if (!jobs.some(j => j.title.toLowerCase() === title.toLowerCase())) {
                 const details = enrichJobDetails(title, q.type);
-                let postCount = details.posts;
-                if (postCount === "Active Openings" && postName.includes('Posts')) {
+                let postCount = "Active Openings";
+                if (vacancyText && /\b\d+\s*posts?\b/i.test(vacancyText)) {
+                  postCount = vacancyText;
+                } else if (details.posts !== "Active Openings") {
+                  postCount = details.posts;
+                } else if (postName.includes('Posts')) {
                   const parts = postName.split('–');
                   if (parts.length > 1 && /\d+\s*posts/i.test(parts[parts.length - 1])) {
                     postCount = parts[parts.length - 1].trim();
                   }
                 }
+
+                // If Apprentice or ITI, ensure accurate stipend & merit selection
+                let currentSalary = details.salary;
+                let currentSelection = details.selectionProcess;
+                let currentQual = q.qual;
+                if (/apprentice/i.test(title) || /apprentice/i.test(postName)) {
+                  currentSalary = "Monthly Stipend ₹7,000 - ₹12,500/month (As per Apprenticeship Rules)";
+                  currentSelection = "10th & ITI Merit List (No Written Exam) + Document Verification";
+                  if (q.type === 'Graduate' || !qualText) {
+                    currentQual = "10th Pass with ITI in relevant trade (NCVT / SCVT)";
+                  }
+                }
+
                 jobs.push({
                   id: `state-${sp.state.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}-${i}`,
                   title: title,
-                  dept: org,
+                  dept: details.dept || cleanJobTitle(rawOrgCell),
                   posts: postCount,
-                  qualification: q.qual,
+                  qualification: currentQual,
                   state: sp.state,
-                  category: "Govt",
+                  category: /apprentice/i.test(title) ? "Apprentice" : "Govt",
                   type: q.type,
                   lastDate: lastDate,
                   isRealDate: true,
@@ -1721,8 +1803,8 @@ export async function scrapeAllStateGovernmentJobs() {
                   isClosingSoon: isClosingWithinDays(lastDate, 7),
                   status: "ACTIVE",
                   viewsCount: Math.floor(18000 + Math.random() * 20000),
-                  salary: details.salary,
-                  selectionProcess: details.selectionProcess,
+                  salary: currentSalary,
+                  selectionProcess: currentSelection,
                   videoId: details.videoId,
                   videoUrl: details.videoUrl,
                   videoTitle: details.videoTitle
@@ -1849,25 +1931,32 @@ export async function aggregateAllLiveData() {
   // Automatically match jobs with real videos from your channel (@vacancyeraeducation)
   // STRICT: Only assign videoId if the channel video is a 100% verified match for that organization/topic
   const orgVideoRules = [
-    { name: 'NTPC', re: /\bntpc\b/i },
-    { name: 'ISRO', re: /\bisro\b|\bvssc\b|\bursc\b/i },
-    { name: 'EIL', re: /\beil\b|engineers india/i },
-    { name: 'Coal India', re: /coal india/i },
-    { name: 'ONGC', re: /\bongc\b/i },
-    { name: 'Hero', re: /hero motocorp|hero company/i },
-    { name: 'DMRC', re: /\bdmrc\b|delhi metro/i },
-    { name: 'Oil India', re: /oil india/i },
-    { name: 'NMDC', re: /\bnmdc\b/i },
-    { name: 'LIC', re: /\blic\b|life insurance/i },
-    { name: 'NCL', re: /\bncl\b|northern coalfields/i },
-    { name: 'DRDO', re: /\bdrdo\b/i },
-    { name: 'BHEL', re: /\bbhel\b/i },
-    { name: 'NHAI', re: /\bnhai\b/i },
-    { name: 'RITES', re: /\brites\b/i }
+    { name: 'HPCL', re: /\bhpcl\b|hindustan petroleum/i, vidPattern: /\bhpcl\b/i },
+    { name: 'ONGC', re: /\bongc\b|oil and natural gas/i, vidPattern: /\bongc\b/i },
+    { name: 'SCL', re: /\bscl\b|semi[\s-]?conductor/i, vidPattern: /\bscl\b/i },
+    { name: 'Railway', re: /\brailway|\brrb\b|\brrc\b/i, vidPattern: /\brailway|\brrb\b|\brrc\b/i },
+    { name: 'DFCCIL', re: /\bdfccil\b|dedicated freight corridor/i, vidPattern: /\bdfccil\b/i },
+    { name: 'NTPC', re: /\bntpc\b/i, vidPattern: /\bntpc\b/i },
+    { name: 'ISRO', re: /\bisro\b|\bvssc\b|\bursc\b|\bsdsc\b/i, vidPattern: /\bisro\b/i },
+    { name: 'EIL', re: /\beil\b|engineers india/i, vidPattern: /\beil\b/i },
+    { name: 'Coal India', re: /coal india|\bcil\b/i, vidPattern: /coal india/i },
+    { name: 'Hero', re: /hero motocorp|hero company|\bhero\b/i, vidPattern: /\bhero\b/i },
+    { name: 'DMRC', re: /\bdmrc\b|delhi metro/i, vidPattern: /\bdmrc\b|metro/i },
+    { name: 'Oil India', re: /oil india/i, vidPattern: /oil india/i },
+    { name: 'NMDC', re: /\bnmdc\b|national mineral/i, vidPattern: /\bnmdc\b/i },
+    { name: 'LIC', re: /\blic\b|life insurance/i, vidPattern: /\blic\b/i },
+    { name: 'NCL', re: /\bncl\b|northern coalfields/i, vidPattern: /\bncl\b/i },
+    { name: 'DRDO', re: /\bdrdo\b/i, vidPattern: /\bdrdo\b/i },
+    { name: 'BHEL', re: /\bbhel\b|bharat heavy/i, vidPattern: /\bbhel\b/i },
+    { name: 'NHAI', re: /\bnhai\b/i, vidPattern: /\bnhai\b/i },
+    { name: 'RITES', re: /\brites\b/i, vidPattern: /\brites\b/i }
   ];
 
   const allVideos = Array.isArray(channelVideos) ? channelVideos : [];
   allFreshJobs.forEach((job) => {
+    // Clean job title to eliminate any duplicated strings or concatenated tags
+    job.title = cleanJobTitle(job.title);
+
     const jobText = `${job.title || ''} ${job.dept || ''}`;
 
     // Ensure official website portal link is populated for all jobs
@@ -1880,30 +1969,22 @@ export async function aggregateAllLiveData() {
     // A. Match against specific organization rules first
     for (const rule of orgVideoRules) {
       if (rule.re.test(jobText)) {
-        matchedVid = allVideos.find(v => rule.re.test(v.title || ''));
+        matchedVid = allVideos.find(v => (rule.vidPattern || rule.re).test(v.title || ''));
         if (matchedVid) break;
       }
     }
 
-    // B. Automatic Smart Semantic Matcher for ANY newly uploaded YouTube video from channel:
-    // If you upload a video on YouTube for Railway, Police, ITBP, Bank, SSC, Apprentice, etc.,
-    // it will automatically pair with the corresponding job in the app!
+    // B. Strict Acronym Matcher for ANY newly uploaded YouTube video from channel:
+    // If you upload a video on YouTube for ITBP, BSF, CISF, CRPF, SBI, SSC, UPSC, etc.
+    // It verifies that both the job AND the video contain the exact same organization acronym!
     if (!matchedVid && allVideos.length > 0) {
-      const cleanTokens = (job.title || '')
-        .replace(/2026|2025|Recruitment|Bharti|Online Form|Notification|\d+[\s,]*Posts|\d+[\s,]*Vacanc(y|ies)/gi, '')
-        .replace(/[^\w\s\u0900-\u097F]/gi, ' ')
-        .trim()
-        .toLowerCase()
-        .split(/\s+/)
-        .filter(w => w.length >= 3 && !/^(for|and|the|all|new|post|apply|date|govt|jobs|india)$/i.test(w));
-
-      if (cleanTokens.length > 0) {
-        matchedVid = allVideos.find(v => {
-          const vTitle = (v.title || '').toLowerCase();
-          const matches = cleanTokens.filter(token => vTitle.includes(token));
-          // Matches if at least 2 key tokens match, or 1 strong specific acronym like rrb, bssc, uppsc, itbp, crpf, bsf
-          return matches.length >= 2 || (matches.length >= 1 && matches.some(m => m.length >= 4));
-        });
+      const acronyms = (jobText.match(/\b[A-Z]{3,6}\b/g) || []).filter(ac =>
+        !['GOVT', 'POST', 'POSTS', 'FREE', 'FORM', 'DATE', 'INFO', 'TYPE', 'FULL', 'MORE', 'VIEW', 'MTS', 'ITI', 'CBT', 'PET', 'PST', 'PSC', 'PDF', 'EXAM', 'NEW', 'ALL', 'GEN', 'OBC', 'EWS', 'SC', 'ST'].includes(ac)
+      );
+      for (const ac of acronyms) {
+        const acRe = new RegExp(`\\b${ac}\\b`, 'i');
+        matchedVid = allVideos.find(v => acRe.test(v.title || ''));
+        if (matchedVid) break;
       }
     }
 

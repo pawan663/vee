@@ -4,6 +4,24 @@ export const OFFICIAL_CHANNEL_ID = "UChHRt-QM9T9Wyx1Q4zUTcVg";
 
 export const VIDEO_REGISTRY = [
   {
+    topic: "HPCL",
+    match: /\bhpcl\b|hindustan petroleum/i,
+    videoId: "Gr0hGjO4I5o",
+    videoUrl: "https://youtu.be/Gr0hGjO4I5o",
+    title: "HPCL नई भर्ती 2026 | 12th, ITI, B.Tech | Salary व योग्यता देखें | Vacancy Era Education",
+    channel: "@vacancyeraeducation",
+    duration: "Full Analysis"
+  },
+  {
+    topic: "Railway / RRB",
+    match: /\brailway|\brrb\b|\brrc\b/i,
+    videoId: "8WFrgDklQcE",
+    videoUrl: "https://youtu.be/8WFrgDklQcE",
+    title: "RRB नई भर्ती 2026 💯 Railway Vacancy 2026 Eligibility, Exam Pattern | Railway Posts",
+    channel: "@vacancyeraeducation",
+    duration: "Full Analysis"
+  },
+  {
     topic: "NTPC",
     match: /\bntpc\b/i,
     videoId: "EZvKIO-TNsQ",
@@ -32,7 +50,7 @@ export const VIDEO_REGISTRY = [
   },
   {
     topic: "Coal India",
-    match: /coal india/i,
+    match: /coal india|\bcil\b/i,
     videoId: "YDpQqasdH7s",
     videoUrl: "https://youtu.be/YDpQqasdH7s",
     title: "Coal India भर्ती 2026🚨Notification और सरकारी नौकरी | CIL नई भर्ती | Exam & Apply Online",
@@ -42,15 +60,33 @@ export const VIDEO_REGISTRY = [
   {
     topic: "ONGC",
     match: /\bongc\b|oil and natural gas/i,
-    videoId: "NmmE_hfX97Q",
-    videoUrl: "https://youtu.be/NmmE_hfX97Q",
-    title: "ONGC Recruitment 2026 | ONGC नई भर्ती | Free Form | Apply Online | 10th ITI Pass New Jobs",
+    videoId: "_U6RdSxLIMc",
+    videoUrl: "https://youtu.be/_U6RdSxLIMc",
+    title: "ONGC नई भर्ती 2026 | ONGC Trainee Bharti 2026🚨10वीं, 12वीं, ITI, Diploma, Graduate के लिए मौका",
+    channel: "@vacancyeraeducation",
+    duration: "Full Analysis"
+  },
+  {
+    topic: "DFCCIL",
+    match: /\bdfccil\b|dedicated freight corridor/i,
+    videoId: "wXgnEhaJoFU",
+    videoUrl: "https://youtu.be/wXgnEhaJoFU",
+    title: "DFCCIL Recruitment 2026🚨नई भर्ती | Direct Interview? | योग्यता, सैलरी और पूरी जानकारी",
+    channel: "@vacancyeraeducation",
+    duration: "Full Analysis"
+  },
+  {
+    topic: "SCL",
+    match: /\bscl\b|semi[\s-]?conductor/i,
+    videoId: "6FN-LU_YaA0",
+    videoUrl: "https://youtu.be/6FN-LU_YaA0",
+    title: "SCL Recruitment 2026 Short Notice Out! 🚀 Technician Post | ITI, Diploma Pass | Apply Online",
     channel: "@vacancyeraeducation",
     duration: "Full Analysis"
   },
   {
     topic: "Hero",
-    match: /hero motocorp|hero company|\bhero moto\b/i,
+    match: /hero motocorp|hero company|\bhero moto\b|\bhero\b/i,
     videoId: "gZb4UqmYDAU",
     videoUrl: "https://youtu.be/gZb4UqmYDAU",
     title: "Hero कंपनी में नौकरी 2026 | Hero MotoCorp Recruitment 2026🔥Private Vacancy | ITI 10th/12th Pass Jobs",
@@ -140,11 +176,80 @@ export const VIDEO_REGISTRY = [
   }
 ];
 
+// Strict organization cross-validator: Prevents HPCL from showing on Railway, or LIC on ITBP!
+function isVideoValidForJob(jobText, videoId, videoTitle) {
+  if (!videoId) return false;
+
+  // Specific video guards
+  if (videoId === 'Gr0hGjO4I5o') { // HPCL video
+    return /\bhpcl\b|hindustan petroleum/i.test(jobText);
+  }
+  if (videoId === '8WFrgDklQcE') { // Railway / RRB video
+    return /\brailway|\brrb\b|\brrc\b/i.test(jobText);
+  }
+  if (videoId === '_3G_myadrN8') { // ISRO video
+    return /\bisro\b|\bvssc\b|\bursc\b|\bsdsc\b/i.test(jobText);
+  }
+  if (videoId === 'EZvKIO-TNsQ') { // NTPC video
+    return /\bntpc\b/i.test(jobText);
+  }
+  if (videoId === 'pgtC9BT744I') { // EIL video
+    return /\beil\b|engineers india/i.test(jobText);
+  }
+  if (videoId === '_U6RdSxLIMc' || videoId === 'NmmE_hfX97Q') { // ONGC video
+    return /\bongc\b|oil and natural gas/i.test(jobText);
+  }
+  if (videoId === 'wXgnEhaJoFU') { // DFCCIL video
+    return /\bdfccil\b/i.test(jobText);
+  }
+  if (videoId === '6FN-LU_YaA0') { // SCL video
+    return /\bscl\b|semi[\s-]?conductor/i.test(jobText);
+  }
+  if (videoId === 'dSWQFQwSBXQ') { // DMRC video
+    return /\bdmrc\b|delhi metro/i.test(jobText);
+  }
+  if (videoId === 'yLXb10KOm6c') { // Oil India video
+    return /oil india/i.test(jobText);
+  }
+  if (videoId === '9P2WHJkSgJs') { // NMDC video
+    return /\bnmdc\b/i.test(jobText);
+  }
+  if (videoId === '_xhQ_NeJh0Q') { // LIC video
+    return /\blic\b|life insurance/i.test(jobText);
+  }
+  if (videoId === 'vef7YrcAw4E') { // NCL video
+    return /\bncl\b/i.test(jobText);
+  }
+  if (videoId === 'vPtE6PtRjUE') { // DRDO video
+    return /\bdrdo\b/i.test(jobText);
+  }
+  if (videoId === 'JdRoSYF1Oao') { // BHEL video
+    return /\bbhel\b/i.test(jobText);
+  }
+  if (videoId === 'HWymphHCh5I') { // NHAI video
+    return /\bnhai\b/i.test(jobText);
+  }
+  if (videoId === 'Y-d3PX5twY8') { // RITES video
+    return /\brites\b/i.test(jobText);
+  }
+
+  // Generic mismatch check: if video title mentions an org that conflicts with job
+  const vTitle = (videoTitle || '').toLowerCase();
+  if (vTitle.includes('hpcl') && !/\bhpcl\b/i.test(jobText)) return false;
+  if (vTitle.includes('rrb') && !/\brrb\b|\brrc\b|railway/i.test(jobText)) return false;
+  if (vTitle.includes('isro') && !/\bisro\b/i.test(jobText)) return false;
+  if (vTitle.includes('ntpc') && !/\bntpc\b/i.test(jobText)) return false;
+
+  return true;
+}
+
 export function getJobVideo(job) {
   if (!job) return null;
 
-  // 1. If job has videoId directly attached by crawler from live YouTube channel feed:
-  if (job.videoId) {
+  const text = `${job.title || ''} ${job.dept || ''}`;
+
+  // 1. If job has videoId directly attached by crawler, verify it first!
+  if (job.videoId && isVideoValidForJob(text, job.videoId, job.videoTitle)) {
     return {
       videoId: job.videoId,
       videoUrl: job.videoUrl || `https://youtu.be/${job.videoId}`,
@@ -153,8 +258,6 @@ export function getJobVideo(job) {
     };
   }
 
-  const text = `${job.title || ''} ${job.dept || ''}`;
-
   // 2. Strictly match against registered videos using word boundaries
   for (const item of VIDEO_REGISTRY) {
     if (item.match.test(text)) {
@@ -162,8 +265,8 @@ export function getJobVideo(job) {
     }
   }
 
-  // 2. If no exact video exists for this specific exam on channel:
-  // NEVER embed an unrelated video (e.g. NEVER embed LIC on ITBP or Police or Railway)!
+  // 3. If no exact video exists for this specific exam on channel:
+  // NEVER embed an unrelated video (e.g. NEVER embed HPCL on Railway or LIC on ITBP)!
   const cleanSearch = (job.title || '')
     .replace(/2026|Recruitment|Bharti|Online Form|\d+[\s,]*Posts|\d+[\s,]*Vacanc(y|ies)/gi, '')
     .replace(/[^\w\s\u0900-\u097F]/gi, ' ')
