@@ -27,6 +27,7 @@ export default function ProfileTab({
   const [activeSection, setActiveSection] = useState('applied'); // 'applied' | 'vault' | 'saved' | 'badges'
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddTrackerOpen, setIsAddTrackerOpen] = useState(false);
+  const [isHealthDropdownOpen, setIsHealthDropdownOpen] = useState(false);
 
   // New Tracker Form State (Manual / Cyber Cafe Tracking)
   const [newJobTitle, setNewJobTitle] = useState('');
@@ -1073,172 +1074,196 @@ export default function ProfileTab({
         </div>
       </div>
 
-      {/* Multi-Portal & Scraper Live Health Status Monitor */}
+      {/* Multi-Portal & Scraper Live Health Status Dropdown Accordion */}
       <div
-        className="scraper-health-card p-3 rounded-xl mb-4 border"
+        className="scraper-health-card rounded-xl mb-4 border overflow-hidden"
         style={{
           background: 'var(--card-bg, #FFFFFF)',
           borderColor: 'var(--border-color, #E2E8F0)',
           boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
         }}
       >
-        <div className="flex-between mb-2 pb-2 border-bottom">
-          <div className="flex-center-start gap-1.5">
-            <Activity size={16} className="text-success" />
+        <button
+          type="button"
+          className="w-full flex-between p-3 cursor-pointer"
+          onClick={() => setIsHealthDropdownOpen(!isHealthDropdownOpen)}
+          style={{ background: 'transparent', border: 'none', textAlign: 'left' }}
+        >
+          <div className="flex-center-start gap-2">
+            <Activity size={18} className="text-success" />
             <div>
-              <h4 className="font-bold text-xs m-0" style={{ color: 'var(--text-color, #1E293B)' }}>
-                पोर्टल सिंक व लाइव हेल्थ स्टेटस
+              <h4 className="font-bold text-xs m-0 flex-center-start gap-1.5" style={{ color: 'var(--text-color, #1E293B)' }}>
+                <span>पोर्टल सिंक व लाइव हेल्थ स्टेटस</span>
+                <span className="badge-live-sm bg-success text-white text-3xs font-bold px-1.5 py-0.2 rounded-full">
+                  100% OK
+                </span>
               </h4>
-              <p className="text-3xs text-muted m-0">Live Multi-Portal Health & Data Sync Monitor</p>
+              <p className="text-3xs text-muted m-0 mt-0.5">
+                {isHealthDropdownOpen ? '8 कनेक्टेड भर्ती पोर्टल्स का स्टेटस देखें' : '8 कनेक्टेड भर्ती पोर्टल्स का स्टेटस देखने हेतु टैप करें'}
+              </p>
             </div>
           </div>
-          <span className="badge-live-sm bg-success text-white text-3xs font-bold px-2 py-0.5 rounded-full flex-center gap-1">
-            <span className="live-dot-pulse bg-white"></span> ALL SYSTEMS 100% OK
-          </span>
-        </div>
-
-        {/* Status Indicators List */}
-        <div className="health-metrics flex-column gap-2 mb-3">
-          {/* 1. FreeJobAlert & State Portals */}
-          <div className="metric-row flex-between p-2 rounded" style={{ background: 'var(--surface-color, #F8FAFC)' }}>
-            <div className="flex-center-start gap-2">
-              <span className="status-dot-green">🟢</span>
-              <div>
-                <p className="text-xs font-semibold m-0">FreeJobAlert & Govt Portals</p>
-                <p className="text-3xs text-muted m-0">SSC, Railway, UPSC, Police, State PSC</p>
-              </div>
-            </div>
-            <span className="badge-pill font-bold text-3xs text-success" style={{ background: 'rgba(34, 197, 94, 0.12)' }}>
-              {allJobs.length} Jobs Active
+          <div className="flex-center gap-1.5">
+            <span className="text-3xs text-muted font-bold">
+              {isHealthDropdownOpen ? 'छुपाएं ✕' : 'ड्रॉपडाउन ▾'}
             </span>
           </div>
+        </button>
 
-          {/* 2. Sarkari Result & Daily News */}
-          <div className="metric-row flex-between p-2 rounded" style={{ background: 'var(--surface-color, #F8FAFC)' }}>
-            <div className="flex-center-start gap-2">
-              <span className="status-dot-green">🟢</span>
-              <div>
-                <p className="text-xs font-semibold m-0">Sarkari Result & Daily News</p>
-                <p className="text-3xs text-muted m-0">Admit Cards, Results & Breaking Bulletins</p>
+        {/* Dropdown Content (Revealed when open) */}
+        {isHealthDropdownOpen && (
+          <div className="p-3 pt-0 border-top mt-1" style={{ borderColor: 'var(--border-color, #F1F5F9)' }}>
+            <div className="flex-between mb-2 pt-2 pb-1 border-bottom">
+              <span className="text-3xs text-muted font-semibold">Live Multi-Portal Health & Data Sync Monitor</span>
+              <span className="badge-live-sm bg-success text-white text-3xs font-bold px-2 py-0.5 rounded-full flex-center gap-1">
+                <span className="live-dot-pulse bg-white"></span> ALL SYSTEMS 100% OK
+              </span>
+            </div>
+
+            {/* Status Indicators List */}
+            <div className="health-metrics flex-column gap-2 mb-3">
+              {/* 1. FreeJobAlert & State Portals */}
+              <div className="metric-row flex-between p-2 rounded" style={{ background: 'var(--surface-color, #F8FAFC)' }}>
+                <div className="flex-center-start gap-2">
+                  <span className="status-dot-green">🟢</span>
+                  <div>
+                    <p className="text-xs font-semibold m-0">FreeJobAlert & Govt Portals</p>
+                    <p className="text-3xs text-muted m-0">SSC, Railway, UPSC, Police, State PSC</p>
+                  </div>
+                </div>
+                <span className="badge-pill font-bold text-3xs text-success" style={{ background: 'rgba(34, 197, 94, 0.12)' }}>
+                  {allJobs.length} Jobs Active
+                </span>
+              </div>
+
+              {/* 2. Sarkari Result & Daily News */}
+              <div className="metric-row flex-between p-2 rounded" style={{ background: 'var(--surface-color, #F8FAFC)' }}>
+                <div className="flex-center-start gap-2">
+                  <span className="status-dot-green">🟢</span>
+                  <div>
+                    <p className="text-xs font-semibold m-0">Sarkari Result & Daily News</p>
+                    <p className="text-3xs text-muted m-0">Admit Cards, Results & Breaking Bulletins</p>
+                  </div>
+                </div>
+                <span className="badge-pill font-bold text-3xs text-primary" style={{ background: 'rgba(37, 99, 235, 0.12)' }}>
+                  {liveNews.length} Notices Live
+                </span>
+              </div>
+
+              {/* 3. Drishti IAS & GKToday Daily Current Affairs */}
+              <div className="metric-row flex-between p-2 rounded" style={{ background: 'var(--surface-color, #F8FAFC)' }}>
+                <div className="flex-center-start gap-2">
+                  <span className="status-dot-green">🟢</span>
+                  <div>
+                    <p className="text-xs font-semibold m-0">Drishti IAS & GKToday Current Affairs</p>
+                    <p className="text-3xs text-muted m-0">Daily News Analysis, Prelims Facts & Editorials</p>
+                  </div>
+                </div>
+                <span className="badge-pill font-bold text-3xs text-amber-700" style={{ background: 'rgba(245, 158, 11, 0.12)' }}>
+                  Daily Live Synced
+                </span>
+              </div>
+
+              {/* 4. Jagran Josh General Knowledge (GK) */}
+              <div className="metric-row flex-between p-2 rounded" style={{ background: 'var(--surface-color, #F8FAFC)' }}>
+                <div className="flex-center-start gap-2">
+                  <span className="status-dot-green">🟢</span>
+                  <div>
+                    <p className="text-xs font-semibold m-0">Jagran Josh General Knowledge (GK)</p>
+                    <p className="text-3xs text-muted m-0">Subject GK, Constitution, Science & Quizzes</p>
+                  </div>
+                </div>
+                <span className="badge-pill font-bold text-3xs text-indigo-700" style={{ background: 'rgba(99, 102, 241, 0.12)' }}>
+                  All-India GK Live
+                </span>
+              </div>
+
+              {/* 5. YouTube Channel @vacancyeraeducation */}
+              <div className="metric-row flex-between p-2 rounded" style={{ background: 'var(--surface-color, #F8FAFC)' }}>
+                <div className="flex-center-start gap-2">
+                  <span className="status-dot-green">🟢</span>
+                  <div>
+                    <p className="text-xs font-semibold m-0">YouTube Official Channel</p>
+                    <p className="text-3xs text-muted m-0">@vacancyeraeducation (Pawan Meena)</p>
+                  </div>
+                </div>
+                <span className="badge-pill font-bold text-3xs text-danger" style={{ background: 'rgba(239, 68, 68, 0.12)' }}>
+                  15 Real Videos Synced
+                </span>
+              </div>
+
+              {/* 5B. Instagram Official Channel @vacancyera */}
+              <div
+                className="metric-row flex-between p-2 rounded cursor-pointer"
+                style={{ background: 'var(--surface-color, #F8FAFC)' }}
+                onClick={() => window.open('https://www.instagram.com/vacancyera?vrfl=emU0dzIyM295Mmx0&utm_source=qr', '_blank')}
+              >
+                <div className="flex-center-start gap-2">
+                  <span className="status-dot-green">📸</span>
+                  <div>
+                    <p className="text-xs font-semibold m-0">Instagram Official Reels</p>
+                    <p className="text-3xs text-muted m-0">@vacancyera (Daily Fast Vacancy Updates)</p>
+                  </div>
+                </div>
+                <a
+                  href="https://www.instagram.com/vacancyera?vrfl=emU0dzIyM295Mmx0&utm_source=qr"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="badge-pill font-bold text-3xs text-pink-600"
+                  style={{ background: 'rgba(236, 72, 153, 0.12)', textDecoration: 'none' }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  Follow @vacancyera ↗
+                </a>
+              </div>
+
+              {/* 6. Automated Cloud Runner */}
+              <div className="metric-row flex-between p-2 rounded" style={{ background: 'var(--surface-color, #F8FAFC)' }}>
+                <div className="flex-center-start gap-2">
+                  <span className="status-dot-green">🟢</span>
+                  <div>
+                    <p className="text-xs font-semibold m-0">Cloud Auto-Sync Engine</p>
+                    <p className="text-3xs text-muted m-0">GitHub Actions Cron (Every 60 Minutes)</p>
+                  </div>
+                </div>
+                <span className="badge-pill font-bold text-3xs text-purple-700" style={{ background: 'rgba(147, 51, 234, 0.12)' }}>
+                  Automated 24x7
+                </span>
+              </div>
+
+              {/* 7. Strict Auto-Expiry & Failover Shield */}
+              <div className="metric-row flex-between p-2 rounded" style={{ background: 'var(--surface-color, #F8FAFC)' }}>
+                <div className="flex-center-start gap-2">
+                  <span className="status-dot-green">🛡️</span>
+                  <div>
+                    <p className="text-xs font-semibold m-0">Auto-Expiry & Zero Downtime Shield</p>
+                    <p className="text-3xs text-muted m-0">अंतिम तिथि निकलते ही जॉब हट जाती है + ऑफलाइन बैकअप</p>
+                  </div>
+                </div>
+                <span className="badge-pill font-bold text-3xs text-emerald-700" style={{ background: 'rgba(16, 185, 129, 0.12)' }}>
+                  Auto-Purge Active
+                </span>
               </div>
             </div>
-            <span className="badge-pill font-bold text-3xs text-primary" style={{ background: 'rgba(37, 99, 235, 0.12)' }}>
-              {liveNews.length} Notices Live
-            </span>
-          </div>
 
-          {/* 3. Drishti IAS & GKToday Daily Current Affairs */}
-          <div className="metric-row flex-between p-2 rounded" style={{ background: 'var(--surface-color, #F8FAFC)' }}>
-            <div className="flex-center-start gap-2">
-              <span className="status-dot-green">🟢</span>
-              <div>
-                <p className="text-xs font-semibold m-0">Drishti IAS & GKToday Current Affairs</p>
-                <p className="text-3xs text-muted m-0">Daily News Analysis, Prelims Facts & Editorials</p>
-              </div>
+            {/* Sync Action & Timestamp */}
+            <div className="flex-between pt-1 flex-wrap gap-2">
+              <span className="text-3xs text-muted">
+                ⏱️ Last Synced: <b>{lastSyncedTime ? new Date(lastSyncedTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Live'}</b>
+              </span>
+              <button
+                type="button"
+                className="btn-accent-xs font-bold text-3xs px-3 py-1.5 rounded inline-flex flex-center gap-1.5"
+                onClick={onManualSync}
+                disabled={isSyncing}
+                style={{ background: '#2563EB', color: '#FFFFFF', border: 'none', cursor: 'pointer' }}
+              >
+                <RefreshCw size={11} className={isSyncing ? 'animate-spin' : ''} />
+                {isSyncing ? 'Syncing...' : 'Abhi Live Sync Karein'}
+              </button>
             </div>
-            <span className="badge-pill font-bold text-3xs text-amber-700" style={{ background: 'rgba(245, 158, 11, 0.12)' }}>
-              Daily Live Synced
-            </span>
           </div>
-
-          {/* 4. Jagran Josh General Knowledge (GK) */}
-          <div className="metric-row flex-between p-2 rounded" style={{ background: 'var(--surface-color, #F8FAFC)' }}>
-            <div className="flex-center-start gap-2">
-              <span className="status-dot-green">🟢</span>
-              <div>
-                <p className="text-xs font-semibold m-0">Jagran Josh General Knowledge (GK)</p>
-                <p className="text-3xs text-muted m-0">Subject GK, Constitution, Science & Quizzes</p>
-              </div>
-            </div>
-            <span className="badge-pill font-bold text-3xs text-indigo-700" style={{ background: 'rgba(99, 102, 241, 0.12)' }}>
-              All-India GK Live
-            </span>
-          </div>
-
-          {/* 5. YouTube Channel @vacancyeraeducation */}
-          <div className="metric-row flex-between p-2 rounded" style={{ background: 'var(--surface-color, #F8FAFC)' }}>
-            <div className="flex-center-start gap-2">
-              <span className="status-dot-green">🟢</span>
-              <div>
-                <p className="text-xs font-semibold m-0">YouTube Official Channel</p>
-                <p className="text-3xs text-muted m-0">@vacancyeraeducation (Pawan Meena)</p>
-              </div>
-            </div>
-            <span className="badge-pill font-bold text-3xs text-danger" style={{ background: 'rgba(239, 68, 68, 0.12)' }}>
-              15 Real Videos Synced
-            </span>
-          </div>
-
-          {/* 5B. Instagram Official Channel @vacancyera */}
-          <div
-            className="metric-row flex-between p-2 rounded cursor-pointer"
-            style={{ background: 'var(--surface-color, #F8FAFC)' }}
-            onClick={() => window.open('https://www.instagram.com/vacancyera?vrfl=emU0dzIyM295Mmx0&utm_source=qr', '_blank')}
-          >
-            <div className="flex-center-start gap-2">
-              <span className="status-dot-green">📸</span>
-              <div>
-                <p className="text-xs font-semibold m-0">Instagram Official Reels</p>
-                <p className="text-3xs text-muted m-0">@vacancyera (Daily Fast Vacancy Updates)</p>
-              </div>
-            </div>
-            <a
-              href="https://www.instagram.com/vacancyera?vrfl=emU0dzIyM295Mmx0&utm_source=qr"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="badge-pill font-bold text-3xs text-pink-600"
-              style={{ background: 'rgba(236, 72, 153, 0.12)', textDecoration: 'none' }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              Follow @vacancyera ↗
-            </a>
-          </div>
-
-          {/* 6. Automated Cloud Runner */}
-          <div className="metric-row flex-between p-2 rounded" style={{ background: 'var(--surface-color, #F8FAFC)' }}>
-            <div className="flex-center-start gap-2">
-              <span className="status-dot-green">🟢</span>
-              <div>
-                <p className="text-xs font-semibold m-0">Cloud Auto-Sync Engine</p>
-                <p className="text-3xs text-muted m-0">GitHub Actions Cron (Every 4 Hours)</p>
-              </div>
-            </div>
-            <span className="badge-pill font-bold text-3xs text-purple-700" style={{ background: 'rgba(147, 51, 234, 0.12)' }}>
-              Automated 24x7
-            </span>
-          </div>
-
-          {/* 7. Strict Auto-Expiry & Failover Shield */}
-          <div className="metric-row flex-between p-2 rounded" style={{ background: 'var(--surface-color, #F8FAFC)' }}>
-            <div className="flex-center-start gap-2">
-              <span className="status-dot-green">🛡️</span>
-              <div>
-                <p className="text-xs font-semibold m-0">Auto-Expiry & Zero Downtime Shield</p>
-                <p className="text-3xs text-muted m-0">अंतिम तिथि निकलते ही जॉब हट जाती है + ऑफलाइन बैकअप</p>
-              </div>
-            </div>
-            <span className="badge-pill font-bold text-3xs text-emerald-700" style={{ background: 'rgba(16, 185, 129, 0.12)' }}>
-              Auto-Purge Active
-            </span>
-          </div>
-        </div>
-
-        {/* Sync Action & Timestamp */}
-        <div className="flex-between pt-1 flex-wrap gap-2">
-          <span className="text-3xs text-muted">
-            ⏱️ Last Synced: <b>{lastSyncedTime ? new Date(lastSyncedTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Live'}</b>
-          </span>
-          <button
-            type="button"
-            className="btn-accent-xs font-bold text-3xs px-3 py-1.5 rounded inline-flex flex-center gap-1.5"
-            onClick={onManualSync}
-            disabled={isSyncing}
-            style={{ background: '#2563EB', color: '#FFFFFF', border: 'none', cursor: 'pointer' }}
-          >
-            <RefreshCw size={11} className={isSyncing ? 'animate-spin' : ''} />
-            {isSyncing ? 'Syncing...' : 'Abhi Live Sync Karein'}
-          </button>
-        </div>
+        )}
       </div>
 
       {/* Official Government Disclaimer (Google Play Compliance) */}

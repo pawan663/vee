@@ -423,6 +423,8 @@ export default function App() {
           {activeTab === 'shorts' && (
             <ShortsTab
               shorts={shorts}
+              userProfile={userProfile}
+              onOpenAuth={() => setIsAuthOpen(true)}
               onSelectJob={(jobId) => {
                 const targetJob = jobs.find((j) => j.id === jobId);
                 if (targetJob) setSelectedDetailJob(targetJob);
