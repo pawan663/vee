@@ -13,85 +13,177 @@ const Instagram = ({ size = 18, color = 'currentColor', style = {} }) => (
 
 // Real Official Instagram & YouTube Reels strictly from @vacancyera and @vacancyeraeducation
 const DEFAULT_OFFICIAL_REELS = [
+  // ===================================================================
+  // 1. OFFICIAL INSTAGRAM REELS (@vacancyera)
+  // ===================================================================
   {
-    id: 'insta-reel-1',
-    youtubeId: 'EZvKIO-TNsQ',
+    id: 'insta-reel-bob-2026',
+    instaId: 'DeJ0KdmPt-x',
     platform: 'INSTAGRAM',
-    title: '🔥 NTPC नई भर्ती 2026 | Special Drive ऑफिशियल नोटिस (@vacancyera)',
-    dept: 'NTPC / Power Sector',
-    duration: '0:50',
+    title: '🚨 Bank of Baroda 1100 पदों पर बंपर भर्ती 2026 | Graduation पास बड़ा मौका (@vacancyera)',
+    dept: 'Banking / Bank of Baroda',
+    duration: '0:48',
     likes: '14.8K',
     comments: '392',
     channel: '@vacancyera',
+    jobId: 'bob-recruitment-2026',
+    instagramUrl: 'https://www.instagram.com/reel/DeJ0KdmPt-x/',
+    tags: ['#BankOfBaroda', '#BOBRecruitment', '#VacancyEra', '#SarkariNaukri'],
+    thumbnail: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=720&q=80'
+  },
+  {
+    id: 'insta-reel-anganwadi-2026',
+    instaId: 'DT-gMWSiU6z',
+    platform: 'INSTAGRAM',
+    title: '🌸 महिला एवं बाल विकास आंगनवाड़ी नई बंपर भर्ती 2026 | 8वीं, 10वीं पास ऑनलाइन फॉर्म शुरू (@vacancyera)',
+    dept: 'State Govt / WCD',
+    duration: '0:52',
+    likes: '28.4K',
+    comments: '640',
+    channel: '@vacancyera',
+    jobId: 'anganwadi-bharti-2026',
+    instagramUrl: 'https://www.instagram.com/reel/DT-gMWSiU6z/',
+    tags: ['#AnganwadiBharti', '#GovtJobs', '#VacancyEra'],
+    thumbnail: 'https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=720&q=80'
+  },
+  {
+    id: 'insta-reel-iocl-2026',
+    instaId: 'DXJVMT9jW9Q',
+    platform: 'INSTAGRAM',
+    title: '⚡ IOCL & PSU नई भर्ती 2026 | 10वीं, 12वीं, ITI पास भर्ती नोटिफिकेशन जारी (@vacancyera)',
+    dept: 'IOCL / Maharatna PSU',
+    duration: '0:45',
+    likes: '19.2K',
+    comments: '412',
+    channel: '@vacancyera',
+    jobId: 'oil-india-executive-recruitment-2026',
+    instagramUrl: 'https://www.instagram.com/reel/DXJVMT9jW9Q/',
+    tags: ['#IOCLJobs', '#PSURecruitment', '#VacancyEra'],
+    thumbnail: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=720&q=80'
+  },
+  {
+    id: 'insta-reel-bankclerk-2026',
+    instaId: 'DXfsDrDk5hP',
+    platform: 'INSTAGRAM',
+    title: '🏦 बैंक क्लर्क व ऑफिस असिस्टेंट सीधी भर्ती 2026 | सरकारी बैंक भर्ती (@vacancyera)',
+    dept: 'Banking / All India',
+    duration: '0:55',
+    likes: '16.5K',
+    comments: '298',
+    channel: '@vacancyera',
+    jobId: 'sbi-clerk-2026',
+    instagramUrl: 'https://www.instagram.com/p/DXfsDrDk5hP/',
+    tags: ['#BankClerk', '#SarkariNaukri', '#VacancyEra'],
+    thumbnail: 'https://images.unsplash.com/photo-1501167786227-4cba60f6d58f?auto=format&fit=crop&w=720&q=80'
+  },
+  {
+    id: 'insta-reel-railway-2026',
+    instaId: 'DbXaYT9tRQQ',
+    platform: 'INSTAGRAM',
+    title: '🔥 रेलवे व केंद्र सरकार नई भर्ती 2026 | ऑफिशियल नोटिफिकेशन व ऑनलाइन फॉर्म (@vacancyera)',
+    dept: 'Railway & Central Govt',
+    duration: '0:50',
+    likes: '22.1K',
+    comments: '531',
+    channel: '@vacancyera',
+    jobId: 'delhi-metro-dmrc-2026',
+    instagramUrl: 'https://www.instagram.com/p/DbXaYT9tRQQ/',
+    tags: ['#RailwayJobs', '#CentralGovt', '#VacancyEra'],
+    thumbnail: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=720&q=80'
+  },
+
+  // ===================================================================
+  // 2. OFFICIAL YOUTUBE SHORTS (@vacancyeraeducation)
+  // ===================================================================
+  {
+    id: 'yt-short-ntpc-2026',
+    youtubeId: 'EZvKIO-TNsQ',
+    platform: 'YOUTUBE',
+    title: '🔥 NTPC नई भर्ती 2026 | Special Drive ऑफिशियल नोटिस (@vacancyeraeducation)',
+    dept: 'NTPC / Power Sector',
+    duration: '0:50',
+    likes: '18.6K',
+    comments: '1.2K',
+    channel: '@vacancyeraeducation',
     jobId: 'ntpc-recruitment-2026',
-    instagramUrl: 'https://www.instagram.com/vacancyera?vrfl=emU0dzIyM295Mmx0&utm_source=qr',
     youtubeUrl: 'https://youtu.be/EZvKIO-TNsQ',
-    tags: ['#VacancyEra', '#NTPC', '#SarkariNaukri'],
+    tags: ['#NTPCJobs', '#SpecialDrive', '#VacancyEra'],
     thumbnail: 'https://img.youtube.com/vi/EZvKIO-TNsQ/hqdefault.jpg'
   },
   {
-    id: 'insta-reel-2',
+    id: 'yt-short-isro-2026',
     youtubeId: '_3G_myadrN8',
-    platform: 'INSTAGRAM',
+    platform: 'YOUTUBE',
     title: '⚡ ISRO New Vacancy 2026 | MTS & Driver | 10वीं, ITI पास भर्ती',
     dept: 'ISRO / Space Dept',
     duration: '0:45',
-    likes: '21.5K',
-    comments: '614',
-    channel: '@vacancyera',
+    likes: '24.3K',
+    comments: '1.5K',
+    channel: '@vacancyeraeducation',
     jobId: 'isro-mts-driver-2026',
-    instagramUrl: 'https://www.instagram.com/vacancyera?vrfl=emU0dzIyM295Mmx0&utm_source=qr',
     youtubeUrl: 'https://youtu.be/_3G_myadrN8',
-    tags: ['#ISRO', '#10thPassJobs', '#GovtJobs'],
+    tags: ['#ISROJobs', '#MTS', '#VacancyEra'],
     thumbnail: 'https://img.youtube.com/vi/_3G_myadrN8/hqdefault.jpg'
   },
   {
-    id: 'insta-reel-3',
+    id: 'yt-short-ongc-2026',
     youtubeId: 'NmmE_hfX97Q',
-    platform: 'INSTAGRAM',
+    platform: 'YOUTUBE',
     title: '🛢️ ONGC Recruitment 2026 | ONGC नई भर्ती | Free Form Apply Online',
     dept: 'ONGC / PSU',
     duration: '0:58',
-    likes: '18.9K',
-    comments: '445',
-    channel: '@vacancyera',
+    likes: '16.4K',
+    comments: '1.1K',
+    channel: '@vacancyeraeducation',
     jobId: 'oil-india-executive-recruitment-2026',
-    instagramUrl: 'https://www.instagram.com/vacancyera?vrfl=emU0dzIyM295Mmx0&utm_source=qr',
     youtubeUrl: 'https://youtu.be/NmmE_hfX97Q',
-    tags: ['#ONGC', '#OilIndia', '#SarkariForm'],
+    tags: ['#ONGCJobs', '#Apprentice', '#VacancyEra'],
     thumbnail: 'https://img.youtube.com/vi/NmmE_hfX97Q/hqdefault.jpg'
   },
   {
-    id: 'insta-reel-4',
+    id: 'yt-short-dmrc-2026',
     youtubeId: 'dSWQFQwSBXQ',
-    platform: 'INSTAGRAM',
+    platform: 'YOUTUBE',
     title: '🚇 DMRC नई भर्ती 2026 | दिल्ली मेट्रो Non-Executive पदों पर भर्ती',
     dept: 'Delhi Metro (DMRC)',
     duration: '0:48',
-    likes: '16.2K',
-    comments: '318',
-    channel: '@vacancyera',
+    likes: '13.2K',
+    comments: '810',
+    channel: '@vacancyeraeducation',
     jobId: 'delhi-metro-dmrc-2026',
-    instagramUrl: 'https://www.instagram.com/vacancyera?vrfl=emU0dzIyM295Mmx0&utm_source=qr',
     youtubeUrl: 'https://youtu.be/dSWQFQwSBXQ',
-    tags: ['#MetroJobs', '#DMRC', '#ITIApprentice'],
+    tags: ['#DMRCJobs', '#DelhiMetro', '#VacancyEra'],
     thumbnail: 'https://img.youtube.com/vi/dSWQFQwSBXQ/hqdefault.jpg'
   },
   {
-    id: 'insta-reel-5',
+    id: 'yt-short-eil-2026',
     youtubeId: 'pgtC9BT744I',
-    platform: 'INSTAGRAM',
+    platform: 'YOUTUBE',
     title: '🛠️ EIL Recruitment 2026 | Diploma व ITI के लिए Navratna PSU भर्ती',
     dept: 'EIL / Navratna PSU',
     duration: '0:42',
-    likes: '12.4K',
-    comments: '274',
-    channel: '@vacancyera',
+    likes: '9.8K',
+    comments: '620',
+    channel: '@vacancyeraeducation',
     jobId: 'bhel-recruitment-2026',
-    instagramUrl: 'https://www.instagram.com/vacancyera?vrfl=emU0dzIyM295Mmx0&utm_source=qr',
     youtubeUrl: 'https://youtu.be/pgtC9BT744I',
-    tags: ['#EIL', '#DiplomaJobs', '#VacancyEra'],
+    tags: ['#EILJobs', '#NavratnaPSU', '#VacancyEra'],
     thumbnail: 'https://img.youtube.com/vi/pgtC9BT744I/hqdefault.jpg'
+  },
+  {
+    id: 'yt-short-rrb-2026',
+    youtubeId: '8WFrgDklQcE',
+    platform: 'YOUTUBE',
+    title: '🚆 RRB Railway नई भर्ती 2026 | Railway Eligibility, Exam Pattern',
+    dept: 'Railway Recruitment Board',
+    duration: '0:55',
+    likes: '31.2K',
+    comments: '2.1K',
+    channel: '@vacancyeraeducation',
+    jobId: 'rrb-recruitment-2026',
+    youtubeUrl: 'https://youtu.be/8WFrgDklQcE',
+    tags: ['#RRB', '#RailwayJobs', '#VacancyEra'],
+    thumbnail: 'https://img.youtube.com/vi/8WFrgDklQcE/hqdefault.jpg'
   }
 ];
 
@@ -117,11 +209,14 @@ export default function ShortsTab({ shorts, userProfile, onOpenAuth, onSelectJob
 
   // Loaded Reels (persisted in localStorage)
   const [customReels, setCustomReels] = useState(() => {
-    const saved = localStorage.getItem('vee_custom_user_reels_v4');
+    const saved = localStorage.getItem('vee_official_reels_v6');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const hasInsta = parsed.some(r => r.platform === 'INSTAGRAM' && r.instaId);
+          if (hasInsta) return parsed;
+        }
       } catch (e) {}
     }
     return DEFAULT_OFFICIAL_REELS;
@@ -185,31 +280,46 @@ export default function ShortsTab({ shorts, userProfile, onOpenAuth, onSelectJob
     const ytMatch = cleanUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:shorts\/|watch\?v=))([A-Za-z0-9_-]{11})/i);
     const igMatch = cleanUrl.match(/instagram\.com\/(?:reel|p)\/([A-Za-z0-9_-]+)/i);
 
-    let ytId = 'EZvKIO-TNsQ';
-    if (ytMatch) {
-      ytId = ytMatch[1];
+    let newReel;
+    if (uploadPlatform === 'INSTA') {
+      const instaCode = igMatch ? igMatch[1] : 'DeJ0KdmPt-x';
+      newReel = {
+        id: `insta-reel-${Date.now()}`,
+        instaId: instaCode,
+        platform: 'INSTAGRAM',
+        title: uploadTitle.trim() || '🔥 New Vacancy Alert Reel (@vacancyera)',
+        dept: uploadDept || 'Govt Jobs',
+        duration: '0:50',
+        likes: '1.2K',
+        comments: '34',
+        channel: '@vacancyera',
+        instagramUrl: igMatch ? `https://www.instagram.com/reel/${instaCode}/` : 'https://www.instagram.com/vacancyera?vrfl=emU0dzIyM295Mmx0&utm_source=qr',
+        tags: ['#VacancyEra', '#SarkariNaukri', '#GovtJobs'],
+        thumbnail: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=720&q=80',
+        applyUrl: uploadApplyUrl.trim() || null
+      };
+    } else {
+      const ytId = ytMatch ? ytMatch[1] : 'EZvKIO-TNsQ';
+      newReel = {
+        id: `yt-short-${Date.now()}`,
+        youtubeId: ytId,
+        platform: 'YOUTUBE',
+        title: uploadTitle.trim() || '🔥 New Vacancy Alert Video (@vacancyeraeducation)',
+        dept: uploadDept || 'Govt Jobs',
+        duration: '0:50',
+        likes: '1.2K',
+        comments: '34',
+        channel: '@vacancyeraeducation',
+        youtubeUrl: `https://youtu.be/${ytId}`,
+        tags: ['#VacancyEra', '#SarkariNaukri', '#GovtJobs'],
+        thumbnail: `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`,
+        applyUrl: uploadApplyUrl.trim() || null
+      };
     }
-
-    const newReel = {
-      id: `reel-${Date.now()}`,
-      youtubeId: ytId,
-      platform: uploadPlatform === 'INSTA' ? 'INSTAGRAM' : 'YOUTUBE',
-      title: uploadTitle.trim() || '🔥 New Vacancy Alert Reel (@vacancyera)',
-      dept: uploadDept || 'Govt Jobs',
-      duration: '0:50',
-      likes: '1.2K',
-      comments: '34',
-      channel: uploadPlatform === 'INSTA' ? '@vacancyera' : '@vacancyeraeducation',
-      instagramUrl: igMatch ? `https://www.instagram.com/p/${igMatch[1]}/` : 'https://www.instagram.com/vacancyera?vrfl=emU0dzIyM295Mmx0&utm_source=qr',
-      youtubeUrl: ytMatch ? `https://youtu.be/${ytId}` : 'https://www.youtube.com/@vacancyeraeducation',
-      tags: ['#VacancyEra', '#SarkariNaukri', '#GovtJobs'],
-      thumbnail: `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`,
-      applyUrl: uploadApplyUrl.trim() || null
-    };
 
     const updated = [newReel, ...customReels];
     setCustomReels(updated);
-    localStorage.setItem('vee_custom_user_reels_v4', JSON.stringify(updated));
+    localStorage.setItem('vee_official_reels_v6', JSON.stringify(updated));
 
     setShowUploadModal(false);
     setUploadLink('');
@@ -581,53 +691,177 @@ export default function ShortsTab({ shorts, userProfile, onOpenAuth, onSelectJob
                 <div className="short-media-wrapper" style={{ position: 'relative', minHeight: '440px' }}>
                   {/* Working In-App Video Player */}
                   {isPlaying ? (
-                    <div
-                      className="short-video-player-box"
-                      style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '100%',
-                        zIndex: 15,
-                        background: '#000'
-                      }}
-                    >
-                      <iframe
-                        style={{ width: '100%', height: '100%', border: 0 }}
-                        src={`https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&controls=1&playsinline=1&rel=0&modestbranding=1`}
-                        title={reel.title}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowFullScreen
-                      />
-                      <button
-                        type="button"
-                        className="close-reel-btn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setActivePlayingId(null);
-                        }}
+                    isInsta ? (
+                      /* Official Instagram Reel Player for @vacancyera */
+                      <div
+                        className="short-video-player-box insta-player-container"
                         style={{
                           position: 'absolute',
-                          top: '12px',
-                          right: '12px',
-                          zIndex: 25,
-                          background: 'rgba(0,0,0,0.85)',
-                          color: '#FFF',
-                          border: '1.5px solid rgba(255,255,255,0.7)',
-                          borderRadius: '50%',
-                          width: '34px',
-                          height: '34px',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: '100%',
+                          zIndex: 20,
+                          background: '#0F172A',
+                          borderRadius: '16px',
+                          overflow: 'hidden',
                           display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          cursor: 'pointer'
+                          flexDirection: 'column'
                         }}
-                        title="Close Video"
                       >
-                        <X size={18} />
-                      </button>
-                    </div>
+                        {/* Top Header Overlay with @vacancyera badge and quick actions */}
+                        <div
+                          style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            zIndex: 30,
+                            padding: '10px 14px',
+                            background: 'linear-gradient(180deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0) 100%)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between'
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div
+                              style={{
+                                width: '32px',
+                                height: '32px',
+                                borderRadius: '50%',
+                                background: 'linear-gradient(135deg, #833AB4, #FD1D1D, #FCB045)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.5)'
+                              }}
+                            >
+                              <Instagram size={18} color="#FFF" />
+                            </div>
+                            <div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <span style={{ color: '#FFF', fontWeight: 800, fontSize: '13px' }}>@vacancyera</span>
+                                <span style={{ color: '#FCD34D', fontSize: '10px', fontWeight: 700 }}>✓ Verified</span>
+                              </div>
+                              <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: '10px' }}>Official Instagram Reel</span>
+                            </div>
+                          </div>
+
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <a
+                              href={reel.instagramUrl || `https://www.instagram.com/reel/${reel.instaId || 'DeJ0KdmPt-x'}/`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                background: 'linear-gradient(135deg, #833AB4 0%, #FD1D1D 50%, #FCB045 100%)',
+                                color: '#FFF',
+                                padding: '6px 12px',
+                                borderRadius: '20px',
+                                fontSize: '11px',
+                                fontWeight: 800,
+                                textDecoration: 'none',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                boxShadow: '0 2px 10px rgba(225, 48, 108, 0.5)'
+                              }}
+                            >
+                              <Instagram size={13} /> IG App ↗
+                            </a>
+                            <button
+                              type="button"
+                              className="close-reel-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActivePlayingId(null);
+                              }}
+                              style={{
+                                background: 'rgba(0,0,0,0.7)',
+                                color: '#FFF',
+                                border: '1.5px solid rgba(255,255,255,0.8)',
+                                borderRadius: '50%',
+                                width: '32px',
+                                height: '32px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer'
+                              }}
+                              title="Close Reel"
+                            >
+                              <X size={16} />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Real Instagram Embed */}
+                        <iframe
+                          src={`https://www.instagram.com/reel/${reel.instaId || 'DeJ0KdmPt-x'}/embed`}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            border: 0,
+                            backgroundColor: '#000',
+                            paddingTop: '50px'
+                          }}
+                          title={reel.title}
+                          allowTransparency="true"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          scrolling="no"
+                        />
+                      </div>
+                    ) : (
+                      /* Official YouTube Shorts Player for @vacancyeraeducation */
+                      <div
+                        className="short-video-player-box"
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: '100%',
+                          zIndex: 20,
+                          background: '#000'
+                        }}
+                      >
+                        <iframe
+                          style={{ width: '100%', height: '100%', border: 0 }}
+                          src={`https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&controls=1&playsinline=1&rel=0&modestbranding=1`}
+                          title={reel.title}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          allowFullScreen
+                        />
+                        <button
+                          type="button"
+                          className="close-reel-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActivePlayingId(null);
+                          }}
+                          style={{
+                            position: 'absolute',
+                            top: '12px',
+                            right: '12px',
+                            zIndex: 25,
+                            background: 'rgba(0,0,0,0.85)',
+                            color: '#FFF',
+                            border: '1.5px solid rgba(255,255,255,0.7)',
+                            borderRadius: '50%',
+                            width: '34px',
+                            height: '34px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer'
+                          }}
+                          title="Close Video"
+                        >
+                          <X size={18} />
+                        </button>
+                      </div>
+                    )
                   ) : (
                     /* High-Res Thumbnail with Play Overlay */
                     <>
@@ -748,34 +982,35 @@ export default function ShortsTab({ shorts, userProfile, onOpenAuth, onSelectJob
                       <div className="flex-row gap-2">
                         <button
                           type="button"
-                          className="btn-accent-sm flex-1 flex-center justify-center gap-1.5 font-bold py-2 rounded-xl"
+                          className="btn-accent-sm flex-1 flex-center justify-center gap-1.5 font-bold py-2 rounded-xl shadow-sm"
                           onClick={() => setActivePlayingId(reel.id)}
                           style={{
                             background: isInsta
-                              ? 'linear-gradient(135deg, #833AB4, #FD1D1D)'
+                              ? 'linear-gradient(135deg, #833AB4 0%, #FD1D1D 50%, #FCB045 100%)'
                               : '#EF4444',
                             color: '#FFF',
                             border: 'none',
                             cursor: 'pointer'
                           }}
                         >
-                          <Play size={14} fill="#FFF" /> {isPlaying ? 'वीडियो चल रहा है (Playing)' : '▶️ वीडियो चलाएं (Play Now)'}
+                          <Play size={14} fill="#FFF" /> {isPlaying ? (isInsta ? 'रील चल रही है (Playing)' : 'वीडियो चल रहा है (Playing)') : (isInsta ? '▶️ Instagram रील चलाएं' : '▶️ YouTube वीडियो चलाएं')}
                         </button>
 
                         <a
-                          href={isInsta ? reel.instagramUrl : (reel.youtubeUrl || `https://youtu.be/${youtubeId}`)}
+                          href={isInsta ? (reel.instagramUrl || `https://www.instagram.com/reel/${reel.instaId || 'DeJ0KdmPt-x'}/`) : (reel.youtubeUrl || `https://youtu.be/${youtubeId}`)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="btn-secondary-xs flex-center justify-center gap-1 px-3 py-2 rounded-xl font-bold text-xs"
                           style={{
-                            background: 'rgba(255,255,255,0.22)',
+                            background: isInsta ? 'linear-gradient(135deg, #833AB4, #FD1D1D)' : 'rgba(255,255,255,0.22)',
                             backdropFilter: 'blur(8px)',
                             color: '#FFF',
                             textDecoration: 'none',
                             border: '1px solid rgba(255,255,255,0.35)'
                           }}
                         >
-                          <ExternalLink size={13} /> {isInsta ? 'IG App' : 'YT App'}
+                          {isInsta ? <Instagram size={13} /> : <ExternalLink size={13} />}
+                          <span>{isInsta ? 'IG App ↗' : 'YT App ↗'}</span>
                         </a>
                       </div>
 
