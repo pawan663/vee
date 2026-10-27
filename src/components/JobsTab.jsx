@@ -652,36 +652,39 @@ export default function JobsTab({
     const postsText = (job.posts || '').toLowerCase();
 
     // Flagship major government recruiters base weights
-    if (/railway|rrb|rrc|irctc|metro/i.test(dept) || /railway|rrb/i.test(title)) score += 60;
-    if (/ssc|staff selection/i.test(dept) || /\bssc\b/i.test(title)) score += 55;
-    if (/police|constable|daroga|sub inspector/i.test(title) || /police/i.test(dept)) score += 50;
-    if (/army|defence|navy|air force|agniveer/i.test(title) || /defence|army/i.test(dept)) score += 50;
-    if (/apprentice/i.test(cat) || /apprentice/i.test(title) || /apprentice/i.test(dept)) score += 45;
-    if (/bhel|ongc|iocl|ntpc|sail|isro|drdo|hal|bel|power grid/i.test(dept) || /bhel|ongc|iocl/i.test(title)) score += 40;
-    if (/bank|sbi|ibps|rbi/i.test(dept) || /sbi|ibps|po\b/i.test(title)) score += 35;
+    if (/railway|rrb|rrc|irctc|metro/i.test(dept) || /railway|rrb/i.test(title)) score += 45;
+    if (/ssc|staff selection/i.test(dept) || /\bssc\b/i.test(title)) score += 42;
+    if (/police|constable|daroga|sub inspector/i.test(title) || /police/i.test(dept)) score += 40;
+    if (/army|defence|navy|air force|agniveer/i.test(title) || /defence|army/i.test(dept)) score += 40;
+    if (/apprentice/i.test(cat) || /apprentice/i.test(title) || /apprentice/i.test(dept)) score += 38;
+    if (/bhel|ongc|iocl|ntpc|sail|isro|drdo|hal|bel|power grid/i.test(dept) || /bhel|ongc|iocl/i.test(title)) score += 35;
+    if (/bank|sbi|ibps|rbi/i.test(dept) || /sbi|ibps|po\b/i.test(title)) score += 32;
 
-    // Brand new announcement bonus - always elevated to top hero spots
-    if (job.isNew) score += 80;
+    // Fresh announcement bonus
+    if (job.isNew) score += 35;
 
-    // Hourly Spotlight Category Rotation:
-    // Changes every hour (0-23) so regular app visitors see diverse categories in the hero slots
-    const rotationSlot = currentHour % 4;
-    if (rotationSlot === 0 && (/apprentice/i.test(cat) || /railway|rrb/i.test(dept) || /railway|rrb/i.test(title))) {
-      score += 25; // Apprentice & Railway hour
-    } else if (rotationSlot === 1 && (/police|constable|sub inspector/i.test(title) || /army|defence|agniveer/i.test(title))) {
-      score += 25; // Defence & Police hour
-    } else if (rotationSlot === 2 && (/bank|sbi|ibps|rbi/i.test(dept) || /ssc|cgl|chsl|mts/i.test(title))) {
-      score += 25; // Banking & SSC hour
-    } else if (rotationSlot === 3 && (/psc|upsc|uppsc|bpsc|rpsc|mppsc/i.test(dept) || cat === 'private')) {
-      score += 25; // State PSC & Corporate hour
+    // 6-Category Dynamic Hourly & Session Spotlight Rotation:
+    // Changes every hour (0-23) & sessionCount so returning users always discover DIFFERENT jobs at the top!
+    const rotationSlot = (currentHour + sessionCount) % 6;
+    if (rotationSlot === 0 && (/railway|rrb|rrc|metro/i.test(dept) || /railway|rrb/i.test(title))) {
+      score += 50; // Theme 0: Railway & Metro Spotlight
+    } else if (rotationSlot === 1 && (job.state && job.state !== 'All India')) {
+      score += 50; // Theme 1: State Government Jobs Spotlight (UP, MP, Bihar, Rajasthan, Delhi, etc.)
+    } else if (rotationSlot === 2 && (/police|constable|sub inspector/i.test(title) || /army|defence|navy|air force|agniveer|itbp|bsf|cisf/i.test(title))) {
+      score += 50; // Theme 2: Defence & Police Spotlight
+    } else if (rotationSlot === 3 && (/bank|sbi|ibps|rbi|pnb|uco|canara/i.test(dept) || /bank|clerk|po\b|specialist/i.test(title))) {
+      score += 50; // Theme 3: Banking & Financial Institutions Spotlight
+    } else if (rotationSlot === 4 && (/ssc|cgl|chsl|mts|gd|upsc|india post|gds/i.test(title) || /ssc|upsc/i.test(dept))) {
+      score += 50; // Theme 4: Central Govt & SSC Spotlight
+    } else if (rotationSlot === 5 && (/apprentice/i.test(cat) || /apprentice|iti|diploma/i.test(title) || /apprentice/i.test(dept))) {
+      score += 50; // Theme 5: Apprentice & Technical Skills Spotlight
     }
 
     // Dynamic Session Shuffle:
-    // When a user opens or refreshes the app within the same hour, jobs within similar score brackets
-    // receive a subtle deterministic pseudo-random offset based on sessionCount.
-    // This ensures returning users discover DIFFERENT vacancies instead of the exact same static cards!
+    // Guarantees that when a user opens the app 30-60 mins later, the top cards dynamically shift
+    // so older, verified gems in the database get spotlighted and user never sees a static feed!
     const idSeed = (job.id ? String(job.id) : title).split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
-    const sessionOffset = (idSeed + sessionCount * 13) % 18;
+    const sessionOffset = ((idSeed * 17) + (sessionCount * 31) + (currentHour * 19)) % 45;
     score += sessionOffset;
 
     // Post count bonus

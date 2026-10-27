@@ -1480,11 +1480,29 @@ export async function scrapeWeWorkRemotelyJobs() {
 }
 
 // 14. Scrape Official Vacancy Era Education YouTube Channel Real-Time Feed
+const FALLBACK_CHANNEL_VIDEOS = [
+  { videoId: "Gr0hGjO4I5o", videoUrl: "https://youtu.be/Gr0hGjO4I5o", title: "HPCL नई भर्ती 2026 | 12th, ITI, B.Tech | Salary व योग्यता देखें | Vacancy Era Education", channel: "@vacancyeraeducation" },
+  { videoId: "8WFrgDklQcE", videoUrl: "https://youtu.be/8WFrgDklQcE", title: "RRB नई भर्ती 2026 💯 Railway Vacancy 2026 Eligibility, Exam Pattern | Railway Posts", channel: "@vacancyeraeducation" },
+  { videoId: "_U6RdSxLIMc", videoUrl: "https://youtu.be/_U6RdSxLIMc", title: "ONGC नई भर्ती 2026 | ONGC Trainee Bharti 2026🚨10वीं, 12वीं, ITI, Diploma, Graduate के लिए मौका", channel: "@vacancyeraeducation" },
+  { videoId: "6FN-LU_YaA0", videoUrl: "https://youtu.be/6FN-LU_YaA0", title: "SCL Recruitment 2026 Short Notice Out! 🚀 Technician Post | ITI, Diploma Pass | Apply Online", channel: "@vacancyeraeducation" },
+  { videoId: "wXgnEhaJoFU", videoUrl: "https://youtu.be/wXgnEhaJoFU", title: "DFCCIL Recruitment 2026🚨नई भर्ती | Direct Interview? | योग्यता, सैलरी और पूरी जानकारी", channel: "@vacancyeraeducation" },
+  { videoId: "EZvKIO-TNsQ", videoUrl: "https://youtu.be/EZvKIO-TNsQ", title: "NTPC Recruitment 2026 UR-OBC के लिए | Special Drive नई भर्ती | Vacancy Era Education", channel: "@vacancyeraeducation" },
+  { videoId: "_3G_myadrN8", videoUrl: "https://youtu.be/_3G_myadrN8", title: "ISRO New Vacancy 2026 | MTS & Driver Vacancy | ISRO Recruitment 2026 🚀10वीं, ITI पास", channel: "@vacancyeraeducation" },
+  { videoId: "pgtC9BT744I", videoUrl: "https://youtu.be/pgtC9BT744I", title: "EIL Recruitment 2026🚨Diploma पास के लिए मौका | Navratna PSU Job | पूरी जानकारी", channel: "@vacancyeraeducation" },
+  { videoId: "YDpQqasdH7s", videoUrl: "https://youtu.be/YDpQqasdH7s", title: "Coal India भर्ती 2026🚨Notification और सरकारी नौकरी | CIL नई भर्ती | Exam & Apply Online", channel: "@vacancyeraeducation" },
+  { videoId: "gZb4UqmYDAU", videoUrl: "https://youtu.be/gZb4UqmYDAU", title: "Hero कंपनी में नौकरी 2026 | Hero MotoCorp Recruitment 2026🔥Private Vacancy | ITI 10th/12th Pass Jobs", channel: "@vacancyeraeducation" },
+  { videoId: "dSWQFQwSBXQ", videoUrl: "https://youtu.be/dSWQFQwSBXQ", title: "DMRC नई भर्ती 2026🚇Non-Executive पदों पर भर्ती | ITI, Diploma, B.Tech | पूरी जानकारी", channel: "@vacancyeraeducation" },
+  { videoId: "yLXb10KOm6c", videoUrl: "https://youtu.be/yLXb10KOm6c", title: "Oil India नई भर्ती 2026🚨Executive Vacancy | Oil India Recruitment 2026 | Full Details", channel: "@vacancyeraeducation" },
+  { videoId: "9P2WHJkSgJs", videoUrl: "https://youtu.be/9P2WHJkSgJs", title: "NMDC नई भर्ती 2026🔥ITI, Diploma Vacancy | बंपर सरकारी भर्ती का नोटिफिकेशन | Age Limit & Salary", channel: "@vacancyeraeducation" },
+  { videoId: "_xhQ_NeJh0Q", videoUrl: "https://youtu.be/_xhQ_NeJh0Q", title: "LIC Recruitment 2026🚀Freshers के लिए Job Update | Salary, Eligibility & Apply Online", channel: "@vacancyeraeducation" },
+  { videoId: "vef7YrcAw4E", videoUrl: "https://youtu.be/vef7YrcAw4E", title: "NCL नई भर्ती 2026 | NCL MTS Recruitment 2026🚨10वीं पास MTS Vacancy | Apply Online", channel: "@vacancyeraeducation" }
+];
+
 export async function scrapeYouTubeChannel() {
   console.log("📺 [14/14] Scraping Official @vacancyeraeducation YouTube Feed...");
   try {
     const xml = await fetchHtml('https://www.youtube.com/feeds/videos.xml?channel_id=UChHRt-QM9T9Wyx1Q4zUTcVg');
-    if (!xml) return [];
+    if (!xml) return FALLBACK_CHANNEL_VIDEOS;
     const $ = cheerio.load(xml, { xmlMode: true });
     const videos = [];
     $('entry').each((_, el) => {
@@ -1499,11 +1517,14 @@ export async function scrapeYouTubeChannel() {
         });
       }
     });
-    console.log(`📺 Successfully fetched ${videos.length} live videos from @vacancyeraeducation!`);
-    return videos;
+    if (videos.length > 0) {
+      console.log(`📺 Successfully fetched ${videos.length} live videos from @vacancyeraeducation!`);
+      return videos;
+    }
+    return FALLBACK_CHANNEL_VIDEOS;
   } catch (err) {
     console.warn("⚠️ YouTube RSS fetch failed, using fallback registry:", err.message);
-    return [];
+    return FALLBACK_CHANNEL_VIDEOS;
   }
 }
 
@@ -1691,16 +1712,16 @@ export async function scrapeAllStateGovernmentJobs() {
     { state: 'Uttar Pradesh', url: 'https://www.freejobalert.com/up-government-jobs/' },
     { state: 'Bihar', url: 'https://www.freejobalert.com/bihar-government-jobs/' },
     { state: 'Madhya Pradesh', url: 'https://www.freejobalert.com/mp-government-jobs/' },
-    { state: 'Delhi', url: 'https://www.freejobalert.com/delhi-jobs/' },
-    { state: 'Haryana', url: 'https://www.freejobalert.com/haryana-jobs/' },
-    { state: 'Jharkhand', url: 'https://www.freejobalert.com/jharkhand-jobs/' },
-    { state: 'Chhattisgarh', url: 'https://www.freejobalert.com/chhattisgarh-jobs/' },
+    { state: 'Delhi', url: 'https://www.freejobalert.com/delhi-government-jobs/' },
+    { state: 'Haryana', url: 'https://www.freejobalert.com/haryana-government-jobs/' },
+    { state: 'Jharkhand', url: 'https://www.freejobalert.com/jharkhand-government-jobs/' },
+    { state: 'Chhattisgarh', url: 'https://www.freejobalert.com/chhattisgarh-government-jobs/' },
     { state: 'Punjab', url: 'https://www.freejobalert.com/punjab-government-jobs/' },
     { state: 'Odisha', url: 'https://www.freejobalert.com/odisha-government-jobs/' },
     { state: 'Assam', url: 'https://www.freejobalert.com/assam-government-jobs/' },
     { state: 'Gujarat', url: 'https://www.freejobalert.com/gujarat-government-jobs/' },
     { state: 'Maharashtra', url: 'https://www.freejobalert.com/maharashtra-government-jobs/' },
-    { state: 'West Bengal', url: 'https://www.freejobalert.com/west-bengal-government-jobs/' }
+    { state: 'West Bengal', url: 'https://www.freejobalert.com/wb-government-jobs/' }
   ];
 
   const jobs = [];
@@ -1712,13 +1733,17 @@ export async function scrapeAllStateGovernmentJobs() {
       const html = await fetchHtml(sp.url);
       if (!html) return;
       const $ = cheerio.load(html);
+      let stateCount = 0;
       $('table tr').each((i, tr) => {
+        if (stateCount >= 25) return;
         const tds = $(tr).find('td');
         if (tds.length >= 6) {
           // Clean text helper removing hidden/mobile duplicate spans
           const getCellText = (cell) => {
-            if (!cell || !cell.length) return '';
-            const clone = $(cell).clone();
+            if (!cell) return '';
+            const $c = $(cell);
+            if (!$c.length) return '';
+            const clone = $c.clone();
             clone.find('.kar-t-mob, script, style, noscript').remove();
             return clone.text().trim().replace(/\s+/g, ' ');
           };
@@ -1757,6 +1782,7 @@ export async function scrapeAllStateGovernmentJobs() {
               title = cleanJobTitle(title);
 
               if (!jobs.some(j => j.title.toLowerCase() === title.toLowerCase())) {
+                stateCount++;
                 const details = enrichJobDetails(title, q.type);
                 let postCount = "Active Openings";
                 if (vacancyText && /\b\d+\s*posts?\b/i.test(vacancyText)) {
