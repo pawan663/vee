@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://vee.naukriwire9.workers.dev/sitemap.xml
