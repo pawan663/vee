@@ -4128,6 +4128,102 @@ iframe[title*="Netlify"],
   background-color: #FFFFFF !important;
 }
 
+/* ==========================================================================
+   Native App Bottom Sheet & Animated 3D VEE Logo + Magic Book
+   ========================================================================== */
+@keyframes nativeSheetSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(60px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Floating 3D VEE Letters */
+@keyframes veeFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.vee-floating-letters {
+  animation: veeFloat 3.6s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.vee-floating-cap {
+  animation: veeFloat 3.6s ease-in-out infinite 0.2s;
+  transform-origin: center;
+}
+
+/* Swaying Golden Tassel */
+@keyframes tasselSway {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(14deg);
+  }
+}
+
+.vee-swaying-tassel {
+  animation: tasselSway 2.4s ease-in-out infinite;
+  transform-origin: 90px 29px;
+}
+
+/* Opening Magic Book with Flipping Page */
+@keyframes pageFlip {
+  0%, 100% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scaleX(0.2) skewY(-10deg);
+    opacity: 0.8;
+  }
+}
+
+.vee-flipping-page {
+  animation: pageFlip 2.8s ease-in-out infinite;
+  transform-origin: 16px 13px;
+}
+
+/* Twinkling Star Sparkle */
+@keyframes starGlow {
+  0%, 100% {
+    transform: scale(0.9);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 1;
+  }
+}
+
+.vee-twinkle-sparkle {
+  animation: starGlow 1.8s ease-in-out infinite;
+  transform-origin: 28px 8px;
+}
+
+.native-auth-sheet input {
+  color: #0F172A !important;
+}
+
+.native-auth-sheet input::placeholder {
+  color: #94A3B8 !important;
+}
+
+.native-auth-sheet select {
+  color: #0F172A !important;
+  background-color: #FFFFFF !important;
+}
+
 
 
 
