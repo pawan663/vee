@@ -478,6 +478,7 @@ export default function App() {
               onOpenAuth={() => setIsAuthOpen(true)}
               onOpenLegal={(tab) => setLegalPolicyTab(tab || 'disclaimer')}
               onLogout={handleLogout}
+              onClearData={handleClearAllUserData}
               currentLang={currentLang}
               onChangeLang={setCurrentLang}
               darkMode={darkMode}

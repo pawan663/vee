@@ -50,6 +50,7 @@ export default function ProfileTab({
   onToggleDarkMode,
   onOpenAuth,
   onLogout,
+  onClearData,
   lastSyncedTime,
   onManualSync,
   isSyncing,
@@ -58,6 +59,7 @@ export default function ProfileTab({
   const [activeSection, setActiveSection] = useState('applied'); // 'applied' | 'vault' | 'saved' | 'badges'
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddTrackerOpen, setIsAddTrackerOpen] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   // New Tracker Form State
   const [newJobTitle, setNewJobTitle] = useState('');
@@ -93,6 +95,21 @@ export default function ProfileTab({
     if (window.confirm(msg)) {
       const updated = appliedJobs.filter((_, i) => i !== index);
       onUpdateAppliedJobs(updated);
+    }
+  };
+
+  const handleConfirmNormalLogout = () => {
+    setIsLogoutModalOpen(false);
+    if (onLogout) onLogout();
+  };
+
+  const handleConfirmDeleteData = () => {
+    setIsLogoutModalOpen(false);
+    if (onClearData) {
+      onClearData();
+      alert(isEn ? "All your profile details and saved data have been permanently deleted from this device." : "आपका अकाउंट और सारा डेटा हमेशा के लिए हटा दिया गया है।");
+    } else if (onLogout) {
+      onLogout();
     }
   };
 
@@ -319,7 +336,7 @@ export default function ProfileTab({
         {userProfile?.isLoggedIn ? (
           <button
             type="button"
-            onClick={onLogout}
+            onClick={() => setIsLogoutModalOpen(true)}
             style={{
               border: '1px solid #FECACA',
               background: '#FEF2F2',
@@ -1268,9 +1285,9 @@ export default function ProfileTab({
           <ChevronRight size={17} color="#94A3B8" />
         </div>
 
-        {/* Item 9: Delete Data (ZERO HINDI IN ENGLISH!) */}
+        {/* Item 9: Delete Data / Logout Options */}
         <div
-          onClick={() => onOpenLegal && onOpenLegal('delete')}
+          onClick={() => setIsLogoutModalOpen(true)}
           style={{
             padding: '12px 0',
             display: 'flex',
@@ -1351,8 +1368,196 @@ export default function ProfileTab({
       </div>
 
       {/* ===================================================================
-          6. MODALS: EDIT PROFILE & MANUAL FORM TRACKER
+          6. MODALS: EDIT PROFILE & MANUAL FORM TRACKER & LOGOUT/DELETE
           =================================================================== */}
+      {/* Smart Logout vs Permanent Data Deletion Confirmation Dialog */}
+      {isLogoutModalOpen && (
+        <div
+          className="modal-overlay"
+          onClick={() => setIsLogoutModalOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(6px)',
+            zIndex: 99999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '16px'
+          }}
+        >
+          <div
+            style={{
+              width: '100%',
+              maxWidth: '390px',
+              background: '#FFFFFF',
+              borderRadius: '22px',
+              padding: '22px',
+              boxShadow: '0 20px 45px rgba(15, 23, 42, 0.28)',
+              display: 'flex',
+              flexDirection: 'column',
+              boxSizing: 'border-box'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Top Bar: Icon + Close */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+              <div
+                style={{
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '12px',
+                  background: '#EFF6FF',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <Shield size={22} color="#1D64F2" />
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsLogoutModalOpen(false)}
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  background: '#F1F5F9',
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer'
+                }}
+              >
+                <X size={16} color="#64748B" />
+              </button>
+            </div>
+
+            <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#0F172A', margin: '0 0 6px' }}>
+              {isEn ? 'Account & Session Options' : 'अकाउंट से बाहर जाएं'}
+            </h3>
+            <p style={{ fontSize: '13px', color: '#64748B', margin: '0 0 18px', lineHeight: '1.45' }}>
+              {isEn
+                ? 'What would you like to do with your account on this device?'
+                : 'आप VEE ऐप से बाहर जाने के लिए कौन सा विकल्प चुनना चाहते हैं?'}
+            </p>
+
+            {/* Option 1: Log Out Only (Keeps Data Safe) */}
+            <div
+              onClick={handleConfirmNormalLogout}
+              style={{
+                border: '1.5px solid #E2E8F0',
+                borderRadius: '16px',
+                padding: '14px',
+                marginBottom: '12px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '12px',
+                background: '#FFFFFF',
+                boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)',
+                transition: 'all 0.18s'
+              }}
+            >
+              <div
+                style={{
+                  width: '38px',
+                  height: '38px',
+                  borderRadius: '11px',
+                  background: '#EFF6FF',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  fontSize: '18px'
+                }}
+              >
+                🚪
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '14px', fontWeight: '800', color: '#0F172A' }}>
+                  {isEn ? 'Log Out Only' : 'सिर्फ लॉगआउट करें'}
+                </div>
+                <div style={{ fontSize: '11.5px', color: '#64748B', marginTop: '3px', lineHeight: '1.4' }}>
+                  {isEn
+                    ? 'Your saved jobs, tracked forms, and profile remain safe. You can log back in anytime with your mobile number.'
+                    : 'आपकी सेव की गई नौकरियां और फॉर्म सुरक्षित रहेंगे। आप कभी भी अपने मोबाइल नंबर से दोबारा लॉगिन कर सकते हैं।'}
+                </div>
+                <span style={{ display: 'inline-block', marginTop: '6px', fontSize: '12px', fontWeight: '700', color: '#1D64F2' }}>
+                  {isEn ? 'Log Out (Keep My Data) →' : 'लॉगआउट करें (डेटा सुरक्षित रखें) →'}
+                </span>
+              </div>
+            </div>
+
+            {/* Option 2: Permanently Delete Data & Account */}
+            <div
+              onClick={handleConfirmDeleteData}
+              style={{
+                border: '1.5px solid #FECACA',
+                borderRadius: '16px',
+                padding: '14px',
+                marginBottom: '16px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '12px',
+                background: '#FEF2F2',
+                transition: 'all 0.18s'
+              }}
+            >
+              <div
+                style={{
+                  width: '38px',
+                  height: '38px',
+                  borderRadius: '11px',
+                  background: '#FEE2E2',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}
+              >
+                <Trash2 size={18} color="#DC2626" />
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '14px', fontWeight: '800', color: '#DC2626' }}>
+                  {isEn ? 'Permanently Delete Data & Account' : 'हमेशा के लिए अकाउंट व डेटा हटाएं'}
+                </div>
+                <div style={{ fontSize: '11.5px', color: '#991B1B', marginTop: '3px', lineHeight: '1.4' }}>
+                  {isEn
+                    ? 'Completely purges your mobile number, profile, bookmarks, and application tracking history from this device.'
+                    : 'फोन से आपका मोबाइल नंबर, प्रोफाइल, सेव्ड नौकरियां और पूरी हिस्ट्री हमेशा के लिए मिटा दी जाएगी।'}
+                </div>
+                <span style={{ display: 'inline-block', marginTop: '6px', fontSize: '12px', fontWeight: '700', color: '#DC2626' }}>
+                  {isEn ? 'Delete Permanently ⚠️' : 'हमेशा के लिए डेटा हटाएं ⚠️'}
+                </span>
+              </div>
+            </div>
+
+            {/* Cancel Button */}
+            <button
+              type="button"
+              onClick={() => setIsLogoutModalOpen(false)}
+              style={{
+                width: '100%',
+                height: '44px',
+                borderRadius: '12px',
+                background: '#F8FAFC',
+                border: '1px solid #CBD5E1',
+                color: '#475569',
+                fontSize: '13.5px',
+                fontWeight: '700',
+                cursor: 'pointer'
+              }}
+            >
+              {isEn ? 'Cancel (Stay in App)' : 'रद्द करें (ऐप में बने रहें)'}
+            </button>
+          </div>
+        </div>
+      )}
+
       {isAddTrackerOpen && (
         <div className="modal-overlay" onClick={() => setIsAddTrackerOpen(false)}>
           <div className="modal-content bottom-sheet" onClick={(e) => e.stopPropagation()}>
