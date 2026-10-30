@@ -1,8 +1,11 @@
 [{
-      "relation": ["delegate_permission/common.handle_all_urls"],
-      "target": {
-        "namespace": "android_app",
-        "package_name": "com.pawan.vacancyera",
-        "sha256_cert_fingerprints": ["0B:B3:80:2D:F9:78:72:D4:4B:91:E9:80:04:35:56:D1:6B:36:0C:2E:DF:96:63:51:1F:D7:8E:48:66:F9:C4:27"]
-      }
-    }]
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.pawan.vacancyera",
+    "sha256_cert_fingerprints": [
+      "25:CE:52:9D:84:4D:A0:A1:5D:D1:B0:64:B7:A7:4B:EF:E0:9B:81:EA:3F:95:12:8B:EA:C0:A6:37:81:E7:32:45",
+      "0B:B3:80:2D:F9:78:72:D4:4B:91:E9:80:04:35:56:D1:6B:36:0C:2E:DF:96:63:51:1F:D7:8E:48:66:F9:C4:27"
+    ]
+  }
+}]
