@@ -1,230 +1,139 @@
 import React, { useState, useEffect } from 'react';
-import { X, Phone, Mail, CheckCircle2, Shield, ArrowRight, RefreshCw, Key, User, Lock, Sparkles, Compass, BookOpen } from 'lucide-react';
+import { X, Phone, Mail, CheckCircle2, ArrowRight, RefreshCw, User, Lock, Eye, EyeOff, Sparkles, MapPin, Target, GraduationCap, ChevronLeft, ShieldCheck } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 export default function AuthModal({ isOpen, onClose, onLoginSuccess, currentProfile, t, currentLang = 'hi' }) {
-  const [authMethod, setAuthMethod] = useState('phone'); // 'phone' | 'email'
-  const [step, setStep] = useState('input'); // 'input' | 'otp' | 'profile'
-  const [isBookOpen, setIsBookOpen] = useState(false);
-  const [showNewLogin, setShowNewLogin] = useState(false);
-  
-  // Inputs
-  const [countryCode, setCountryCode] = useState('+91');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [emailAddress, setEmailAddress] = useState('');
+  // Modes: 'welcome' | 'login' | 'signup' | 'profile' | 'otp'
+  const [mode, setMode] = useState('welcome');
+  const [slideIndex, setSlideIndex] = useState(0);
+
+  // Form States
+  const [fullName, setFullName] = useState(currentProfile?.name || '');
+  const [phoneNumber, setPhoneNumber] = useState(currentProfile?.phone ? currentProfile.phone.replace('+91', '').trim() : '');
+  const [emailAddress, setEmailAddress] = useState(currentProfile?.email || '');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Profile Personalization States (Rich & Detailed)
+  const [state, setState] = useState(currentProfile?.state || 'Rajasthan');
+  const [goal, setGoal] = useState(currentProfile?.goal || 'Railway ALP & Technician / ITI Fitter');
+  const [qual, setQual] = useState(currentProfile?.qual || 'ITI Pass');
+  const [category, setCategory] = useState(currentProfile?.category || 'OBC');
+
+  // OTP Simulation
   const [otp, setOtp] = useState('');
   const [generatedOtp, setGeneratedOtp] = useState('7892');
-  const [isAutoFilling, setIsAutoFilling] = useState(false);
-  const [fullName, setFullName] = useState(currentProfile?.name || '');
-  const [state, setState] = useState(currentProfile?.state || 'Rajasthan');
-  const [goal, setGoal] = useState(currentProfile?.goal || 'ITI Fitter / Railway ALP');
-
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
   const isHi = currentLang === 'hi';
 
-  // Check if there is already saved user data in profile or localStorage
-  const existingAccount = React.useMemo(() => {
-    try {
-      if (currentProfile && currentProfile.name && currentProfile.name !== 'VEE Aspirant' && (currentProfile.phone || currentProfile.email || currentProfile.isLoggedIn)) {
-        return currentProfile;
-      }
-      const savedAccKey = localStorage.getItem('vee_current_account_key');
-      if (savedAccKey) {
-        const raw = localStorage.getItem(savedAccKey);
-        if (raw) return JSON.parse(raw);
-      }
-      const rawProfile = localStorage.getItem('vee_user_profile');
-      if (rawProfile) {
-        const parsed = JSON.parse(rawProfile);
-        if (parsed && parsed.name && parsed.name !== 'VEE Aspirant' && (parsed.phone || parsed.email || parsed.isLoggedIn)) {
-          return parsed;
-        }
-      }
-    } catch (e) {}
-    return null;
-  }, [currentProfile, isOpen]);
-
-  // Handle 3D Book Flip Opening Animation when modal is triggered
   useEffect(() => {
-    let timer;
     if (isOpen) {
-      setIsBookOpen(false);
-      setShowNewLogin(false);
-      // Brief pause to show the luxurious 3D leather & gold book cover, then smoothly swing open!
-      timer = setTimeout(() => {
-        setIsBookOpen(true);
-      }, 400);
-    } else {
-      setIsBookOpen(false);
+      setErrorMsg('');
+      // If user already logged in, show profile mode
+      if (currentProfile && currentProfile.isLoggedIn) {
+        setMode('profile');
+      } else {
+        setMode('welcome');
+      }
     }
-    return () => clearTimeout(timer);
   }, [isOpen]);
-
-  const strings = {
-    bookTitle: isHi ? 'रोज़गार भर्ती डायरी 2026' : 'Aspirant Career Passport 2026',
-    bookSubtitle: isHi ? 'भारत का #1 रियल-टाइम भर्ती पोर्टल' : "India's #1 Real-Time Jobs Hub",
-    badge: isHi ? '🛡️ राष्ट्रीय अभ्यर्थी सेवा' : '🛡️ NATIONAL ASPIRANT PORTAL',
-    title: isHi ? 'VEE ऐप में आपका स्वागत है' : 'Welcome to VEE',
-    subtitle: isHi 
-      ? 'भारत का #1 रियल-टाइम सरकारी व प्राइवेट भर्ती पोर्टल 🎯' 
-      : "India's #1 Real-Time Sarkari & Private Jobs Hub 🎯",
-    existingTitle: isHi ? '🌟 अभ्यर्थी पहचान पत्र (Welcome Back)' : '🌟 Aspirant Identity Pass',
-    existingSub: isHi ? 'आपके पास पहले से सत्यापित प्रोफाइल डेटा मौजूद है:' : 'Verified profile data found on this device:',
-    continueExisting: isHi ? 'के रूप में सीधे शुरू करें' : 'Continue as',
-    useDifferent: isHi ? '🔄 किसी दूसरे नंबर / Google से लॉगिन करें' : '🔄 Login with Different Account',
-    googleBtn: isHi ? 'Google से 1-क्लिक साइन इन करें' : 'Continue with Google',
-    orDivider: isHi ? 'या मोबाइल नंबर से जारी रखें' : 'OR CONTINUE WITH MOBILE',
-    phoneLabel: isHi ? '10-अंकों का मोबाइल नंबर दर्ज करें:' : 'Enter 10-Digit Mobile Number:',
-    autoOtpBadge: isHi ? '⚡ तुरंत ऑटो-ओटीपी' : '⚡ Instant Auto-OTP',
-    phonePlaceholder: 'e.g. 9829012345',
-    getOtpBtn: isHi ? 'ओटीपी प्राप्त करें' : 'Get Verification Code',
-    sendingOtp: isHi ? 'ओटीपी भेजा जा रहा है...' : 'Sending OTP...',
-    skipBtn: isHi ? 'अतिथि के रूप में सीधे देखें →' : 'Skip & Explore as Guest →',
-    skipNote: isHi 
-      ? 'आप बिना लॉगिन किए भी 460+ लाइव भर्तियां देख सकते हैं।' 
-      : 'Explore 460+ live verified vacancies without signing in.',
-    
-    // OTP Step
-    otpTitle: isHi ? 'मोबाइल नंबर सत्यापन' : 'Verify Mobile Number',
-    otpSub: isHi ? 'दिए गए 4-अंकों के सुरक्षा कोड को दर्ज करें:' : 'Enter the 4-digit code sent to:',
-    smsDetected: isHi ? '📲 ऑटो-एसएमएस वेरिफिकेशन डिटेक्टेड' : '📲 SMS Verification Auto-Detected',
-    secOtpLabel: isHi ? 'ओटीपी कोड:' : 'Security OTP:',
-    autoFilling: isHi ? '⚡ बॉक्स में कोड भरा जा रहा है...' : '⚡ Auto-filling 4-digit code...',
-    autoFilled: isHi ? '✅ कोड भर दिया गया! नीचे सत्यापित करें पर क्लिक करें।' : '✅ Code auto-filled! Click verify below.',
-    verifyBtn: isHi ? 'ओटीपी सत्यापित करें और डायरी शुरू करें' : 'Verify OTP & Continue',
-    verifying: isHi ? 'सत्यापित हो रहा है...' : 'Verifying...',
-    changeNumber: isHi ? '← दूसरा नंबर दर्ज करें' : '← Change Mobile Number',
-
-    // Profile Step
-    profileTitle: isHi ? 'अपनी प्रोफाइल सेट करें' : 'Personalize Your Feed',
-    profileSub: isHi ? 'बस एक कदम! अपनी पसंदीदा भर्तियों के लिए विवरण भरें:' : 'Almost there! Set your details to get tailored job alerts:',
-    mobileVerified: isHi ? '🎉 मोबाइल सफलतापूर्वक सत्यापित!' : '🎉 Mobile Verified Successfully!',
-    nameLabel: isHi ? 'आपका पूरा नाम:' : 'Full Name:',
-    namePlaceholder: 'e.g. Pawan Meena',
-    stateLabel: isHi ? 'गृह राज्य (Home State):' : 'Home State:',
-    goalLabel: isHi ? 'लक्षित भर्ती / परीक्षा (Goal):' : 'Target Exam / Goal:',
-    startBtn: isHi ? '✨ VEE ऐप शुरू करें' : '✨ Start Exploring VEE App',
-
-    // Errors
-    errPhone: isHi ? 'कृपया 10 अंकों का सही मोबाइल नंबर दर्ज करें' : 'Please enter a valid 10-digit mobile number',
-    errPhoneIntl: isHi ? 'कृपया सही मोबाइल नंबर दर्ज करें' : 'Please enter a valid mobile number',
-    errEmail: isHi ? 'कृपया सही Email ID दर्ज करें' : 'Please enter a valid email address',
-    errOtp: isHi ? 'गलत ओटीपी! कृपया स्क्रीन पर दिखाया गया कोड दर्ज करें।' : 'Invalid OTP! Please enter code shown on screen.'
-  };
-
-  // Auto-fill OTP simulation when arriving at step 'otp'
-  useEffect(() => {
-    let timer1;
-    if (step === 'otp') {
-      setIsAutoFilling(true);
-      timer1 = setTimeout(() => {
-        setOtp(generatedOtp);
-        setIsAutoFilling(false);
-      }, 900);
-    }
-    return () => {
-      clearTimeout(timer1);
-    };
-  }, [step, generatedOtp]);
 
   if (!isOpen) return null;
 
-  // Handle Send OTP
-  const handleSendOtp = (e) => {
+  // Login handler
+  const handleLoginSubmit = (e) => {
     e.preventDefault();
     setErrorMsg('');
-
-    if (authMethod === 'phone') {
-      const cleanPhone = phoneNumber.replace(/\D/g, '');
-      if (countryCode === '+91') {
-        if (cleanPhone.length !== 10) {
-          setErrorMsg(strings.errPhone);
-          return;
-        }
-      } else {
-        if (cleanPhone.length < 7 || cleanPhone.length > 12) {
-          setErrorMsg(strings.errPhoneIntl);
-          return;
-        }
-      }
-    } else {
-      if (!emailAddress.includes('@') || !emailAddress.includes('.')) {
-        setErrorMsg(strings.errEmail);
-        return;
-      }
+    const clean = phoneNumber.replace(/\D/g, '');
+    if (clean.length !== 10) {
+      setErrorMsg(isHi ? 'कृपया 10 अंकों का सही मोबाइल नंबर दर्ज करें' : 'Please enter a valid 10-digit mobile number');
+      return;
     }
-
-    setIsLoading(true);
-    const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
-    setGeneratedOtp(randomCode);
-
-    setTimeout(() => {
-      setIsLoading(false);
-      setStep('otp');
-    }, 450);
-  };
-
-  // Handle Verify OTP
-  const handleVerifyOtp = (e) => {
-    e.preventDefault();
-    setErrorMsg('');
-
-    if (otp !== generatedOtp && otp !== '1234' && otp !== '7892') {
-      setErrorMsg(strings.errOtp);
+    if (!password) {
+      setErrorMsg(isHi ? 'कृपया अपना पासवर्ड दर्ज करें' : 'Please enter your password');
       return;
     }
 
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
-      const fullPhoneIdentifier = `${countryCode}_${phoneNumber}`;
-      const accountKey = authMethod === 'phone' ? `vee_acc_${fullPhoneIdentifier}` : `vee_acc_${emailAddress}`;
-      const savedAccount = localStorage.getItem(accountKey);
-
-      if (savedAccount) {
+      // Check saved account or create
+      const key = `vee_acc_+91_${clean}`;
+      const saved = localStorage.getItem(key);
+      if (saved) {
         try {
-          const parsed = JSON.parse(savedAccount);
-          completeLogin(parsed);
+          const parsed = JSON.parse(saved);
+          finalizeLogin(parsed);
           return;
         } catch (err) {}
       }
-
-      setStep('profile');
-    }, 450);
+      // If new, move to profile setup to personalize
+      setMode('profile');
+    }, 600);
   };
 
-  // Complete Login Flow
-  const completeLogin = (customData = null) => {
-    const formattedPhone = `${countryCode} ${phoneNumber}`.trim();
-    const updatedProfile = customData || {
+  // Sign up handler
+  const handleSignUpSubmit = (e) => {
+    e.preventDefault();
+    setErrorMsg('');
+    if (!fullName.trim()) {
+      setErrorMsg(isHi ? 'कृपया अपना पूरा नाम दर्ज करें' : 'Please enter your full name');
+      return;
+    }
+    const clean = phoneNumber.replace(/\D/g, '');
+    if (clean.length !== 10) {
+      setErrorMsg(isHi ? 'कृपया 10 अंकों का सही मोबाइल नंबर दर्ज करें' : 'Please enter a valid 10-digit mobile number');
+      return;
+    }
+    if (!password || password.length < 4) {
+      setErrorMsg(isHi ? 'पासवर्ड कम से कम 4 अक्षरों का होना चाहिए' : 'Password must be at least 4 characters');
+      return;
+    }
+    if (password !== confirmPassword) {
+      setErrorMsg(isHi ? 'पासवर्ड और कन्फर्म पासवर्ड मैच नहीं हो रहे हैं' : 'Password and Confirm Password do not match');
+      return;
+    }
+
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      setMode('profile');
+    }, 500);
+  };
+
+  // Complete profile setup and save
+  const finalizeLogin = (customData = null) => {
+    const cleanPhone = phoneNumber ? `+91 ${phoneNumber.replace(/\D/g, '')}` : '+91 9829012345';
+    const profile = customData || {
       ...currentProfile,
-      name: fullName.trim() || (isHi ? 'पवन मीणा (Aspirant)' : 'VEE Aspirant'),
-      phone: authMethod === 'phone' ? formattedPhone : (currentProfile?.phone || ''),
-      countryCode: countryCode,
-      email: authMethod === 'email' ? emailAddress : (currentProfile?.email || ''),
+      name: fullName.trim() || 'Pawan Meena',
+      phone: cleanPhone,
+      email: emailAddress.trim() || 'aspirant@vacancyera.com',
       state: state,
       goal: goal,
+      qual: qual,
+      category: category,
       isLoggedIn: true,
-      loginMethod: authMethod,
       loginDate: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
     };
 
-    const fullPhoneIdentifier = `${countryCode}_${phoneNumber}`;
-    const accountKey = authMethod === 'phone' ? `vee_acc_${fullPhoneIdentifier}` : `vee_acc_${emailAddress}`;
-    localStorage.setItem(accountKey, JSON.stringify(updatedProfile));
-    localStorage.setItem('vee_current_account_key', accountKey);
-    localStorage.setItem('vee_user_profile', JSON.stringify(updatedProfile));
+    const key = `vee_acc_${profile.phone.replace(/\s+/g, '_')}`;
+    localStorage.setItem(key, JSON.stringify(profile));
+    localStorage.setItem('vee_current_account_key', key);
+    localStorage.setItem('vee_user_profile', JSON.stringify(profile));
 
     if (onLoginSuccess) {
-      onLoginSuccess(updatedProfile);
+      onLoginSuccess(profile);
     }
 
     try {
       confetti({
-        particleCount: 110,
-        spread: 80,
+        particleCount: 120,
+        spread: 90,
         origin: { y: 0.55 }
       });
     } catch (e) {}
@@ -232,724 +141,840 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess, currentProf
     onClose();
   };
 
-  // Quick 1-Click Google Sign-In Simulation
+  // 1-Click Google Sign In Simulation
   const handleGoogleSignIn = () => {
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
-      const googleUser = {
-        ...currentProfile,
-        name: 'Pawan Meena',
-        email: 'pkmeena988796@gmail.com',
-        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
-        state: 'Rajasthan',
-        goal: 'ITI Fitter / Railway ALP',
-        isLoggedIn: true,
-        loginMethod: 'google',
-        loginDate: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
-      };
-      completeLogin(googleUser);
+      setFullName('Pawan Meena');
+      setEmailAddress('pkmeena988796@gmail.com');
+      setMode('profile');
     }, 550);
   };
 
   return (
-    <div className="book-auth-overlay" onClick={onClose}>
-      <div className="book-3d-wrapper" onClick={(e) => e.stopPropagation()}>
-        
-        {/* ===================================================================
-            3D FRONT BOOK COVER (Flipping Open Animation)
-            =================================================================== */}
-        <div
-          className={`book-cover-3d ${isBookOpen ? 'book-open' : ''}`}
-          onClick={() => setIsBookOpen(true)}
-          title="टैप करके डायरी खोलें"
-        >
-          {/* Leather Spine Ridge */}
-          <div className="book-spine-ridge"></div>
-
-          {/* Hanging Ribbon Marker */}
-          <div className="book-ribbon-tag"></div>
-
-          {/* Top Filigree Corner */}
-          <div className="flex-between items-center text-amber-300" style={{ paddingLeft: '14px' }}>
-            <span style={{ fontSize: '18px', opacity: 0.9 }}>⚜️</span>
-            <span
-              style={{
-                fontSize: '9.5px',
-                fontWeight: '900',
-                letterSpacing: '1px',
-                background: 'rgba(245, 158, 11, 0.25)',
-                color: '#FEF08A',
-                border: '1px solid rgba(245, 158, 11, 0.5)',
-                padding: '2px 8px',
-                borderRadius: '8px'
-              }}
-            >
-              VEE 2026 EDITION
-            </span>
-            <span style={{ fontSize: '18px', opacity: 0.9 }}>⚜️</span>
-          </div>
-
-          {/* Center Royal Gold Crest */}
-          <div className="text-center" style={{ padding: '20px 10px 10px 24px' }}>
-            <div
-              style={{
-                width: '68px',
-                height: '68px',
-                borderRadius: '20px',
-                background: 'linear-gradient(135deg, #FEF08A 0%, #F59E0B 50%, #D97706 100%)',
-                boxShadow: '0 8px 24px rgba(245, 158, 11, 0.45)',
-                margin: '0 auto 14px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '34px',
-                border: '2px solid #FFFFFF'
-              }}
-            >
-              🚀
-            </div>
-
-            <span
-              style={{
-                fontSize: '11px',
-                fontWeight: '900',
-                letterSpacing: '1.2px',
-                color: '#FEF08A',
-                textTransform: 'uppercase',
-                display: 'block'
-              }}
-            >
-              Vacancy Era Education
-            </span>
-
-            <h2
-              style={{
-                fontSize: '22px',
-                fontWeight: '900',
-                color: '#FFFFFF',
-                margin: '6px 0 2px',
-                letterSpacing: '0.5px',
-                textShadow: '0 2px 8px rgba(0,0,0,0.5)'
-              }}
-            >
-              {strings.bookTitle}
-            </h2>
-
-            <p
-              style={{
-                fontSize: '11px',
-                color: '#93C5FD',
-                margin: '0 0 16px',
-                fontWeight: '700',
-                letterSpacing: '0.5px'
-              }}
-            >
-              ✦ ASPIRANT CAREER PASSPORT ✦
-            </p>
-
-            <div
-              style={{
-                background: 'rgba(15, 23, 42, 0.45)',
-                border: '1px dashed rgba(245, 158, 11, 0.45)',
-                borderRadius: '12px',
-                padding: '10px',
-                margin: '0 auto 18px',
-                maxWidth: '280px'
-              }}
-            >
-              <div style={{ fontSize: '10.5px', color: '#E2E8F0', fontWeight: '600' }}>
-                ✦ 100% सत्यापित सरकारी व प्राइवेट भर्तियां ✦
-              </div>
-              <div style={{ fontSize: '9.5px', color: '#FCD34D', fontWeight: 'bold', marginTop: '4px' }}>
-                रेलवे • SSC • पुलिस • बैंक • अप्रेंटिस • 14+ राज्य
-              </div>
-            </div>
-
-            {/* Tap to Open Action Prompt */}
-            <div
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full font-bold text-xs"
-              style={{
-                background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
-                color: '#FFFFFF',
-                boxShadow: '0 4px 14px rgba(245, 158, 11, 0.5)',
-                animation: 'pulse 1.8s infinite'
-              }}
-            >
-              <BookOpen size={14} />
-              <span>📖 डायरी खोलने के लिए टैप करें</span>
-            </div>
-          </div>
-
-          {/* Bottom Filigree Corner */}
-          <div className="flex-between items-center text-amber-300" style={{ paddingLeft: '14px' }}>
-            <span style={{ fontSize: '18px', opacity: 0.9 }}>⚜️</span>
-            <span style={{ fontSize: '9.5px', color: 'rgba(255,255,255,0.6)', fontWeight: '600' }}>
-              TAP ANYWHERE TO OPEN
-            </span>
-            <span style={{ fontSize: '18px', opacity: 0.9 }}>⚜️</span>
+    <div className="auth-sheet-overlay" onClick={onClose}>
+      <div
+        className="auth-sheet-card"
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          maxWidth: '430px',
+          width: '100%',
+          background: '#FFFFFF',
+          borderRadius: '24px',
+          boxShadow: '0 20px 60px rgba(15, 23, 42, 0.45)',
+          overflow: 'hidden',
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'column',
+          maxHeight: '92vh',
+          animation: 'slideUpAuth 0.35s cubic-bezier(0.16, 1, 0.3, 1)'
+        }}
+      >
+        {/* Top Status Bar Decor */}
+        <div className="flex-between items-center px-6 pt-3 pb-1" style={{ fontSize: '11px', color: '#64748B', fontWeight: '600' }}>
+          <span>9:41</span>
+          <div className="flex-center gap-1.5">
+            <span>5G 📶</span>
+            <span>100% 🔋</span>
           </div>
         </div>
 
         {/* ===================================================================
-            INTERIOR OPEN BOOK PAGE (Revealed after cover flips open)
+            SCREEN 1: WELCOME & ONBOARDING (Image 1 Left Screen)
             =================================================================== */}
-        <div className="book-page-interior">
-          {/* Binder Stitch Rings */}
-          <div className="book-binder-stitch">
-            <span className="stitch-dot"></span>
-            <span className="stitch-dot"></span>
-            <span className="stitch-dot"></span>
-            <span className="stitch-dot"></span>
-            <span className="stitch-dot"></span>
-            <span className="stitch-dot"></span>
-            <span className="stitch-dot"></span>
-            <span className="stitch-dot"></span>
-          </div>
-
-          {/* Hanging Ribbon Marker Accent */}
-          <div className="book-ribbon-tag"></div>
-
-          {/* Book Header / Passport Identity Banner */}
-          <div
-            className="p-3.5 relative"
-            style={{
-              background: 'linear-gradient(135deg, #1E3A8A 0%, #2563EB 60%, #3B82F6 100%)',
-              color: '#FFFFFF',
-              borderBottom: '2.5px solid #F59E0B'
-            }}
-          >
-            {/* Action buttons (Close + Flip Cover) */}
-            <div className="flex-between items-center mb-1.5" style={{ paddingLeft: '8px' }}>
-              <button
-                type="button"
-                className="btn-flip-back text-2xs font-bold px-2 py-0.5 rounded cursor-pointer"
-                onClick={() => setIsBookOpen(false)}
-                title="कवर बंद करें"
-                style={{
-                  background: 'rgba(255, 255, 255, 0.18)',
-                  color: '#FEF08A',
-                  border: '1px solid rgba(254, 240, 138, 0.4)'
-                }}
-              >
-                📘 कवर बंद करें
-              </button>
-
-              <button
-                type="button"
-                className="icon-btn auth-close-btn"
-                onClick={onClose}
-                style={{
-                  color: '#FFFFFF',
-                  background: 'rgba(255,255,255,0.22)',
-                  borderRadius: '50%',
-                  width: '28px',
-                  height: '28px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: 'none',
-                  cursor: 'pointer'
-                }}
-                title="बंद करें"
-              >
-                <X size={16} />
-              </button>
-            </div>
-
-            {/* Passport Branding */}
-            <div className="flex-center-start gap-2.5" style={{ paddingLeft: '8px' }}>
+        {mode === 'welcome' && (
+          <div className="p-6 flex-1 flex-column justify-between overflow-y-auto">
+            {/* Header branding */}
+            <div className="text-center pt-2">
               <div
                 style={{
-                  width: '38px',
-                  height: '38px',
-                  borderRadius: '10px',
-                  background: '#FFFFFF',
+                  width: '72px',
+                  height: '72px',
+                  margin: '0 auto 8px',
+                  borderRadius: '20px',
+                  background: 'linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '20px',
-                  boxShadow: '0 4px 10px rgba(0,0,0,0.25)',
-                  flexShrink: 0
+                  boxShadow: '0 8px 24px rgba(37, 99, 235, 0.35)',
+                  position: 'relative'
                 }}
               >
-                🚀
+                {/* 3D Graduation Cap on V */}
+                <span style={{ fontSize: '24px', position: 'absolute', top: '-10px', right: '-4px', transform: 'rotate(15deg)' }}>🎓</span>
+                <span style={{ fontSize: '32px', fontWeight: '900', color: '#FEF08A', letterSpacing: '-1px' }}>VEE</span>
               </div>
-              <div className="min-w-0 flex-1">
-                <span
-                  style={{
-                    fontSize: '9px',
-                    fontWeight: '800',
-                    letterSpacing: '0.6px',
-                    background: 'rgba(255,255,255,0.2)',
-                    color: '#FEF08A',
-                    padding: '1px 6px',
-                    borderRadius: '6px',
-                    display: 'inline-block'
-                  }}
-                >
-                  {strings.badge}
-                </span>
-                <h3 className="font-extrabold text-sm m-0 leading-tight text-white mt-0.5 truncate">
-                  {step === 'profile' ? strings.profileTitle : (step === 'otp' ? strings.otpTitle : strings.title)}
-                </h3>
-              </div>
+
+              <h2 style={{ fontSize: '23px', fontWeight: '900', color: '#0F172A', margin: '4px 0 2px', letterSpacing: '-0.3px' }}>
+                Vacancy Era Education
+              </h2>
+              <p style={{ fontSize: '12px', fontWeight: '700', color: '#2563EB', margin: '0 0 10px', letterSpacing: '0.5px' }}>
+                — Your Career • Our Priority —
+              </p>
+              <p style={{ fontSize: '12px', color: '#64748B', margin: '0 auto', maxWidth: '320px', lineHeight: '1.45' }}>
+                {isHi
+                  ? 'नवीनतम सरकारी व प्राइवेट भर्तियां, परीक्षा अपडेट्स, स्टडी मटेरियल व करियर मार्गदर्शन – सब एक जगह।'
+                  : 'Latest Government & Private Job Vacancies, Exam Updates, Study Material and Career Guidance – All in One Place.'}
+              </p>
             </div>
 
-            <p
+            {/* Center Animated Boy & Road Signs Illustration */}
+            <div
+              className="illustration-hero-box my-4"
               style={{
-                fontSize: '10.5px',
-                color: 'rgba(238, 242, 255, 0.95)',
-                margin: '6px 0 0 8px',
-                fontWeight: '500'
+                position: 'relative',
+                width: '100%',
+                height: '240px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
               }}
             >
-              {step === 'profile'
-                ? strings.profileSub
-                : (step === 'otp'
-                  ? `${strings.otpSub} ${countryCode} ${phoneNumber}`
-                  : strings.subtitle)}
-            </p>
-          </div>
+              <svg width="340" height="230" viewBox="0 0 340 230" fill="none" xmlns="http://www.w3.org/2000/svg">
+                {/* Soft Pastel Backdrop Dome */}
+                <ellipse cx="170" cy="210" rx="150" ry="35" fill="#E2E8F0" opacity="0.6" />
+                <path d="M120 180 C120 120, 220 120, 220 180 Z" fill="#DBEAFE" opacity="0.7" />
+                <rect x="160" y="90" width="20" height="40" fill="#BFDBFE" />
+                <path d="M150 90 L170 65 L190 90 Z" fill="#93C5FD" />
+                <line x1="170" y1="65" x2="170" y2="45" stroke="#F59E0B" strokeWidth="2" />
+                {/* Indian Tricolor Flag on Dome */}
+                <rect x="170" y="45" width="18" height="10" fill="#FF9933" />
+                <rect x="170" y="50" width="18" height="5" fill="#138808" />
 
-          {/* Book Page Body */}
-          <div className="sheet-body p-4" style={{ overflowY: 'auto' }}>
-            {errorMsg && (
-              <div
-                className="p-2.5 mb-3 rounded-xl text-xs font-semibold flex-center-start gap-1.5"
+                {/* Floating Soft Cloud Animations */}
+                <g className="anim-cloud-slow">
+                  <path d="M40 70 Q55 55 75 70 Q90 60 100 75 Q90 90 40 85 Z" fill="#F1F5F9" opacity="0.85" />
+                </g>
+                <g className="anim-cloud-fast">
+                  <path d="M230 50 Q245 40 260 50 Q275 42 285 55 Q275 68 230 65 Z" fill="#F1F5F9" opacity="0.85" />
+                </g>
+
+                {/* Road Signboard Pole */}
+                <rect x="235" y="80" width="8" height="130" rx="4" fill="#64748B" />
+
+                {/* Sign 1: Government Jobs (Blue) */}
+                <g className="anim-sign-float-1" transform="translate(190, 85)">
+                  <path d="M0 0 L100 0 L115 14 L100 28 L0 28 Z" fill="#2563EB" filter="drop-shadow(0 4px 8px rgba(37,99,235,0.3))" />
+                  <text x="12" y="18" fill="#FFFFFF" fontSize="10.5" fontWeight="bold" fontFamily="sans-serif">
+                    🏛️ Govt Jobs
+                  </text>
+                </g>
+
+                {/* Sign 2: Private Jobs (Green) */}
+                <g className="anim-sign-float-2" transform="translate(200, 118)">
+                  <path d="M0 0 L90 0 L105 14 L90 28 L0 28 Z" fill="#10B981" filter="drop-shadow(0 4px 8px rgba(16,185,129,0.3))" />
+                  <text x="10" y="18" fill="#FFFFFF" fontSize="10" fontWeight="bold" fontFamily="sans-serif">
+                    🏢 Private Jobs
+                  </text>
+                </g>
+
+                {/* Sign 3: Exam Updates (Orange) */}
+                <g className="anim-sign-float-3" transform="translate(190, 150)">
+                  <path d="M0 0 L98 0 L112 14 L98 28 L0 28 Z" fill="#F59E0B" filter="drop-shadow(0 4px 8px rgba(245,158,11,0.3))" />
+                  <text x="10" y="18" fill="#FFFFFF" fontSize="10" fontWeight="bold" fontFamily="sans-serif">
+                    📢 Exam Updates
+                  </text>
+                </g>
+
+                {/* Sign 4: Study Material (Purple) */}
+                <g className="anim-sign-float-4" transform="translate(195, 182)">
+                  <path d="M0 0 L95 0 L108 13 L95 26 L0 26 Z" fill="#8B5CF6" filter="drop-shadow(0 4px 8px rgba(139,92,246,0.3))" />
+                  <text x="10" y="17" fill="#FFFFFF" fontSize="9.5" fontWeight="bold" fontFamily="sans-serif">
+                    📚 Study Material
+                  </text>
+                </g>
+
+                {/* Animated Aspirant Boy Character (Looking forward with backpack) */}
+                <g className="anim-boy-bob">
+                  {/* Shadow */}
+                  <ellipse cx="105" cy="216" rx="35" ry="8" fill="#CBD5E1" />
+
+                  {/* Backpack */}
+                  <rect x="68" y="145" width="26" height="42" rx="10" fill="#1E293B" />
+                  <rect x="64" y="152" width="8" height="30" rx="3" fill="#3B82F6" />
+                  <circle cx="78" cy="180" r="3" fill="#F59E0B" />
+
+                  {/* Body / Blue Jacket */}
+                  <path d="M85 138 C80 145, 78 175, 80 205 L125 205 C128 175, 126 145, 120 138 Z" fill="#2563EB" />
+                  {/* Jacket zipper & collar */}
+                  <line x1="102" y1="138" x2="102" y2="205" stroke="#FFFFFF" strokeWidth="2" strokeDasharray="3 3" />
+                  <path d="M92 138 L102 150 L112 138" stroke="#FFFFFF" strokeWidth="2" fill="none" />
+
+                  {/* Neck */}
+                  <rect x="96" y="125" width="14" height="15" fill="#FBBF24" rx="3" />
+
+                  {/* Head */}
+                  <circle cx="103" cy="112" r="18" fill="#FDE68A" />
+
+                  {/* Stylish Modern Hair */}
+                  <path d="M86 112 C85 96, 115 90, 122 105 C122 105, 110 102, 102 105 C95 107, 88 110, 86 112 Z" fill="#0F172A" />
+                  <path d="M84 112 Q82 120 86 126 L90 120 Z" fill="#0F172A" />
+
+                  {/* Smiling Face looking right towards signs */}
+                  <ellipse cx="112" cy="110" rx="2.5" ry="3.5" fill="#0F172A" />
+                  <path d="M108 118 Q113 124 118 118" stroke="#B45309" strokeWidth="2" fill="none" strokeLinecap="round" />
+                  <circle cx="106" cy="116" r="2.5" fill="#FCA5A5" opacity="0.6" />
+
+                  {/* Arm holding backpack strap */}
+                  <path d="M88 145 Q96 160 100 175" stroke="#1D4ED8" strokeWidth="9" strokeLinecap="round" fill="none" />
+                  <ellipse cx="100" cy="178" rx="5" ry="6" fill="#FDE68A" />
+
+                  {/* Sparkle star around student */}
+                  <g className="anim-star-pulse">
+                    <path d="M60 115 L62 110 L64 115 L69 117 L64 119 L62 124 L60 119 L55 117 Z" fill="#F59E0B" />
+                    <path d="M145 95 L146 91 L148 95 L152 96 L148 98 L146 102 L145 98 L141 96 Z" fill="#3B82F6" />
+                  </g>
+                </g>
+              </svg>
+            </div>
+
+            {/* Carousel Indicators & Actions */}
+            <div className="pt-1 pb-2">
+              {/* 3 Dots */}
+              <div className="flex-center justify-center gap-1.5 mb-5">
+                <span style={{ width: '22px', height: '6px', borderRadius: '4px', background: '#2563EB' }}></span>
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#CBD5E1' }}></span>
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#CBD5E1' }}></span>
+              </div>
+
+              {/* Get Started Button */}
+              <button
+                type="button"
+                className="btn-primary w-full text-base font-bold flex-center justify-center gap-2 py-3.5 rounded-2xl cursor-pointer"
                 style={{
-                  background: '#FEF2F2',
-                  color: '#DC2626',
-                  border: '1px solid #FCA5A5'
+                  background: 'linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%)',
+                  color: '#FFFFFF',
+                  boxShadow: '0 8px 20px rgba(37, 99, 235, 0.35)',
+                  border: 'none'
                 }}
+                onClick={() => setMode('signup')}
               >
-                <span>⚠️</span>
-                <span>{errorMsg}</span>
-              </div>
-            )}
+                <span>{isHi ? 'शुरू करें (Get Started)' : 'Get Started'}</span>
+                <ArrowRight size={18} />
+              </button>
 
-            {/* ===============================================================
-                CASE A: USER HAS EXISTING PROFILE / SAVED DATA
-                "kee ke pass data huga es ko acha bna dey"
-                =============================================================== */}
-            {existingAccount && !showNewLogin && step === 'input' && (
-              <div className="aspirant-pass-card mb-3">
-                <div className="flex-between items-center mb-2">
-                  <span
-                    className="text-3xs font-extrabold px-2 py-0.5 rounded-full"
-                    style={{ background: '#F59E0B', color: '#FFFFFF' }}
-                  >
-                    ★ प्रमाणित अभ्यर्थी पास (Registered)
-                  </span>
-                  <span className="text-3xs font-bold text-amber-800">
-                    VEE ID: #{Math.abs(existingAccount.name?.length * 4821 || 7842)}
-                  </span>
-                </div>
-
-                <div className="flex-center-start gap-3 mt-2">
-                  <img
-                    src={existingAccount.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'}
-                    alt={existingAccount.name}
-                    style={{
-                      width: '52px',
-                      height: '52px',
-                      borderRadius: '50%',
-                      border: '2.5px solid #F59E0B',
-                      boxShadow: '0 3px 10px rgba(0,0,0,0.15)',
-                      objectFit: 'cover'
-                    }}
-                  />
-                  <div className="min-w-0 flex-1">
-                    <h4 className="font-extrabold text-sm text-slate-900 m-0 leading-tight">
-                      {existingAccount.name}
-                    </h4>
-                    <span className="text-3xs text-emerald-800 font-bold block mt-0.5">
-                      ✓ मोबाइल सत्यापित: {existingAccount.phone || existingAccount.email || '+91 9829012345'}
-                    </span>
-                    <span className="text-3xs text-slate-600 font-medium block mt-0.5">
-                      📍 {existingAccount.state || 'Rajasthan'} • 🎯 {existingAccount.goal || 'Govt Job Aspirant'}
-                    </span>
-                  </div>
-                </div>
-
-                {/* 1-Tap Resume Button */}
+              {/* Already have an account? Log In */}
+              <div className="text-center mt-3.5">
+                <span style={{ fontSize: '12.5px', color: '#64748B' }}>
+                  {isHi ? 'पहले से खाता है?' : 'Already have an account?'}{' '}
+                </span>
                 <button
                   type="button"
-                  className="w-full mt-3 py-2.5 px-3 rounded-xl font-bold text-xs flex-center justify-center gap-1.5 cursor-pointer shadow-md"
-                  style={{
-                    background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-                    color: '#FFFFFF',
-                    border: 'none',
-                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)'
-                  }}
-                  onClick={() => completeLogin(existingAccount)}
+                  className="font-bold cursor-pointer"
+                  style={{ color: '#2563EB', fontSize: '13px', border: 'none', background: 'none' }}
+                  onClick={() => setMode('login')}
                 >
-                  <Sparkles size={14} className="text-yellow-200" />
-                  <span>🚀 {existingAccount.name} के रूप में सीधे शुरू करें (1-Tap Entry)</span>
+                  {isHi ? 'लॉगिन करें (Log In)' : 'Log In'}
                 </button>
-
-                {/* Switch to Different Account */}
-                <div className="mt-2.5 text-center">
-                  <button
-                    type="button"
-                    className="text-3xs font-bold text-blue-700 underline cursor-pointer hover:text-blue-900"
-                    onClick={() => setShowNewLogin(true)}
-                  >
-                    {strings.useDifferent}
-                  </button>
-                </div>
               </div>
-            )}
 
-            {/* ===============================================================
-                CASE B: STANDARD / NEW LOGIN FLOW (Google + Mobile OTP)
-                =============================================================== */}
-            {(!existingAccount || showNewLogin) && step === 'input' && (
-              <div>
-                {/* 1-Click Google Sign-In Hero Button */}
+              {/* Guest skip link */}
+              <div className="text-center mt-2">
                 <button
                   type="button"
-                  className="google-auth-btn w-full p-2.5 rounded-xl flex-center justify-center gap-2.5 font-bold text-xs shadow-xs cursor-pointer"
-                  style={{
-                    background: '#FFFFFF',
-                    border: '1.5px solid #CBD5E1',
-                    color: '#1E293B',
-                    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.04)',
-                    transition: 'all 0.15s ease'
-                  }}
-                  onClick={handleGoogleSignIn}
-                  disabled={isLoading}
+                  className="text-xs text-muted underline cursor-pointer"
+                  style={{ border: 'none', background: 'none' }}
+                  onClick={onClose}
                 >
-                  <svg width="18" height="18" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                  </svg>
-                  <span>{strings.googleBtn}</span>
+                  {isHi ? 'अतिथि (Guest) के रूप में सीधे देखें →' : 'Explore as Guest →'}
                 </button>
-
-                {/* Divider */}
-                <div className="flex-center my-3">
-                  <div className="flex-1 border-top" style={{ borderColor: '#E2E8F0' }}></div>
-                  <span
-                    style={{
-                      fontSize: '9.5px',
-                      fontWeight: '800',
-                      color: '#64748B',
-                      padding: '0 8px',
-                      letterSpacing: '0.5px'
-                    }}
-                  >
-                    {strings.orDivider}
-                  </span>
-                  <div className="flex-1 border-top" style={{ borderColor: '#E2E8F0' }}></div>
-                </div>
-
-                {/* Mobile Input Form */}
-                <form onSubmit={handleSendOtp}>
-                  <div className="form-group mb-2.5">
-                    <label className="form-label text-xs font-semibold flex-between">
-                      <span>{strings.phoneLabel}</span>
-                      <span
-                        style={{
-                          fontSize: '9px',
-                          fontWeight: '800',
-                          color: '#059669',
-                          background: '#ECFDF5',
-                          padding: '1px 6px',
-                          borderRadius: '6px',
-                          border: '1px solid #A7F3D0'
-                        }}
-                      >
-                        {strings.autoOtpBadge}
-                      </span>
-                    </label>
-                    
-                    <div className="flex-row items-center gap-1.5 mt-1">
-                      <select
-                        className="p-2 rounded-xl border text-xs font-bold cursor-pointer"
-                        value={countryCode}
-                        onChange={(e) => {
-                          setCountryCode(e.target.value);
-                          setErrorMsg('');
-                        }}
-                        style={{
-                          minWidth: '90px',
-                          height: '42px',
-                          borderColor: '#CBD5E1',
-                          background: '#F8FAFC'
-                        }}
-                      >
-                        <option value="+91">🇮🇳 +91</option>
-                        <option value="+1">🇺🇸 +1</option>
-                        <option value="+44">🇬🇧 +44</option>
-                        <option value="+971">🇦🇪 +971</option>
-                        <option value="+966">🇸🇦 +966</option>
-                        <option value="+977">🇳🇵 +977</option>
-                        <option value="+880">🇧🇩 +880</option>
-                      </select>
-
-                      <input
-                        type="tel"
-                        required
-                        maxLength={countryCode === '+91' ? 10 : 13}
-                        placeholder={strings.phonePlaceholder}
-                        className="form-input text-xs flex-1 rounded-xl font-bold"
-                        style={{
-                          height: '42px',
-                          letterSpacing: '0.5px',
-                          borderColor: '#CBD5E1',
-                          padding: '0 10px'
-                        }}
-                        value={phoneNumber}
-                        onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
-                        autoFocus
-                      />
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="btn-primary w-full text-xs font-bold flex-center justify-center gap-1.5 py-2.5 rounded-xl shadow-md cursor-pointer"
-                    style={{
-                      background: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)',
-                      boxShadow: '0 4px 12px rgba(37, 99, 235, 0.35)',
-                      border: 'none',
-                      color: '#FFFFFF'
-                    }}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <>
-                        <RefreshCw size={13} className="animate-spin" /> {strings.sendingOtp}
-                      </>
-                    ) : (
-                      <>
-                        <span>📱 {strings.getOtpBtn}</span> <ArrowRight size={13} />
-                      </>
-                    )}
-                  </button>
-                </form>
-
-                {/* Return to existing account view if applicable */}
-                {existingAccount && showNewLogin && (
-                  <div className="mt-2 text-center">
-                    <button
-                      type="button"
-                      className="text-3xs text-muted underline cursor-pointer"
-                      onClick={() => setShowNewLogin(false)}
-                    >
-                      ← {existingAccount.name} वाले खाते पर वापस जाएं
-                    </button>
-                  </div>
-                )}
-
-                {/* Guest Explore Option */}
-                <div className="mt-3 pt-2 text-center border-top" style={{ borderColor: '#E2E8F0' }}>
-                  <button
-                    type="button"
-                    className="btn-secondary w-full text-xs font-semibold py-2 rounded-xl flex-center justify-center gap-1.5 cursor-pointer"
-                    onClick={onClose}
-                    style={{
-                      background: 'transparent',
-                      border: '1.5px dashed #CBD5E1',
-                      color: '#475569'
-                    }}
-                  >
-                    <Compass size={13} />
-                    <span>{strings.skipBtn}</span>
-                  </button>
-                  <p className="text-3xs text-muted mt-1 m-0">
-                    {strings.skipNote}
-                  </p>
-                </div>
               </div>
-            )}
+            </div>
+          </div>
+        )}
 
-            {/* ===============================================================
-                STEP 2: OTP AUTO-FILL & INSTANT VERIFICATION
-                =============================================================== */}
-            {step === 'otp' && (
-              <form onSubmit={handleVerifyOtp}>
+        {/* ===================================================================
+            SCREEN 2: LOGIN TO YOUR ACCOUNT (Image 1 Middle Screen)
+            =================================================================== */}
+        {mode === 'login' && (
+          <div className="p-6 flex-1 flex-column justify-between overflow-y-auto">
+            {/* Top Navigation */}
+            <div>
+              <div className="flex-between items-center mb-2">
+                <button
+                  type="button"
+                  className="icon-btn-ghost cursor-pointer"
+                  onClick={() => setMode('welcome')}
+                  style={{ border: 'none', background: 'none' }}
+                >
+                  <ChevronLeft size={24} className="text-slate-800" />
+                </button>
+                <button
+                  type="button"
+                  className="font-bold text-xs cursor-pointer"
+                  style={{ color: '#2563EB', border: 'none', background: 'none' }}
+                  onClick={() => setMode('signup')}
+                >
+                  Sign Up
+                </button>
+              </div>
+
+              {/* Branding */}
+              <div className="text-center mt-1 mb-5">
                 <div
-                  className="p-3 rounded-xl mb-3 text-center"
                   style={{
-                    background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)',
-                    border: '1.5px solid #93C5FD'
+                    width: '56px',
+                    height: '56px',
+                    margin: '0 auto 6px',
+                    borderRadius: '16px',
+                    background: 'linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 6px 18px rgba(37, 99, 235, 0.28)'
                   }}
                 >
-                  <span className="text-3xs text-blue-700 font-bold block uppercase flex-center justify-center gap-1">
-                    <span className="live-pill-indicator"></span> {strings.smsDetected}
-                  </span>
-
-                  <div className="mt-1.5 flex-center justify-center gap-2">
-                    <span className="text-xs text-secondary font-semibold">{strings.secOtpLabel}</span>
-                    <span
-                      className="font-mono text-base font-extrabold px-2.5 py-0.5 rounded-lg text-white"
-                      style={{ background: '#2563EB', letterSpacing: '3px', boxShadow: '0 2px 6px rgba(37,99,235,0.4)' }}
-                    >
-                      {generatedOtp}
-                    </span>
-                  </div>
-
-                  {isAutoFilling && (
-                    <span className="text-3xs text-blue-600 block mt-1.5 animate-pulse font-medium">
-                      {strings.autoFilling}
-                    </span>
-                  )}
-                  {!isAutoFilling && otp && (
-                    <span className="text-3xs text-emerald-700 font-bold block mt-1.5">
-                      {strings.autoFilled}
-                    </span>
-                  )}
+                  <span style={{ fontSize: '26px', fontWeight: '900', color: '#FEF08A' }}>VEE</span>
                 </div>
+                <h3 className="text-lg font-bold text-slate-900 m-0">Vacancy Era Education</h3>
+                <p className="text-xs text-muted m-0 mt-0.5">Login to your account</p>
+              </div>
 
-                <div className="form-group mb-3">
-                  <label className="form-label text-xs font-semibold text-center block mb-1">
-                    {strings.otpSub} {countryCode} {phoneNumber}
-                  </label>
+              {errorMsg && (
+                <div className="p-2.5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs mb-3 text-center">
+                  ⚠️ {errorMsg}
+                </div>
+              )}
+
+              {/* Form */}
+              <form onSubmit={handleLoginSubmit} className="flex-column gap-3">
+                {/* Mobile Number Input */}
+                <div
+                  className="flex-center gap-2.5 px-3.5 py-3 rounded-xl border"
+                  style={{ borderColor: '#E2E8F0', background: '#F8FAFC' }}
+                >
+                  <Phone size={17} className="text-slate-400" />
+                  <span className="text-xs font-bold text-slate-700">+91</span>
                   <input
-                    type="text"
+                    type="tel"
                     required
-                    maxLength="4"
-                    placeholder="e.g. 7892"
-                    className="form-input text-center text-xl font-mono font-extrabold tracking-widest rounded-xl"
-                    style={{
-                      height: '46px',
-                      borderColor: otp ? '#10B981' : '#CBD5E1',
-                      background: '#F8FAFC'
-                    }}
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                    placeholder="Mobile Number"
+                    maxLength={10}
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
+                    className="w-full text-xs font-medium border-none bg-transparent outline-none text-slate-900"
                     autoFocus
                   />
                 </div>
 
-                <button
-                  type="submit"
-                  className="btn-success w-full text-xs font-bold flex-center justify-center gap-1.5 py-2.5 rounded-xl shadow-md cursor-pointer"
-                  style={{
-                    background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-                    border: 'none',
-                    color: '#FFFFFF',
-                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)'
-                  }}
-                  disabled={isLoading}
+                {/* Password Input */}
+                <div
+                  className="flex-between items-center px-3.5 py-3 rounded-xl border"
+                  style={{ borderColor: '#E2E8F0', background: '#F8FAFC' }}
                 >
-                  {isLoading ? (
-                    <>
-                      <RefreshCw size={13} className="animate-spin" /> {strings.verifying}
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle2 size={15} /> <span>{strings.verifyBtn}</span>
-                    </>
-                  )}
-                </button>
-
-                <div className="mt-2.5 text-center">
+                  <div className="flex-center gap-2.5 flex-1">
+                    <Lock size={17} className="text-slate-400" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      placeholder="Password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full text-xs font-medium border-none bg-transparent outline-none text-slate-900"
+                    />
+                  </div>
                   <button
                     type="button"
-                    className="btn-clear text-xs text-muted underline cursor-pointer"
-                    onClick={() => { setStep('input'); setOtp(''); }}
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="text-slate-400 cursor-pointer"
+                    style={{ border: 'none', background: 'none' }}
                   >
-                    {strings.changeNumber}
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
-              </form>
-            )}
 
-            {/* ===============================================================
-                STEP 3: QUICK PROFILE CONFIRMATION
-                =============================================================== */}
-            {step === 'profile' && (
-              <form onSubmit={(e) => { e.preventDefault(); completeLogin(); }}>
-                <div
-                  className="p-2.5 rounded-xl mb-3 text-center"
-                  style={{ background: '#ECFDF5', border: '1.5px solid #86EFAC' }}
-                >
-                  <span className="text-xs font-bold text-success flex-center justify-center gap-1.5">
-                    <CheckCircle2 size={15} /> {strings.mobileVerified}
-                  </span>
-                  <span className="text-3xs text-muted block mt-0.5">
-                    {strings.profileSub}
-                  </span>
+                {/* Forgot Password */}
+                <div className="text-right">
+                  <button
+                    type="button"
+                    className="text-3xs font-semibold cursor-pointer"
+                    style={{ color: '#2563EB', border: 'none', background: 'none' }}
+                    onClick={() => alert(isHi ? 'आपका पासवर्ड आपके रजिस्टर्ड नंबर पर SMS द्वारा भेजा गया है।' : 'Password reset link sent to your phone.')}
+                  >
+                    Forgot Password?
+                  </button>
                 </div>
 
-                <div className="form-group mb-2">
-                  <label className="form-label text-xs font-semibold">{strings.nameLabel}</label>
+                {/* Log In Button */}
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="btn-primary w-full text-sm font-bold flex-center justify-center gap-2 py-3.5 rounded-xl cursor-pointer mt-1"
+                  style={{
+                    background: 'linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%)',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    boxShadow: '0 6px 16px rgba(37,99,235,0.3)'
+                  }}
+                >
+                  {isLoading ? <RefreshCw size={16} className="animate-spin" /> : 'Log In'}
+                </button>
+              </form>
+
+              {/* OR Divider */}
+              <div className="flex-center my-4">
+                <div className="flex-1 border-t" style={{ borderColor: '#E2E8F0' }}></div>
+                <span className="px-3 text-3xs font-bold text-slate-400">OR</span>
+                <div className="flex-1 border-t" style={{ borderColor: '#E2E8F0' }}></div>
+              </div>
+
+              {/* Social Login Buttons */}
+              <div className="flex-column gap-2.5">
+                <button
+                  type="button"
+                  onClick={handleGoogleSignIn}
+                  className="flex-center justify-center gap-2.5 w-full py-2.5 rounded-xl border text-xs font-bold text-slate-700 cursor-pointer"
+                  style={{ background: '#FFFFFF', borderColor: '#E2E8F0' }}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+                    <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+                    <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.98 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                  </svg>
+                  <span>Continue with Google</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => { setFullName('Apple Aspirant'); setMode('profile'); }}
+                  className="flex-center justify-center gap-2.5 w-full py-2.5 rounded-xl border text-xs font-bold text-slate-800 cursor-pointer"
+                  style={{ background: '#FFFFFF', borderColor: '#E2E8F0' }}
+                >
+                  <span style={{ fontSize: '18px' }}></span>
+                  <span>Continue with Apple</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Bottom link */}
+            <div className="text-center pt-4">
+              <span style={{ fontSize: '12px', color: '#64748B' }}>Don't have an account? </span>
+              <button
+                type="button"
+                className="font-bold cursor-pointer"
+                style={{ color: '#2563EB', fontSize: '12.5px', border: 'none', background: 'none' }}
+                onClick={() => setMode('signup')}
+              >
+                Sign Up
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ===================================================================
+            SCREEN 3: CREATE YOUR ACCOUNT (Image 1 Right Screen)
+            =================================================================== */}
+        {mode === 'signup' && (
+          <div className="p-6 flex-1 flex-column justify-between overflow-y-auto">
+            <div>
+              <div className="flex-between items-center mb-2">
+                <button
+                  type="button"
+                  className="icon-btn-ghost cursor-pointer"
+                  onClick={() => setMode('welcome')}
+                  style={{ border: 'none', background: 'none' }}
+                >
+                  <ChevronLeft size={24} className="text-slate-800" />
+                </button>
+                <button
+                  type="button"
+                  className="font-bold text-xs cursor-pointer"
+                  style={{ color: '#2563EB', border: 'none', background: 'none' }}
+                  onClick={() => setMode('login')}
+                >
+                  Log In
+                </button>
+              </div>
+
+              {/* Branding */}
+              <div className="text-center mt-1 mb-4">
+                <div
+                  style={{
+                    width: '52px',
+                    height: '52px',
+                    margin: '0 auto 6px',
+                    borderRadius: '14px',
+                    background: 'linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 6px 16px rgba(37, 99, 235, 0.25)'
+                  }}
+                >
+                  <span style={{ fontSize: '24px', fontWeight: '900', color: '#FEF08A' }}>VEE</span>
+                </div>
+                <h3 className="text-base font-bold text-slate-900 m-0">Vacancy Era Education</h3>
+                <p className="text-xs text-muted m-0 mt-0.5">Create your account</p>
+              </div>
+
+              {errorMsg && (
+                <div className="p-2.5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs mb-3 text-center">
+                  ⚠️ {errorMsg}
+                </div>
+              )}
+
+              {/* Form */}
+              <form onSubmit={handleSignUpSubmit} className="flex-column gap-2.5">
+                {/* Full Name */}
+                <div
+                  className="flex-center gap-2.5 px-3 py-2.5 rounded-xl border"
+                  style={{ borderColor: '#E2E8F0', background: '#F8FAFC' }}
+                >
+                  <User size={16} className="text-slate-400" />
                   <input
                     type="text"
                     required
-                    placeholder={strings.namePlaceholder}
-                    className="form-input text-xs rounded-xl"
-                    style={{ height: '40px' }}
+                    placeholder="Full Name"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
+                    className="w-full text-xs font-medium border-none bg-transparent outline-none text-slate-900"
+                    autoFocus
                   />
                 </div>
 
-                <div className="form-group mb-2">
-                  <label className="form-label text-xs font-semibold">{strings.stateLabel}</label>
+                {/* Mobile Number */}
+                <div
+                  className="flex-center gap-2.5 px-3 py-2.5 rounded-xl border"
+                  style={{ borderColor: '#E2E8F0', background: '#F8FAFC' }}
+                >
+                  <Phone size={16} className="text-slate-400" />
+                  <span className="text-xs font-bold text-slate-700">+91</span>
+                  <input
+                    type="tel"
+                    required
+                    placeholder="Mobile Number"
+                    maxLength={10}
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
+                    className="w-full text-xs font-medium border-none bg-transparent outline-none text-slate-900"
+                  />
+                </div>
+
+                {/* Email Address (Optional) */}
+                <div
+                  className="flex-center gap-2.5 px-3 py-2.5 rounded-xl border"
+                  style={{ borderColor: '#E2E8F0', background: '#F8FAFC' }}
+                >
+                  <Mail size={16} className="text-slate-400" />
+                  <input
+                    type="email"
+                    placeholder="Email Address (Optional)"
+                    value={emailAddress}
+                    onChange={(e) => setEmailAddress(e.target.value)}
+                    className="w-full text-xs font-medium border-none bg-transparent outline-none text-slate-900"
+                  />
+                </div>
+
+                {/* Password */}
+                <div
+                  className="flex-between items-center px-3 py-2.5 rounded-xl border"
+                  style={{ borderColor: '#E2E8F0', background: '#F8FAFC' }}
+                >
+                  <div className="flex-center gap-2.5 flex-1">
+                    <Lock size={16} className="text-slate-400" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      placeholder="Password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full text-xs font-medium border-none bg-transparent outline-none text-slate-900"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="text-slate-400 cursor-pointer"
+                    style={{ border: 'none', background: 'none' }}
+                  >
+                    {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
+
+                {/* Confirm Password */}
+                <div
+                  className="flex-between items-center px-3 py-2.5 rounded-xl border"
+                  style={{ borderColor: '#E2E8F0', background: '#F8FAFC' }}
+                >
+                  <div className="flex-center gap-2.5 flex-1">
+                    <Lock size={16} className="text-slate-400" />
+                    <input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      required
+                      placeholder="Confirm Password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="w-full text-xs font-medium border-none bg-transparent outline-none text-slate-900"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="text-slate-400 cursor-pointer"
+                    style={{ border: 'none', background: 'none' }}
+                  >
+                    {showConfirmPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
+
+                {/* Sign Up Button */}
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="btn-primary w-full text-sm font-bold flex-center justify-center gap-2 py-3.5 rounded-xl cursor-pointer mt-1"
+                  style={{
+                    background: 'linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%)',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    boxShadow: '0 6px 16px rgba(37,99,235,0.3)'
+                  }}
+                >
+                  {isLoading ? <RefreshCw size={16} className="animate-spin" /> : 'Sign Up'}
+                </button>
+              </form>
+
+              {/* OR Divider */}
+              <div className="flex-center my-3">
+                <div className="flex-1 border-t" style={{ borderColor: '#E2E8F0' }}></div>
+                <span className="px-3 text-3xs font-bold text-slate-400">OR</span>
+                <div className="flex-1 border-t" style={{ borderColor: '#E2E8F0' }}></div>
+              </div>
+
+              {/* Social Login Buttons */}
+              <div className="flex-row gap-2">
+                <button
+                  type="button"
+                  onClick={handleGoogleSignIn}
+                  className="flex-center justify-center gap-1.5 flex-1 py-2 rounded-xl border text-2xs font-bold text-slate-700 cursor-pointer"
+                  style={{ background: '#FFFFFF', borderColor: '#E2E8F0' }}
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+                    <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+                    <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.98 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                  </svg>
+                  <span>Google</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => { setFullName('Apple Aspirant'); setMode('profile'); }}
+                  className="flex-center justify-center gap-1.5 flex-1 py-2 rounded-xl border text-2xs font-bold text-slate-800 cursor-pointer"
+                  style={{ background: '#FFFFFF', borderColor: '#E2E8F0' }}
+                >
+                  <span style={{ fontSize: '15px' }}></span>
+                  <span>Apple</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Bottom link */}
+            <div className="text-center pt-3">
+              <span style={{ fontSize: '12px', color: '#64748B' }}>Already have an account? </span>
+              <button
+                type="button"
+                className="font-bold cursor-pointer"
+                style={{ color: '#2563EB', fontSize: '12.5px', border: 'none', background: 'none' }}
+                onClick={() => setMode('login')}
+              >
+                Log In
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ===================================================================
+            SCREEN 4: ENRICHED PROFILE PERSONALIZATION (As requested by user!)
+            =================================================================== */}
+        {mode === 'profile' && (
+          <div className="p-6 flex-1 flex-column justify-between overflow-y-auto">
+            <div>
+              <div className="flex-between items-center mb-1">
+                <span className="badge-pill bg-emerald-100 text-emerald-800 text-3xs font-extrabold px-2.5 py-1 rounded-full flex-center gap-1">
+                  <CheckCircle2 size={13} /> {isHi ? 'खाता तैयार!' : 'Account Ready!'}
+                </span>
+                <button
+                  type="button"
+                  className="text-xs text-muted cursor-pointer"
+                  onClick={onClose}
+                  style={{ border: 'none', background: 'none' }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              <h3 className="text-base font-bold text-slate-900 m-0 mt-1">
+                🎯 {isHi ? 'अपनी तैयारी व भर्ती लक्ष्य सेट करें' : 'Personalize Your Exam Goal'}
+              </h3>
+              <p className="text-3xs text-muted m-0 mt-0.5 mb-3">
+                {isHi
+                  ? 'अपना राज्य, लक्षित परीक्षा व योग्यता चुनें ताकि आपको सिर्फ काम की भर्तियों के अलर्ट मिलें:'
+                  : 'Select your home state and dream exam to receive instant relevant vacancies:'}
+              </p>
+
+              <form onSubmit={(e) => { e.preventDefault(); finalizeLogin(); }} className="flex-column gap-3">
+                {/* Candidate Name */}
+                <div className="form-group">
+                  <label className="text-2xs font-bold text-slate-700 block mb-1">
+                    👤 {isHi ? 'अभ्यर्थी का नाम (Candidate Name):' : 'Candidate Name:'}
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Pawan Meena"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="w-full text-xs font-semibold px-3 py-2.5 rounded-xl border"
+                    style={{ borderColor: '#CBD5E1', background: '#F8FAFC' }}
+                  />
+                </div>
+
+                {/* Comprehensive State Selection (All 28 States + 8 UTs) */}
+                <div className="form-group">
+                  <label className="text-2xs font-bold text-slate-700 block mb-1">
+                    📍 {isHi ? 'गृह राज्य / क्षेत्र (Home State):' : 'Home State / Region:'}
+                  </label>
                   <select
-                    className="form-select-sm text-xs rounded-xl"
-                    style={{ height: '40px', width: '100%' }}
+                    className="w-full text-xs font-semibold px-3 py-2.5 rounded-xl border cursor-pointer"
+                    style={{ borderColor: '#CBD5E1', background: '#F8FAFC' }}
                     value={state}
                     onChange={(e) => setState(e.target.value)}
                   >
-                    <option value="Rajasthan">Rajasthan (राजस्थान)</option>
-                    <option value="Uttar Pradesh">Uttar Pradesh (उत्तर प्रदेश)</option>
-                    <option value="Bihar">Bihar (बिहार)</option>
-                    <option value="Madhya Pradesh">Madhya Pradesh (मध्य प्रदेश)</option>
-                    <option value="Haryana">Haryana (हरियाणा)</option>
-                    <option value="Delhi">Delhi / NCR (दिल्ली)</option>
-                    <option value="Gujarat">Gujarat (गुजरात)</option>
-                    <option value="Maharashtra">Maharashtra (महाराष्ट्र)</option>
-                    <option value="Jharkhand">Jharkhand (झारखंड)</option>
-                    <option value="Chhattisgarh">Chhattisgarh (छत्तीसगढ़)</option>
-                    <option value="Punjab">Punjab (पंजाब)</option>
-                    <option value="Odisha">Odisha (ओडिशा)</option>
-                    <option value="Assam">Assam (असम)</option>
-                    <option value="All India">Other State / All India (अखिल भारतीय)</option>
+                    <optgroup label="🌟 मुख्य राज्य (Top States)">
+                      <option value="Rajasthan">Rajasthan (राजस्थान)</option>
+                      <option value="Uttar Pradesh">Uttar Pradesh (उत्तर प्रदेश)</option>
+                      <option value="Bihar">Bihar (बिहार)</option>
+                      <option value="Madhya Pradesh">Madhya Pradesh (मध्य प्रदेश)</option>
+                      <option value="Haryana">Haryana (हरियाणा)</option>
+                      <option value="Delhi">Delhi / NCR (दिल्ली एनसीआर)</option>
+                    </optgroup>
+                    <optgroup label="🏛️ उत्तरी व मध्य भारत (North & Central)">
+                      <option value="Punjab">Punjab (पंजाब)</option>
+                      <option value="Uttarakhand">Uttarakhand (उत्तराखंड)</option>
+                      <option value="Himachal Pradesh">Himachal Pradesh (हिमाचल प्रदेश)</option>
+                      <option value="Jammu & Kashmir">Jammu & Kashmir (जम्मू व कश्मीर)</option>
+                      <option value="Chhattisgarh">Chhattisgarh (छत्तीसगढ़)</option>
+                      <option value="Jharkhand">Jharkhand (झारखंड)</option>
+                    </optgroup>
+                    <optgroup label="🌊 पश्चिम व दक्षिण भारत (West & South)">
+                      <option value="Gujarat">Gujarat (गुजरात)</option>
+                      <option value="Maharashtra">Maharashtra (महाराष्ट्र)</option>
+                      <option value="Odisha">Odisha (ओडिशा)</option>
+                      <option value="West Bengal">West Bengal (पश्चिम बंगाल)</option>
+                      <option value="Telangana">Telangana (तेलंगाना)</option>
+                      <option value="Andhra Pradesh">Andhra Pradesh (आंध्र प्रदेश)</option>
+                      <option value="Karnataka">Karnataka (कर्नाटक)</option>
+                      <option value="Tamil Nadu">Tamil Nadu (तमिलनाडु)</option>
+                    </optgroup>
+                    <optgroup label="🇮🇳 ऑल इंडिया (Central / All India)">
+                      <option value="All India">All India / Central Govt (अखिल भारतीय भर्तियां)</option>
+                    </optgroup>
                   </select>
                 </div>
 
-                <div className="form-group mb-3">
-                  <label className="form-label text-xs font-semibold">{strings.goalLabel}</label>
+                {/* Target Exam Goal (Enriched & Categorized) */}
+                <div className="form-group">
+                  <label className="text-2xs font-bold text-slate-700 block mb-1">
+                    🎯 {isHi ? 'लक्षित भर्ती परीक्षा (Target Exam Goal):' : 'Target Exam Goal:'}
+                  </label>
                   <select
-                    className="form-select-sm text-xs rounded-xl"
-                    style={{ height: '40px', width: '100%' }}
+                    className="w-full text-xs font-semibold px-3 py-2.5 rounded-xl border cursor-pointer"
+                    style={{ borderColor: '#CBD5E1', background: '#F8FAFC' }}
                     value={goal}
                     onChange={(e) => setGoal(e.target.value)}
                   >
-                    <option value="ITI Fitter / Railway ALP">ITI Fitter / Railway ALP & Technician</option>
-                    <option value="ITI Electrician / BHEL">ITI Electrician / BHEL & Bijli Vibhag</option>
-                    <option value="Railway NTPC & Group D">Railway NTPC & Group D</option>
-                    <option value="SSC GD & Police Bharti">SSC GD & State Police Bharti</option>
-                    <option value="All India Apprentice">All India PSU & Railway Apprentice</option>
-                    <option value="Banking PO & Clerk">Banking PO & Clerk / Apprentice</option>
-                    <option value="State PSC / Police">State PSC / Constable / SI</option>
-                    <option value="Private MNC Apprentice">Private MNC (Tata / Maruti / L&T)</option>
+                    <optgroup label="🚆 रेलवे भर्ती (RRB & RRC)">
+                      <option value="Railway ALP & Technician / ITI Fitter">Railway ALP & Technician (ITI / Diploma)</option>
+                      <option value="Railway NTPC (Graduate & 12th)">Railway NTPC (Station Master / Clerk / Guard)</option>
+                      <option value="Railway Group D & Pointsman">Railway Group D (Trackman / Helper / Pointsman)</option>
+                      <option value="Railway RPF Constable & SI">Railway RPF Constable & Sub-Inspector</option>
+                      <option value="Railway Act Apprentice">Railway Act Apprentice (10th + ITI)</option>
+                    </optgroup>
+                    <optgroup label="👮 पुलिस व डिफेंस (Police & Defence)">
+                      <option value="SSC GD Constable (BSF/CISF/CRPF)">SSC GD Constable (BSF / CISF / CRPF / ITBP)</option>
+                      <option value="Delhi Police Constable & SI">Delhi Police Constable (Executive) & SI</option>
+                      <option value="State Police Constable & SI">State Police (UP, Rajasthan, Bihar, MP Police)</option>
+                      <option value="Army Agniveer & Tradesman">Indian Army Agniveer / Airforce / Navy</option>
+                    </optgroup>
+                    <optgroup label="⚡ ITI, टेक्निकल व मेट्रो (ITI & Technical)">
+                      <option value="ITI Electrician / Bijli Vibhag">ITI Electrician / Lineman / Bijli Vibhag</option>
+                      <option value="ITI Fitter / Turner / Welder">ITI Fitter / Turner / Welder PSU Bharti</option>
+                      <option value="Metro Rail (NMRC/DMRC) Maintainer">Metro Rail (NMRC / DMRC / UPMRC) Maintainer</option>
+                      <option value="Junior Engineer (JE Civil/Mech/Elec)">Junior Engineer (SSC JE / RRB JE / State JE)</option>
+                      <option value="PSU Apprentice (BHEL/IOCL/ONGC)">PSU Apprentice (BHEL / IOCL / SAIL / DRDO)</option>
+                    </optgroup>
+                    <optgroup label="🏛️ एसएससी, यूपीएससी व क्लर्क (SSC & Central)">
+                      <option value="SSC CGL & CHSL (10+2)">SSC CGL & CHSL (Inspector, Assistant, LDC, DEO)</option>
+                      <option value="SSC MTS & Havaldar">SSC MTS & Havaldar (10th Pass)</option>
+                      <option value="Banking PO & Clerk (IBPS/SBI)">Banking PO & Clerk (SBI, IBPS, RRB, RBI)</option>
+                      <option value="State PSC (RAS / UPPSC / BPSC)">State PSC (RAS, UPPSC, BPSC, Patwari, VDO)</option>
+                      <option value="Teaching Exams (REET/CTET/TGT)">Teaching Exams (REET, CTET, Super TET, KVS)</option>
+                    </optgroup>
                   </select>
                 </div>
 
+                {/* Educational Qualification */}
+                <div className="grid grid-cols-2 gap-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+                  <div className="form-group">
+                    <label className="text-3xs font-bold text-slate-700 block mb-1">
+                      🎓 {isHi ? 'उच्चतम योग्यता:' : 'Qualification:'}
+                    </label>
+                    <select
+                      className="w-full text-xs font-semibold px-2.5 py-2 rounded-xl border cursor-pointer"
+                      style={{ borderColor: '#CBD5E1', background: '#F8FAFC' }}
+                      value={qual}
+                      onChange={(e) => setQual(e.target.value)}
+                    >
+                      <option value="10th Pass">10th Pass (Matric)</option>
+                      <option value="12th Pass">12th Pass (Inter)</option>
+                      <option value="ITI Pass">⚡ ITI Pass (NCVT/SCVT)</option>
+                      <option value="Polytechnic Diploma">🛠️ Polytechnic Diploma</option>
+                      <option value="Any Graduate">🎓 Any Graduate (BA/BSc)</option>
+                      <option value="B.Tech / B.E">💻 B.Tech / B.E</option>
+                      <option value="Post Graduate">📚 Post Graduate</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="text-3xs font-bold text-slate-700 block mb-1">
+                      🏷️ {isHi ? 'आरक्षण श्रेणी:' : 'Category:'}
+                    </label>
+                    <select
+                      className="w-full text-xs font-semibold px-2.5 py-2 rounded-xl border cursor-pointer"
+                      style={{ borderColor: '#CBD5E1', background: '#F8FAFC' }}
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value)}
+                    >
+                      <option value="OBC">OBC (Non-Creamy)</option>
+                      <option value="General">General (UR)</option>
+                      <option value="EWS">EWS (आर्थिक रूप से कमजोर)</option>
+                      <option value="SC">SC (अनुसूचित जाति)</option>
+                      <option value="ST">ST (अनुसूचित जनजाति)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Save Button */}
                 <button
                   type="submit"
-                  className="btn-primary w-full text-xs font-bold flex-center justify-center gap-1.5 py-2.5 rounded-xl shadow-md cursor-pointer"
+                  className="btn-primary w-full text-sm font-bold flex-center justify-center gap-2 py-3.5 rounded-xl cursor-pointer mt-2"
                   style={{
-                    background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
+                    background: 'linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%)',
                     color: '#FFFFFF',
-                    boxShadow: '0 4px 12px rgba(124, 58, 237, 0.35)',
-                    border: 'none'
+                    border: 'none',
+                    boxShadow: '0 6px 18px rgba(37,99,235,0.35)'
                   }}
                 >
-                  <Sparkles size={14} className="text-warning" /> {strings.startBtn}
+                  <Sparkles size={16} className="text-amber-300" />
+                  <span>{isHi ? '✨ प्रोफाइल सेव करें व ऐप शुरू करें' : 'Save Profile & Explore VEE App'}</span>
                 </button>
               </form>
-            )}
+            </div>
           </div>
-        </div>
+        )}
 
       </div>
     </div>

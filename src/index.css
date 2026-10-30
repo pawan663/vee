@@ -3987,5 +3987,95 @@ iframe[title*="Netlify"],
   border-color: #D97706;
 }
 
+/* --------------------------------------------------------------------------
+   Modern Onboarding & Animated Boy Illustration Modal Styles
+   -------------------------------------------------------------------------- */
+.auth-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  z-index: 1100;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+@keyframes slideUpAuth {
+  0% {
+    opacity: 0;
+    transform: translateY(24px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Animated Boy Breathing / Bobbing */
+@keyframes boyBob {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.anim-boy-bob {
+  animation: boyBob 3.2s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+/* Floating Road Signs with Glowing Hover Effect */
+@keyframes signHover1 {
+  0%, 100% { transform: translate(190px, 85px); }
+  50% { transform: translate(190px, 81px); }
+}
+@keyframes signHover2 {
+  0%, 100% { transform: translate(200px, 118px); }
+  50% { transform: translate(200px, 114px); }
+}
+@keyframes signHover3 {
+  0%, 100% { transform: translate(190px, 150px); }
+  50% { transform: translate(190px, 146px); }
+}
+@keyframes signHover4 {
+  0%, 100% { transform: translate(195px, 182px); }
+  50% { transform: translate(195px, 178px); }
+}
+
+.anim-sign-float-1 { animation: signHover1 3.5s ease-in-out infinite; }
+.anim-sign-float-2 { animation: signHover2 4.1s ease-in-out infinite 0.4s; }
+.anim-sign-float-3 { animation: signHover3 3.8s ease-in-out infinite 0.8s; }
+.anim-sign-float-4 { animation: signHover4 4.4s ease-in-out infinite 1.2s; }
+
+/* Drifting Pastel Clouds */
+@keyframes cloudDriftSlow {
+  0%, 100% { transform: translateX(0px); }
+  50% { transform: translateX(12px); }
+}
+@keyframes cloudDriftFast {
+  0%, 100% { transform: translateX(0px); }
+  50% { transform: translateX(-15px); }
+}
+
+.anim-cloud-slow { animation: cloudDriftSlow 7s ease-in-out infinite; }
+.anim-cloud-fast { animation: cloudDriftFast 5.5s ease-in-out infinite; }
+
+/* Pulsing Stars */
+@keyframes starTwinkle {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.35); opacity: 1; }
+}
+
+.anim-star-pulse {
+  animation: starTwinkle 2.2s ease-in-out infinite;
+  transform-origin: center;
+}
+
+
 
 

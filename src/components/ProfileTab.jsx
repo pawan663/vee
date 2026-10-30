@@ -1127,40 +1127,79 @@ export default function ProfileTab({
 
               {/* Target Exam / Trade Goal */}
               <div className="form-group mb-2">
-                <label className="form-label">Target Exam / Trade Goal:</label>
+                <label className="form-label">{currentLang === 'hi' ? 'लक्षित भर्ती परीक्षा (Target Exam Goal):' : 'Target Exam / Goal:'}</label>
                 <select
                   className="form-select-sm text-xs"
                   value={editGoal}
                   onChange={(e) => setEditGoal(e.target.value)}
                 >
-                  <option value="ITI Fitter / Railway">ITI Fitter / Railway ALP</option>
-                  <option value="ITI Electrician / BHEL">ITI Electrician / BHEL & Bijli Vibhag</option>
-                  <option value="Railway NTPC & Group D">Railway NTPC & Group D</option>
-                  <option value="SSC GD & Police Bharti">SSC GD & State Police Bharti</option>
-                  <option value="Banking PO & Clerk">Banking PO & Clerk / Apprentice</option>
-                  <option value="Teaching / Anganwadi">Teaching / Anganwadi Bharti</option>
-                  <option value="Private MNC Apprentice">Private MNC (Tata / Maruti / L&T)</option>
+                  <optgroup label="🚆 रेलवे भर्ती (RRB & RRC)">
+                    <option value="Railway ALP & Technician / ITI Fitter">Railway ALP & Technician (ITI / Diploma)</option>
+                    <option value="Railway NTPC (Graduate & 12th)">Railway NTPC (Station Master / Clerk / Guard)</option>
+                    <option value="Railway Group D & Pointsman">Railway Group D (Trackman / Helper / Pointsman)</option>
+                    <option value="Railway RPF Constable & SI">Railway RPF Constable & Sub-Inspector</option>
+                    <option value="Railway Act Apprentice">Railway Act Apprentice (10th + ITI)</option>
+                  </optgroup>
+                  <optgroup label="👮 पुलिस व डिफेंस (Police & Defence)">
+                    <option value="SSC GD Constable (BSF/CISF/CRPF)">SSC GD Constable (BSF / CISF / CRPF / ITBP)</option>
+                    <option value="Delhi Police Constable & SI">Delhi Police Constable (Executive) & SI</option>
+                    <option value="State Police Constable & SI">State Police (UP, Rajasthan, Bihar, MP Police)</option>
+                    <option value="Army Agniveer & Tradesman">Indian Army Agniveer / Airforce / Navy</option>
+                  </optgroup>
+                  <optgroup label="⚡ ITI, टेक्निकल व मेट्रो (ITI & Technical)">
+                    <option value="ITI Electrician / Bijli Vibhag">ITI Electrician / Lineman / Bijli Vibhag</option>
+                    <option value="ITI Fitter / Turner / Welder">ITI Fitter / Turner / Welder PSU Bharti</option>
+                    <option value="Metro Rail (NMRC/DMRC) Maintainer">Metro Rail (NMRC / DMRC / UPMRC) Maintainer</option>
+                    <option value="Junior Engineer (JE Civil/Mech/Elec)">Junior Engineer (SSC JE / RRB JE / State JE)</option>
+                    <option value="PSU Apprentice (BHEL/IOCL/ONGC)">PSU Apprentice (BHEL / IOCL / SAIL / DRDO)</option>
+                  </optgroup>
+                  <optgroup label="🏛️ एसएससी, बैंकिंग व शिक्षण (SSC & Central)">
+                    <option value="SSC CGL & CHSL (10+2)">SSC CGL & CHSL (Inspector, Assistant, LDC, DEO)</option>
+                    <option value="SSC MTS & Havaldar">SSC MTS & Havaldar (10th Pass)</option>
+                    <option value="Banking PO & Clerk (IBPS/SBI)">Banking PO & Clerk (SBI, IBPS, RRB, RBI)</option>
+                    <option value="State PSC (RAS / UPPSC / BPSC)">State PSC (RAS, UPPSC, BPSC, Patwari, VDO)</option>
+                    <option value="Teaching Exams (REET/CTET/TGT)">Teaching Exams (REET, CTET, Super TET, KVS)</option>
+                  </optgroup>
                 </select>
               </div>
 
               {/* Home State */}
               <div className="form-group mb-2">
-                <label className="form-label">Aapka Rajya (State):</label>
+                <label className="form-label">{currentLang === 'hi' ? 'गृह राज्य / क्षेत्र (Home State):' : 'Home State:'}</label>
                 <select
                   className="form-select-sm text-xs"
                   value={editState}
                   onChange={(e) => setEditState(e.target.value)}
                 >
-                  <option value="Rajasthan">Rajasthan</option>
-                  <option value="Uttar Pradesh">Uttar Pradesh</option>
-                  <option value="Bihar">Bihar</option>
-                  <option value="Madhya Pradesh">Madhya Pradesh</option>
-                  <option value="Haryana">Haryana</option>
-                  <option value="Delhi">Delhi (NCR)</option>
-                  <option value="Gujarat">Gujarat</option>
-                  <option value="Maharashtra">Maharashtra</option>
-                  <option value="Jharkhand">Jharkhand</option>
-                  <option value="All India">Other State</option>
+                  <optgroup label="🌟 मुख्य राज्य (Top States)">
+                    <option value="Rajasthan">Rajasthan (राजस्थान)</option>
+                    <option value="Uttar Pradesh">Uttar Pradesh (उत्तर प्रदेश)</option>
+                    <option value="Bihar">Bihar (बिहार)</option>
+                    <option value="Madhya Pradesh">Madhya Pradesh (मध्य प्रदेश)</option>
+                    <option value="Haryana">Haryana (हरियाणा)</option>
+                    <option value="Delhi">Delhi / NCR (दिल्ली एनसीआर)</option>
+                  </optgroup>
+                  <optgroup label="🏛️ उत्तरी व मध्य भारत (North & Central)">
+                    <option value="Punjab">Punjab (पंजाब)</option>
+                    <option value="Uttarakhand">Uttarakhand (उत्तराखंड)</option>
+                    <option value="Himachal Pradesh">Himachal Pradesh (हिमाचल प्रदेश)</option>
+                    <option value="Jammu & Kashmir">Jammu & Kashmir (जम्मू व कश्मीर)</option>
+                    <option value="Chhattisgarh">Chhattisgarh (छत्तीसगढ़)</option>
+                    <option value="Jharkhand">Jharkhand (झारखंड)</option>
+                  </optgroup>
+                  <optgroup label="🌊 पश्चिम व दक्षिण भारत (West & South)">
+                    <option value="Gujarat">Gujarat (गुजरात)</option>
+                    <option value="Maharashtra">Maharashtra (महाराष्ट्र)</option>
+                    <option value="Odisha">Odisha (ओडिशा)</option>
+                    <option value="West Bengal">West Bengal (पश्चिम बंगाल)</option>
+                    <option value="Telangana">Telangana (तेलंगाना)</option>
+                    <option value="Andhra Pradesh">Andhra Pradesh (आंध्र प्रदेश)</option>
+                    <option value="Karnataka">Karnataka (कर्नाटक)</option>
+                    <option value="Tamil Nadu">Tamil Nadu (तमिलनाडु)</option>
+                  </optgroup>
+                  <optgroup label="🇮🇳 ऑल इंडिया (Central / All India)">
+                    <option value="All India">All India / Central Govt (अखिल भारतीय भर्तियां)</option>
+                  </optgroup>
                 </select>
               </div>
 

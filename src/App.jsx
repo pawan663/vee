@@ -457,6 +457,7 @@ export default function App() {
               mocks={mocks}
               onStartMock={(mock) => setActiveMock(mock)}
               t={t}
+              currentLang={currentLang}
             />
           )}
 
@@ -510,6 +511,12 @@ export default function App() {
           isSaved={selectedDetailJob ? savedJobIds.includes(selectedDetailJob.id) : false}
           onToggleSave={handleToggleSave}
           t={t}
+          currentLang={currentLang}
+          onStartMock={(mockSubject) => {
+            setSelectedDetailJob(null);
+            const targetMock = mocks.find(m => m.category === mockSubject) || mocks[0];
+            setActiveMock(targetMock);
+          }}
         />
 
         <InAppBrowserModal

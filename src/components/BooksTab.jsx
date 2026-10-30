@@ -1,27 +1,29 @@
 import React, { useState, useMemo } from 'react';
 import { BookOpen, Award, Star, ShoppingBag, Clock, Users, ArrowRight, ExternalLink, CheckCircle2, Sparkles, Filter } from 'lucide-react';
 
-export default function BooksTab({ books = [], mocks = [], onStartMock, t }) {
+export default function BooksTab({ books = [], mocks = [], onStartMock, t, currentLang = 'hi' }) {
   const [subTab, setSubTab] = useState('books'); // 'books' | 'mocks'
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [selectedMockCategory, setSelectedMockCategory] = useState('ALL');
 
+  const isHi = currentLang === 'hi';
+
   const categories = [
-    { id: 'ALL', label: 'सभी पुस्तकें' },
-    { id: 'Current Affairs 2026', label: '🔥 करेंट अफेयर्स 2026' },
-    { id: 'General Knowledge (GK/GS)', label: '🏛️ सामान्य ज्ञान (GK/GS)' },
-    { id: 'Technical / ITI', label: '🛠️ ITI व टेक्निकल' },
-    { id: 'Railways', label: '🚆 रेलवे स्पेशल' },
-    { id: 'Math & Aptitude', label: '📐 गणित व रीजनिंग' }
+    { id: 'ALL', label: isHi ? 'सभी पुस्तकें' : 'All Books' },
+    { id: 'Current Affairs 2026', label: isHi ? '🔥 करेंट अफेयर्स 2026' : '🔥 Current Affairs 2026' },
+    { id: 'General Knowledge (GK/GS)', label: isHi ? '🏛️ सामान्य ज्ञान (GK/GS)' : '🏛️ General Knowledge (GK/GS)' },
+    { id: 'Technical / ITI', label: isHi ? '🛠️ ITI व टेक्निकल' : '🛠️ Technical & ITI' },
+    { id: 'Railways', label: isHi ? '🚆 रेलवे स्पेशल' : '🚆 Railways Special' },
+    { id: 'Math & Aptitude', label: isHi ? '📐 गणित व रीजनिंग' : '📐 Math & Reasoning' }
   ];
 
   const mockCategories = [
-    { id: 'ALL', label: 'सभी टेस्ट्स' },
-    { id: 'Current Affairs', label: '🔥 दैनिक करेंट अफेयर्स (Drishti & GKToday)' },
-    { id: 'General Knowledge', label: '🏛️ सामान्य ज्ञान व राजव्यवस्था (Jagran GK)' },
-    { id: 'Railways', label: '🚆 रेलवे RRB साइंस व GK' },
-    { id: 'Technical / ITI', label: '🛠️ ITI Fitter & Electrician ट्रेड' },
-    { id: 'SSC & Police', label: '👮 एसएससी GD व पुलिस भर्ती' }
+    { id: 'ALL', label: isHi ? 'सभी टेस्ट्स' : 'All Mock Tests' },
+    { id: 'Current Affairs', label: isHi ? '🔥 दैनिक करेंट अफेयर्स (Drishti & GKToday)' : '🔥 Daily Current Affairs (Drishti & GKToday)' },
+    { id: 'General Knowledge', label: isHi ? '🏛️ सामान्य ज्ञान व राजव्यवस्था (Jagran GK)' : '🏛️ General Knowledge & Polity (Jagran GK)' },
+    { id: 'Railways', label: isHi ? '🚆 रेलवे RRB साइंस व GK' : '🚆 Railway RRB Science & GK' },
+    { id: 'Technical / ITI', label: isHi ? '🛠️ ITI Fitter & Electrician ट्रेड' : '🛠️ ITI Fitter & Electrician Trade' },
+    { id: 'SSC & Police', label: isHi ? '👮 एसएससी GD व पुलिस भर्ती' : '👮 SSC GD & Police Bharti' }
   ];
 
   const filteredBooks = useMemo(() => {
@@ -42,13 +44,13 @@ export default function BooksTab({ books = [], mocks = [], onStartMock, t }) {
           className={`pill-btn flex-1 ${subTab === 'books' ? 'active' : ''}`}
           onClick={() => setSubTab('books')}
         >
-          <BookOpen size={15} /> 📚 Best Books (Amazon & Flipkart)
+          <BookOpen size={15} /> 📚 {isHi ? 'प्रतियोगी पुस्तकें (Amazon & Flipkart)' : 'Best Books (Amazon & Flipkart)'}
         </button>
         <button
           className={`pill-btn flex-1 ${subTab === 'mocks' ? 'active' : ''}`}
           onClick={() => setSubTab('mocks')}
         >
-          <Award size={15} /> 📝 100% Free Mock Tests ({mocks.length})
+          <Award size={15} /> 📝 {isHi ? `100% फ्री मॉक टेस्ट्स (${mocks.length})` : `100% Free Mock Tests (${mocks.length})`}
         </button>
       </div>
 
@@ -59,10 +61,12 @@ export default function BooksTab({ books = [], mocks = [], onStartMock, t }) {
             <div className="flex-between">
               <div>
                 <h4 className="font-bold text-xs flex-center-start gap-1" style={{ color: '#1D4ED8' }}>
-                  <Sparkles size={14} className="text-warning" /> टॉप-रेटेड प्रतियोगी पुस्तकें (Amazon & Flipkart)
+                  <Sparkles size={14} className="text-warning" /> {isHi ? 'टॉप-रेटेड प्रतियोगी पुस्तकें (Amazon & Flipkart)' : 'Top-Rated Competitive Exam Books (Amazon & Flipkart)'}
                 </h4>
                 <p className="text-3xs text-muted mt-0.5">
-                  स्पीड, ल्यूसेंट, एडुटिरिया, पिनेकल और आर.एस. अग्रवाल की सबसे प्रामाणिक किताबें व फ्री सैंपल
+                  {isHi
+                    ? 'स्पीड, ल्यूसेंट, एडुटिरिया, पिनेकल और आर.एस. अग्रवाल की सबसे प्रामाणिक किताबें व फ्री सैंपल'
+                    : 'Speedy, Lucent, Eduteria, Pinnacle & R.S. Aggarwal authentic books with free sample PDFs'}
                 </p>
               </div>
               <span className="badge-pill bg-primary text-white text-3xs font-bold" style={{ padding: '3px 7px' }}>
@@ -115,12 +119,16 @@ export default function BooksTab({ books = [], mocks = [], onStartMock, t }) {
                   </div>
 
                   <h4 className="book-title font-bold text-xs mt-1.5 leading-snug">{book.title}</h4>
-                  <p className="text-3xs text-muted mt-0.5">लेखक / पब्लिशर: {book.author}</p>
+                  <p className="text-3xs text-muted mt-0.5">
+                    {isHi ? 'लेखक / पब्लिशर:' : 'Author / Publisher:'} {book.author}
+                  </p>
 
                   <div className="flex-center-start gap-1 mt-1 text-2xs">
                     <Star size={11} className="text-warning fill-warning" />
                     <span className="font-bold">{book.rating}</span>
-                    <span className="text-3xs text-muted">({book.reviewsCount?.toLocaleString()} रेटिंग्स)</span>
+                    <span className="text-3xs text-muted">
+                      ({book.reviewsCount?.toLocaleString()} {isHi ? 'रेटिंग्स' : 'ratings'})
+                    </span>
                   </div>
 
                   {/* Price & Discount */}
@@ -152,7 +160,7 @@ export default function BooksTab({ books = [], mocks = [], onStartMock, t }) {
                         className="btn-accent-xs inline-flex flex-center gap-1 font-bold text-3xs"
                         style={{ background: '#FF9900', color: '#111111', border: 'none', padding: '4px 8px', borderRadius: '6px' }}
                       >
-                        🛒 Amazon पर देखें <ExternalLink size={10} />
+                        🛒 {isHi ? 'Amazon पर देखें' : 'View on Amazon'} <ExternalLink size={10} />
                       </a>
                     )}
                     {book.flipkartUrl && (
@@ -163,7 +171,7 @@ export default function BooksTab({ books = [], mocks = [], onStartMock, t }) {
                         className="btn-accent-xs inline-flex flex-center gap-1 font-bold text-3xs"
                         style={{ background: '#2874F0', color: '#FFFFFF', border: 'none', padding: '4px 8px', borderRadius: '6px' }}
                       >
-                        🛍️ Flipkart पर देखें <ExternalLink size={10} />
+                        🛍️ {isHi ? 'Flipkart पर देखें' : 'View on Flipkart'} <ExternalLink size={10} />
                       </a>
                     )}
                     {book.readUrl && (
@@ -174,7 +182,7 @@ export default function BooksTab({ books = [], mocks = [], onStartMock, t }) {
                         className="btn-secondary-xs inline-flex flex-center gap-1 font-semibold text-3xs"
                         style={{ padding: '4px 8px', borderRadius: '6px' }}
                       >
-                        📖 Free Sample / PDF <ExternalLink size={10} />
+                        📖 {isHi ? 'फ्री सैंपल / PDF' : 'Free Sample / PDF'} <ExternalLink size={10} />
                       </a>
                     )}
                   </div>
@@ -190,10 +198,12 @@ export default function BooksTab({ books = [], mocks = [], onStartMock, t }) {
             <div className="flex-between">
               <div>
                 <h4 className="font-bold text-xs text-success flex-center-start gap-1">
-                  🏆 100% Free All-India Live Mock Tests
+                  🏆 {isHi ? '100% फ्री ऑल-इंडिया लाइव मॉक टेस्ट' : '100% Free All-India Live Mock Tests'}
                 </h4>
                 <p className="text-3xs text-muted mt-0.5">
-                  असली परीक्षा पैटर्न पर 10-प्रश्नों के लाइव मॉक टेस्ट। टाइमर, स्कोरकार्ड व संपूर्ण हिंदी हल।
+                  {isHi
+                    ? 'असली परीक्षा पैटर्न पर 10-प्रश्नों के लाइव मॉक टेस्ट। टाइमर, स्कोरकार्ड व संपूर्ण हल।'
+                    : '10-question live mock tests based on real exam patterns. Timer, scorecard & full solutions.'}
                 </p>
               </div>
               <span className="badge-pill bg-success text-white text-3xs font-bold" style={{ padding: '3px 7px' }}>
@@ -238,10 +248,10 @@ export default function BooksTab({ books = [], mocks = [], onStartMock, t }) {
 
               <div className="flex-row gap-3 mt-2 text-3xs text-muted">
                 <span className="flex-center gap-1">
-                  <Clock size={12} className="text-primary" /> {mock.durationMinutes} मिनट
+                  <Clock size={12} className="text-primary" /> {mock.durationMinutes} {isHi ? 'मिनट' : 'mins'}
                 </span>
                 <span className="flex-center gap-1">
-                  <BookOpen size={12} className="text-accent" /> {mock.totalQuestions} प्रश्न
+                  <BookOpen size={12} className="text-accent" /> {mock.totalQuestions} {isHi ? 'प्रश्न' : 'Qs'}
                 </span>
                 <span className="flex-center gap-1">
                   <Users size={12} className="text-success" /> {mock.attempts}
@@ -254,7 +264,7 @@ export default function BooksTab({ books = [], mocks = [], onStartMock, t }) {
                   style={{ padding: '8px 12px', borderRadius: '8px', background: 'linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%)', color: '#FFFFFF', border: 'none', cursor: 'pointer' }}
                   onClick={() => onStartMock(mock)}
                 >
-                  🚀 Free Test Start Karein <ArrowRight size={14} />
+                  🚀 {isHi ? 'फ्री टेस्ट शुरू करें' : 'Start Free Test'} <ArrowRight size={14} />
                 </button>
               </div>
             </div>

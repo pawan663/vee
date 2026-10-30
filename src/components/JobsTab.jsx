@@ -1039,9 +1039,11 @@ export default function JobsTab({
           <div className="news-header-banner p-2.5 mb-2.5 flex-between rounded-xl" style={{ background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)', border: '1px solid #93C5FD' }}>
             <div>
               <span className="text-xs font-bold text-primary flex-center-start gap-1.5">
-                <Newspaper size={16} /> दैनिक समसामयिकी (Current Affairs), GK व भर्ती बुलेटिन
+                <Newspaper size={16} /> {currentLang === 'hi' ? 'दैनिक समसामयिकी (Current Affairs), GK व भर्ती बुलेटिन' : 'Daily Current Affairs, GK & Recruitment Bulletin'}
               </span>
-              <p className="text-3xs text-muted m-0 mt-0.5">Drishti IAS, GKToday (100+), Jagran GK, अमर उजाला व दैनिक भास्कर</p>
+              <p className="text-3xs text-muted m-0 mt-0.5">
+                {currentLang === 'hi' ? 'Drishti IAS, GKToday (100+), Jagran GK, अमर उजाला व दैनिक भास्कर' : 'Drishti IAS, GKToday, Jagran GK, Amar Ujala & Dainik Bhaskar'}
+              </p>
             </div>
             <span className="badge-live-sm bg-primary text-white text-3xs font-bold px-2 py-0.5 rounded-full">{displayedNews.length} Live</span>
           </div>
@@ -1050,8 +1052,8 @@ export default function JobsTab({
           <div className="qualification-scroll-bar mb-2.5 flex-row gap-1.5 no-scrollbar" style={{ overflowX: 'auto', display: 'flex', whiteSpace: 'nowrap' }}>
             {['ALL', 'Business', 'Drishti IAS (Hindi)', 'GKToday', 'Jagran Josh GK', 'Sarkari Result', 'Sarkari Result .cm', 'Dainik Bhaskar', 'Amar Ujala', 'Navbharat Times', 'Live Hindustan', 'Times of India'].map((src) => {
               const label = src === 'ALL'
-                ? `सभी आर्टिकल्स (${liveNews.length})`
-                : (src === 'Business' ? '💼 बिजनेस व आर्थिकी (Business)' : src);
+                ? (currentLang === 'hi' ? `सभी आर्टिकल्स (${liveNews.length})` : `All Articles (${liveNews.length})`)
+                : (src === 'Business' ? (currentLang === 'hi' ? '💼 बिजनेस व आर्थिकी (Business)' : '💼 Business & Economy') : src);
               return (
                 <button
                   key={src}
@@ -1114,7 +1116,9 @@ export default function JobsTab({
                         className="badge-source-sm font-bold text-3xs px-2 py-0.5 rounded"
                         style={{ color: badgeColor, background: badgeBg }}
                       >
-                        {isBusiness ? '💼 बिजनेस व आर्थिकी' : (isDrishti ? '📖 दृष्टि IAS' : (isGKToday ? '🌐 GKToday (CA)' : (isJagranGK ? '🧠 जागरण GK' : `📡 ${n.source}`)))}
+                        {isBusiness
+                          ? (currentLang === 'hi' ? '💼 बिजनेस व आर्थिकी' : '💼 Business')
+                          : (isDrishti ? '📖 Drishti IAS' : (isGKToday ? '🌐 GKToday (CA)' : (isJagranGK ? '🧠 Jagran GK' : `📡 ${n.source}`)))}
                       </span>
                       <span className="text-3xs text-muted">
                         {n.timeAgo || (n.category ? `• ${n.category}` : 'Live')}
