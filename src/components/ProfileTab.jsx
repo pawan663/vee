@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Bookmark, CheckCircle2, Award, DollarSign, Settings, Globe, Moon, Sun, Star, Share2, Shield, Lock, Wrench, ExternalLink, HelpCircle, ChevronRight, Edit3, MapPin, Target, GraduationCap, X, Check, Copy, Clock, Calendar, PlusCircle, Trash2, Bell, AlertTriangle, FileText, Upload, Download, Eye, Image as ImageIcon, RefreshCw, Activity, Radio, Wifi, Server } from 'lucide-react';
+import { User, Bookmark, CheckCircle2, Award, DollarSign, Settings, Globe, Moon, Sun, Star, Share2, Shield, Lock, Wrench, ExternalLink, HelpCircle, ChevronRight, Edit3, MapPin, Target, GraduationCap, X, Check, Copy, Clock, Calendar, PlusCircle, Trash2, Bell, AlertTriangle, FileText, Upload, Download, Eye, Image as ImageIcon, RefreshCw, Activity, Radio, Wifi, Server, Camera } from 'lucide-react';
 
 export default function ProfileTab({
   userProfile,
@@ -206,6 +206,43 @@ export default function ProfileTab({
     reader.readAsDataURL(file);
   };
 
+  const handleAvatarUpload = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert(currentLang === 'hi' ? 'कृपया एक वैध फोटो फ़ाइल (JPG / PNG) चुनें।' : 'Please select a valid image file (JPG / PNG).');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (loadEvt) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const targetSize = 220;
+        canvas.width = targetSize;
+        canvas.height = targetSize;
+
+        const minDim = Math.min(img.width, img.height);
+        const startX = (img.width - minDim) / 2;
+        const startY = (img.height - minDim) / 2;
+
+        ctx.drawImage(img, startX, startY, minDim, minDim, 0, 0, targetSize, targetSize);
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+        setEditAvatar(compressedDataUrl);
+        onUpdateProfile({
+          ...userProfile,
+          avatar: compressedDataUrl
+        });
+      };
+      img.src = loadEvt.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
   const avatarOptions = [
     "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80",
     "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80",
@@ -226,20 +263,31 @@ export default function ProfileTab({
         </div>
 
         <div className="flex-row gap-3 items-center">
-          <div className="avatar-wrapper position-relative">
+          <div className="avatar-wrapper position-relative" style={{ width: '56px', height: '56px', minWidth: '56px', flexShrink: 0 }}>
             <img
               src={userProfile.avatar}
               alt="Profile"
               className="user-profile-avatar vip-avatar"
+              style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover' }}
             />
             <span className="avatar-level-badge">LVL 12</span>
-            <button
+            
+            {/* Direct Camera / Photo Pick Input */}
+            <input
+              type="file"
+              id="direct-avatar-file-input"
+              accept="image/*"
+              onChange={handleAvatarUpload}
+              style={{ display: 'none' }}
+            />
+            <label
+              htmlFor="direct-avatar-file-input"
               className="avatar-edit-badge"
-              onClick={() => setIsEditModalOpen(true)}
-              title="Change Photo / Profile"
+              title={currentLang === 'hi' ? 'गैलरी या कैमरा से अपनी फोटो लगाएं' : 'Upload photo from gallery/camera'}
+              style={{ cursor: 'pointer' }}
             >
-              <Edit3 size={11} />
-            </button>
+              <Camera size={11} />
+            </label>
           </div>
           <div className="user-info flex-1">
             <div className="flex-between items-center mb-1">
@@ -667,6 +715,13 @@ export default function ProfileTab({
                       title="Resize Photo"
                     >
                       ⚡ Resize
+                    </button>
+                    <button
+                      className="btn-secondary-xs text-3xs font-bold"
+                      onClick={() => onUpdateProfile({ ...userProfile, avatar: userProfile.photo.dataUrl })}
+                      title={currentLang === 'hi' ? 'प्रोफ़ाइल फ़ोटो बनाएं' : 'Set as Avatar'}
+                    >
+                      ⭐ Set Avatar
                     </button>
                     <a
                       href={userProfile.photo.dataUrl}
@@ -1099,18 +1154,59 @@ export default function ProfileTab({
             </div>
 
             <form onSubmit={handleSaveProfile} className="sheet-body">
-              {/* Select Avatar */}
-              <label className="form-label text-xs">Profile Photo / Avatar Chunein:</label>
-              <div className="avatar-pick-row flex-row gap-3 mb-3 mt-1">
-                {avatarOptions.map((av, idx) => (
-                  <img
-                    key={idx}
-                    src={av}
-                    alt={`Avatar ${idx}`}
-                    className={`avatar-pick-img ${editAvatar === av ? 'selected-avatar' : ''}`}
-                    onClick={() => setEditAvatar(av)}
-                  />
-                ))}
+              {/* Select Avatar / Custom Photo */}
+              <div className="profile-photo-picker-section mb-3 p-2.5 rounded-lg" style={{ background: 'var(--bg-app)', border: '1px solid var(--border)' }}>
+                <label className="form-label text-xs font-bold mb-1.5 block">
+                  {currentLang === 'hi' ? '📸 अपनी प्रोफाइल फोटो लगाएं:' : '📸 Profile Photo:'}
+                </label>
+
+                <div className="flex-row items-center gap-3">
+                  <div className="position-relative" style={{ width: '50px', height: '50px', flexShrink: 0 }}>
+                    <img
+                      src={editAvatar || userProfile.avatar}
+                      alt="Preview"
+                      style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #F59E0B' }}
+                    />
+                  </div>
+
+                  <div className="flex-1">
+                    <input
+                      type="file"
+                      id="modal-avatar-file-input"
+                      accept="image/*"
+                      onChange={handleAvatarUpload}
+                      style={{ display: 'none' }}
+                    />
+                    <label
+                      htmlFor="modal-avatar-file-input"
+                      className="btn-accent-sm inline-flex items-center gap-1.5 cursor-pointer text-xs font-bold"
+                      style={{ padding: '6px 12px', borderRadius: '8px' }}
+                    >
+                      <Camera size={13} /> {currentLang === 'hi' ? 'गैलरी / कैमरा से फोटो चुनें' : 'Choose from Gallery / Camera'}
+                    </label>
+                    <p className="text-3xs text-muted mt-0.5">
+                      {currentLang === 'hi' ? 'पासपोर्ट या सेल्फी फोटो लगाएं • JPG/PNG' : 'Passport or photo • JPG/PNG'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-2 pt-2 border-top">
+                  <span className="text-3xs text-muted font-semibold block mb-1">
+                    {currentLang === 'hi' ? 'या तैयार अवतार चुनें:' : 'Or choose preset avatar:'}
+                  </span>
+                  <div className="avatar-pick-row flex-row gap-2">
+                    {avatarOptions.map((av, idx) => (
+                      <img
+                        key={idx}
+                        src={av}
+                        alt={`Avatar ${idx}`}
+                        className={`avatar-pick-img ${editAvatar === av ? 'selected-avatar' : ''}`}
+                        style={{ width: '36px', height: '36px', borderRadius: '50%' }}
+                        onClick={() => setEditAvatar(av)}
+                      />
+                    ))}
+                  </div>
+                </div>
               </div>
 
               {/* Full Name */}

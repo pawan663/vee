@@ -643,67 +643,53 @@ export default function JobsTab({
 
   // Smart Priority Scoring: Major flagship recruitments (Railway, SSC, Police, Army, Apprentice, PSUs, 100+ posts)
   // appear at the top, while small 1-2 post watchman/gardener jobs appear lower down.
-  // Dynamic Hourly Spotlight & Session Shuffle guarantees fresh discoveries every time the app is opened!
   const getJobPriorityScore = (job) => {
     let score = 0;
     const title = (job.title || '').toLowerCase();
     const dept = (job.dept || '').toLowerCase();
     const cat = (job.category || '').toLowerCase();
     const postsText = (job.posts || '').toLowerCase();
+    const source = (job.source || '').toLowerCase();
 
     // Flagship major government recruiters base weights
-    if (/railway|rrb|rrc|irctc|metro/i.test(dept) || /railway|rrb/i.test(title)) score += 45;
-    if (/ssc|staff selection/i.test(dept) || /\bssc\b/i.test(title)) score += 42;
-    if (/police|constable|daroga|sub inspector/i.test(title) || /police/i.test(dept)) score += 40;
-    if (/army|defence|navy|air force|agniveer/i.test(title) || /defence|army/i.test(dept)) score += 40;
-    if (/apprentice/i.test(cat) || /apprentice/i.test(title) || /apprentice/i.test(dept)) score += 38;
-    if (/bhel|ongc|iocl|ntpc|sail|isro|drdo|hal|bel|power grid/i.test(dept) || /bhel|ongc|iocl/i.test(title)) score += 35;
-    if (/bank|sbi|ibps|rbi/i.test(dept) || /sbi|ibps|po\b/i.test(title)) score += 32;
+    if (/railway|rrb|rrc|irctc|metro/i.test(dept) || /railway|rrb|station master|alp|technician/i.test(title)) score += 60;
+    if (/ssc|staff selection/i.test(dept) || /\bssc\b|cgl|chsl|mts|gd/i.test(title)) score += 58;
+    if (/police|constable|daroga|sub inspector/i.test(title) || /police/i.test(dept)) score += 55;
+    if (/army|defence|navy|air force|agniveer/i.test(title) || /defence|army/i.test(dept)) score += 52;
+    if (/teacher|bpsc|tet|super tet/i.test(title) || /teacher/i.test(dept)) score += 50;
+    if (/apprentice/i.test(cat) || /apprentice/i.test(title) || /apprentice/i.test(dept)) score += 48;
+    if (/bhel|ongc|iocl|ntpc|sail|isro|drdo|hal|bel|power grid/i.test(dept) || /bhel|ongc|iocl/i.test(title)) score += 40;
+    if (/bank|sbi|ibps|rbi|pnb/i.test(dept) || /sbi|ibps|po\b|clerk/i.test(title)) score += 38;
+
+    // FreeJobAlert & SarkariResult live verified bonus
+    if (/freejobalert|sarkari\s*result/i.test(source)) score += 30;
 
     // Fresh announcement bonus
-    if (job.isNew) score += 35;
+    if (job.isNew) score += 30;
 
-    // 6-Category Dynamic Hourly & Session Spotlight Rotation:
-    // Changes every hour (0-23) & sessionCount so returning users always discover DIFFERENT jobs at the top!
-    const rotationSlot = (currentHour + sessionCount) % 6;
-    if (rotationSlot === 0 && (/railway|rrb|rrc|metro/i.test(dept) || /railway|rrb/i.test(title))) {
-      score += 50; // Theme 0: Railway & Metro Spotlight
-    } else if (rotationSlot === 1 && (job.state && job.state !== 'All India')) {
-      score += 50; // Theme 1: State Government Jobs Spotlight (UP, MP, Bihar, Rajasthan, Delhi, etc.)
-    } else if (rotationSlot === 2 && (/police|constable|sub inspector/i.test(title) || /army|defence|navy|air force|agniveer|itbp|bsf|cisf/i.test(title))) {
-      score += 50; // Theme 2: Defence & Police Spotlight
-    } else if (rotationSlot === 3 && (/bank|sbi|ibps|rbi|pnb|uco|canara/i.test(dept) || /bank|clerk|po\b|specialist/i.test(title))) {
-      score += 50; // Theme 3: Banking & Financial Institutions Spotlight
-    } else if (rotationSlot === 4 && (/ssc|cgl|chsl|mts|gd|upsc|india post|gds/i.test(title) || /ssc|upsc/i.test(dept))) {
-      score += 50; // Theme 4: Central Govt & SSC Spotlight
-    } else if (rotationSlot === 5 && (/apprentice/i.test(cat) || /apprentice|iti|diploma/i.test(title) || /apprentice/i.test(dept))) {
-      score += 50; // Theme 5: Apprentice & Technical Skills Spotlight
-    }
-
-    // Dynamic Session Shuffle:
-    // Guarantees that when a user opens the app 30-60 mins later, the top cards dynamically shift
-    // so older, verified gems in the database get spotlighted and user never sees a static feed!
-    const idSeed = (job.id ? String(job.id) : title).split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
-    const sessionOffset = ((idSeed * 17) + (sessionCount * 31) + (currentHour * 19)) % 45;
-    score += sessionOffset;
-
-    // Post count bonus
+    // High Vacancy Post Count Bonus: Aspirants love massive recruitments
     const postNumMatch = postsText.match(/(\d+[\d,]*)/);
     if (postNumMatch) {
       const num = parseInt(postNumMatch[1].replace(/,/g, ''), 10);
       if (!isNaN(num)) {
-        if (num >= 5000) score += 35;
-        else if (num >= 1000) score += 30;
-        else if (num >= 500) score += 25;
-        else if (num >= 100) score += 20;
+        if (num >= 10000) score += 80;
+        else if (num >= 5000) score += 65;
+        else if (num >= 1000) score += 50;
+        else if (num >= 500) score += 35;
+        else if (num >= 100) score += 25;
         else if (num >= 20) score += 10;
-        else if (num <= 3) score -= 30; // De-prioritize 1-2 post gardener/watchman jobs from hero spot
+        else if (num <= 3) score -= 60; // Push 1-2 post obscure jobs to bottom
       }
     }
 
-    // De-prioritize watchman / gardener / peon / mali from #1 hero spot
-    if (/gardener|watchman|mali|peon|chaprasi/i.test(title)) {
-      score -= 40;
+    // Heavy penalty for peon / watchman / gardener from taking top spots
+    if (/gardener|watchman|mali|peon|chaprasi|sweeper/i.test(title)) {
+      score -= 70;
+    }
+
+    // De-prioritize purely international / remote customer care when searching Govt
+    if (/remoteok|weworkremotely/i.test(source) || /worldwide remote/i.test(title)) {
+      score -= 30;
     }
 
     return score;

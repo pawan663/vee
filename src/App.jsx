@@ -214,23 +214,25 @@ export default function App() {
       if (isManual) setIsSyncing(true);
 
       // Multi-Layer Cloud Live Sync:
-      // 1. First fetch real-time from GitHub raw CDN (updates 0s after GitHub Action runs)
-      // 2. Fallback to Netlify local endpoint
+      // 1. First fetch real-time from local endpoint (guaranteed fastest, same origin, no CORS)
+      // 2. Fallback to GitHub raw CDN
       let data = null;
       try {
-        const ghRes = await fetch(`https://raw.githubusercontent.com/pawan663/vee/main/public/live_data.json?t=${Date.now()}`);
-        if (ghRes.ok) {
-          data = await ghRes.json();
-        }
-      } catch (err) {
-        // Fallback to local
-      }
-
-      if (!data) {
         const localRes = await fetch(`/live_data.json?t=${Date.now()}`);
         if (localRes.ok) {
           data = await localRes.json();
         }
+      } catch (err) {
+        // Fallback to GitHub CDN
+      }
+
+      if (!data) {
+        try {
+          const ghRes = await fetch(`https://raw.githubusercontent.com/pawan663/vee/main/public/live_data.json?t=${Date.now()}`);
+          if (ghRes.ok) {
+            data = await ghRes.json();
+          }
+        } catch (err) {}
       }
 
       if (data && data.jobs && Array.isArray(data.jobs)) {

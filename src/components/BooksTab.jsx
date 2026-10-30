@@ -36,6 +36,51 @@ export default function BooksTab({ books = [], mocks = [], onStartMock, t, curre
     return mocks.filter((m) => m.category === selectedMockCategory);
   }, [mocks, selectedMockCategory]);
 
+  const getBookTitle = (book) => {
+    if (isHi) return book.title;
+    const titleMap = {
+      'b-speedy': 'Speedy Current Affairs 2026 (Latest October Edition & Yearly)',
+      'b-eduteria': 'Eduteria Current Affairs 2026 (Special Edition - Pravin Sir)',
+      'b-lucent': 'Lucent General Knowledge 2026 (Comprehensive All-India Edition)',
+      'b-pinnacle': 'Pinnacle SSC 6800+ TCS MCQ (Maths, English, Reasoning & GS)',
+      'b-rs-aggarwal': 'Quantitative Aptitude for Competitive Examinations (R.S. Aggarwal)',
+      'b-yct-railway': 'Youth Competition Times RRB ALP & Technician Solved Papers',
+      'b-iti-electrician': 'ITI Electrician Trade Theory (Arihant & NIMI Pattern)',
+      'b-iti-fitter': 'ITI Fitter Trade Theory (NIMI & DGT Syllabus)'
+    };
+    return titleMap[book.id] || book.titleEn || book.title;
+  };
+
+  const getBookDesc = (book) => {
+    if (isHi) return book.description;
+    const descMap = {
+      'b-speedy': 'Latest 2026 current affairs with 2500+ MCQs, budget updates, national schemes, and sports news.',
+      'b-eduteria': 'Authentic 6-month national & international events for BPSC, Railway, SSC, Police & State PCS exams.',
+      'b-lucent': 'India’s most popular GK handbook covering History, Geography, Polity, Economy & General Science.',
+      'b-pinnacle': 'Chapter-wise TCS PYQs with detailed explanations for SSC CGL, CHSL, MTS & GD.',
+      'b-rs-aggarwal': 'Standard quantitative aptitude book with shortcuts, formulas, and solved practice sets.',
+      'b-yct-railway': 'Youth Competition Times RRB ALP/Tech stage 1 & 2 question bank with explanations.',
+      'b-iti-electrician': 'Complete 2-year ITI Electrician course covered as per latest NIMI and DGT exam pattern.',
+      'b-iti-fitter': 'Complete 2-year ITI Fitter trade theory, engineering drawing & workshop calculation.'
+    };
+    return descMap[book.id] || book.descriptionEn || book.description;
+  };
+
+  const getBookBadge = (book) => {
+    if (isHi) return book.badge;
+    const badgeMap = {
+      'b-speedy': 'Latest Edition: October 2026 🔥',
+      'b-eduteria': 'October Special Edition 🌟',
+      'b-lucent': '#1 All India Bestseller 🏆',
+      'b-pinnacle': 'TCS Solved Papers ⭐',
+      'b-rs-aggarwal': 'Must-Have for Quant 📚',
+      'b-yct-railway': 'Railway Special 🚆',
+      'b-iti-electrician': 'DGT & NIMI Pattern ⚡',
+      'b-iti-fitter': 'NIMI Trade Theory ⚙️'
+    };
+    return badgeMap[book.id] || (book.badge ? 'Top Recommended' : null);
+  };
+
   return (
     <div className="books-tab-container">
       {/* Sub Tabs Pill Row */}
@@ -111,14 +156,14 @@ export default function BooksTab({ books = [], mocks = [], onStartMock, t, curre
                     <span className="badge-category text-3xs font-semibold" style={{ color: '#4F46E5', background: 'rgba(79, 70, 229, 0.1)', padding: '2px 6px', borderRadius: '4px' }}>
                       {book.category}
                     </span>
-                    {book.badge && (
+                    {getBookBadge(book) && (
                       <span className="badge-pill text-3xs font-bold" style={{ background: '#FEF3C7', color: '#B45309', border: '1px solid #FDE68A', padding: '1px 5px', borderRadius: '4px' }}>
-                        {book.badge}
+                        {getBookBadge(book)}
                       </span>
                     )}
                   </div>
 
-                  <h4 className="book-title font-bold text-xs mt-1.5 leading-snug">{book.title}</h4>
+                  <h4 className="book-title font-bold text-xs mt-1.5 leading-snug">{getBookTitle(book)}</h4>
                   <p className="text-3xs text-muted mt-0.5">
                     {isHi ? 'लेखक / पब्लिशर:' : 'Author / Publisher:'} {book.author}
                   </p>
@@ -147,7 +192,7 @@ export default function BooksTab({ books = [], mocks = [], onStartMock, t, curre
                   )}
 
                   <p className="text-3xs text-muted mt-1 leading-relaxed">
-                    {book.description}
+                    {getBookDesc(book)}
                   </p>
 
                   {/* Buy on Amazon, Flipkart & Free Sample Buttons */}
