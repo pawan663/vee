@@ -4211,18 +4211,30 @@ iframe[title*="Netlify"],
   transform-origin: 28px 8px;
 }
 
-.native-auth-sheet input {
+/* Authentic Native Full-Screen Auth System (Immune to Dark Theme) */
+.vee-native-auth-screen {
+  background-color: #FFFFFF !important;
   color: #0F172A !important;
 }
 
-.native-auth-sheet input::placeholder {
+.vee-native-auth-screen input {
+  color: #0F172A !important;
+}
+
+.vee-native-auth-screen input::placeholder {
   color: #94A3B8 !important;
 }
 
-.native-auth-sheet select {
+.vee-native-auth-screen select {
   color: #0F172A !important;
   background-color: #FFFFFF !important;
 }
+
+.vee-native-auth-screen form div:focus-within {
+  border-color: #1D64F2 !important;
+  box-shadow: 0 0 0 3px rgba(29, 100, 242, 0.12) !important;
+}
+
 
 
 
