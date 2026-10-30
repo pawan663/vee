@@ -23,7 +23,21 @@ export default function JobDetailModal({
 
   const isHi = currentLang === 'hi';
   const displayTitle = cleanJobTitle(job.title);
-  const syllabus = getJobSyllabus(job);
+  const syllabus = getJobSyllabus(job, currentLang);
+
+  // Language Cleanliness Helper: Guarantees zero Hindi in English mode
+  const cleanForLanguage = (text, lang) => {
+    if (!text || typeof text !== 'string') return text || '';
+    if (lang === 'en') {
+      return text
+        .replace(/\s*\([\u0900-\u097F\s\/,\-\.\d]+\)/g, '')
+        .replace(/\s*\/\s*[\u0900-\u097F\s]+/g, '')
+        .replace(/[\u0900-\u097F]+/g, '')
+        .replace(/\s{2,}/g, ' ')
+        .trim();
+    }
+    return text;
+  };
 
   // Safe Post Display: Never show null or empty
   const displayPosts = job.posts || (() => {
@@ -655,7 +669,7 @@ export default function JobDetailModal({
                                 borderBottom: '1px solid #E2E8F0'
                               }}
                             >
-                              <td style={{ padding: '8px 10px', fontWeight: 600, color: '#1E293B' }}>{row.subject}</td>
+                              <td style={{ padding: '8px 10px', fontWeight: 600, color: '#1E293B' }}>{cleanForLanguage(row.subject, currentLang)}</td>
                               <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 700, color: '#2563EB' }}>{row.questions}</td>
                               <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 700, color: '#059669' }}>{row.marks}</td>
                             </tr>
@@ -678,10 +692,10 @@ export default function JobDetailModal({
                           style={{ background: '#FFFFFF', borderColor: '#CBD5E1' }}
                         >
                           <h5 className="text-xs font-bold text-slate-900 m-0 mb-1 flex-center-start gap-1">
-                            {item.subject}
+                            {cleanForLanguage(item.subject, currentLang)}
                           </h5>
                           <p className="text-2xs text-slate-700 m-0 leading-relaxed font-normal">
-                            {item.items}
+                            {cleanForLanguage(item.items, currentLang)}
                           </p>
                         </div>
                       ))}
@@ -698,22 +712,22 @@ export default function JobDetailModal({
                         <div className="grid grid-cols-2 gap-2 text-2xs" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)' }}>
                           <div>
                             <span className="font-bold text-slate-700 block">📏 {isHi ? 'पुरुष लंबाई (Height):' : 'Male Height:'}</span>
-                            <span className="text-slate-900 font-semibold">{syllabus.physicalStandards.maleHeight}</span>
+                            <span className="text-slate-900 font-semibold">{cleanForLanguage(syllabus.physicalStandards.maleHeight, currentLang)}</span>
                           </div>
                           <div>
                             <span className="font-bold text-slate-700 block">📏 {isHi ? 'महिला लंबाई (Height):' : 'Female Height:'}</span>
-                            <span className="text-slate-900 font-semibold">{syllabus.physicalStandards.femaleHeight}</span>
+                            <span className="text-slate-900 font-semibold">{cleanForLanguage(syllabus.physicalStandards.femaleHeight, currentLang)}</span>
                           </div>
                           {syllabus.physicalStandards.maleChest && (
                             <div className="col-span-2" style={{ gridColumn: 'span 2' }}>
                               <span className="font-bold text-slate-700 block">📐 {isHi ? 'पुरुष सीना (Chest):' : 'Male Chest:'}</span>
-                              <span className="text-slate-900 font-semibold">{syllabus.physicalStandards.maleChest}</span>
+                              <span className="text-slate-900 font-semibold">{cleanForLanguage(syllabus.physicalStandards.maleChest, currentLang)}</span>
                             </div>
                           )}
                           <div className="col-span-2" style={{ gridColumn: 'span 2' }}>
                             <span className="font-bold text-emerald-800 block">🏃 {isHi ? 'दौड़ (Running):' : 'Running:'}</span>
-                            <span className="text-slate-900 font-semibold block">{syllabus.physicalStandards.runningMale}</span>
-                            <span className="text-slate-900 font-semibold block mt-0.5">{syllabus.physicalStandards.runningFemale}</span>
+                            <span className="text-slate-900 font-semibold block">{cleanForLanguage(syllabus.physicalStandards.runningMale, currentLang)}</span>
+                            <span className="text-slate-900 font-semibold block mt-0.5">{cleanForLanguage(syllabus.physicalStandards.runningFemale, currentLang)}</span>
                           </div>
                         </div>
                       </div>
@@ -730,7 +744,7 @@ export default function JobDetailModal({
                         {syllabus.selectionStages.map((stage, sIdx) => (
                           <div key={sIdx} className="flex-center-start gap-1.5 text-2xs font-semibold text-slate-800">
                             <CheckCircle2 size={13} className="text-success flex-shrink-0" />
-                            <span>{stage}</span>
+                            <span>{cleanForLanguage(stage, currentLang)}</span>
                           </div>
                         ))}
                       </div>
