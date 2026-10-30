@@ -272,15 +272,107 @@ export default function ProfileTab({
   return (
     <div className="profile-container" style={{ padding: '12px 14px 28px', maxWidth: '440px', margin: '0 auto' }}>
       {/* ===================================================================
-          1. TOP VIP / ACCOUNT STATUS CARD (100% MATCH WITH IMAGE 2)
+          0. MASTER ASPIRANT PROFILE CARD (PHOTO, NAME, TARGET & STATS)
           =================================================================== */}
       <div
-        className="account-status-banner mb-3 p-3"
+        className="profile-header-card profile-vip-card p-3 mb-2.5"
         style={{
           borderRadius: '16px',
+          boxShadow: '0 4px 14px rgba(15, 23, 42, 0.08)'
+        }}
+      >
+        {/* VIP Ribbon */}
+        <div className="vip-ribbon flex-between mb-2">
+          <span className="vip-crown-badge flex-center gap-1 font-bold text-3xs">
+            👑 <span>VEE VIP ASPIRANT</span>
+          </span>
+          <span className="vip-tier-badge text-3xs font-extrabold">⭐ GOLD TIER</span>
+        </div>
+
+        <div className="flex-row gap-3 items-center">
+          {/* Avatar with Camera Upload Icon */}
+          <div className="avatar-wrapper position-relative" style={{ width: '54px', height: '54px', minWidth: '54px', flexShrink: 0 }}>
+            <img
+              src={userProfile.avatar}
+              alt="Profile"
+              className="user-profile-avatar vip-avatar"
+              style={{ width: '54px', height: '54px', borderRadius: '50%', objectFit: 'cover' }}
+            />
+            <span className="avatar-level-badge">LVL 12</span>
+
+            <input
+              type="file"
+              id="direct-avatar-file-input"
+              accept="image/*"
+              onChange={handleAvatarUpload}
+              style={{ display: 'none' }}
+            />
+            <label
+              htmlFor="direct-avatar-file-input"
+              className="avatar-edit-badge"
+              title={isHi ? 'गैलरी या कैमरा से अपनी फोटो लगाएं' : 'Upload photo from gallery/camera'}
+              style={{ cursor: 'pointer' }}
+            >
+              <Camera size={11} />
+            </label>
+          </div>
+
+          <div className="user-info flex-1">
+            <div className="flex-between items-center mb-1">
+              <div className="flex-center-start gap-1.5 flex-wrap">
+                <h3 className="user-name font-bold text-base leading-none text-white">{userProfile.name}</h3>
+                <span className="badge-verified-pill text-3xs font-bold flex-center gap-0.5">
+                  <CheckCircle2 size={11} /> {isEn ? 'Verified' : 'सत्यापित'}
+                </span>
+              </div>
+              <button
+                className="btn-edit-profile-pill flex-center gap-1 text-2xs"
+                onClick={() => setIsEditModalOpen(true)}
+              >
+                <Edit3 size={11} /> {isEn ? 'Edit' : 'बदलें'}
+              </button>
+            </div>
+
+            <p className="user-tag text-2xs text-gold flex-center-start gap-1">
+              <Target size={11} className="text-warning" /> {userProfile.goal}
+            </p>
+            <p className="user-location text-3xs text-light-muted flex-center-start gap-1 mt-0.5">
+              <MapPin size={10} /> {userProfile.state} • <GraduationCap size={10} /> {userProfile.qual}
+            </p>
+          </div>
+        </div>
+
+        {/* Aspirant 4-Card Analytics Grid (Compact) */}
+        <div className="creator-stats-box vip-stats-grid mt-2.5 p-1.5">
+          <div className="stat-card">
+            <div className="stat-card-header text-3xs text-muted font-semibold">{isEn ? 'Followers' : 'फॉलोअर्स'}</div>
+            <div className="stat-card-value text-accent font-extrabold text-sm mt-0.5">{userProfile.followers || '1,240'}</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-card-header text-3xs text-muted font-semibold">{isEn ? 'Aspirant Karma' : 'कर्मा'}</div>
+            <div className="stat-card-value text-success font-extrabold text-sm mt-0.5">642 🔺</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-card-header text-3xs text-muted font-semibold">{isEn ? 'Community Rank' : 'रैंक'}</div>
+            <div className="stat-card-value text-warning font-extrabold text-sm mt-0.5">Top 5% 🏆</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-card-header text-3xs text-muted font-semibold">{isEn ? 'Study Streak' : 'स्ट्रीक'}</div>
+            <div className="stat-card-value text-danger font-extrabold text-sm mt-0.5">14 Days 🔥</div>
+          </div>
+        </div>
+      </div>
+
+      {/* ===================================================================
+          1. TOP VIP / ACCOUNT STATUS CARD (COMPACT SLEEK SIZING)
+          =================================================================== */}
+      <div
+        className="account-status-banner mb-2.5 p-2.5"
+        style={{
+          borderRadius: '14px',
           border: '1px solid #E2E8F0',
           background: '#FFFFFF',
-          boxShadow: '0 2px 8px rgba(15, 23, 42, 0.04)',
+          boxShadow: '0 2px 6px rgba(15, 23, 42, 0.04)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between'
@@ -376,14 +468,14 @@ export default function ProfileTab({
       </div>
 
       {/* ===================================================================
-          2. 4-TAB NAVIGATION GRID (100% MATCH WITH IMAGE 2)
+          2. 4-TAB NAVIGATION GRID (COMPACT BOX SIZES)
           =================================================================== */}
       <div
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(4, 1fr)',
-          gap: '8px',
-          marginBottom: '16px'
+          gap: '6px',
+          marginBottom: '12px'
         }}
       >
         {/* Tab 1: My Applications */}
@@ -394,22 +486,22 @@ export default function ProfileTab({
             background: activeSection === 'applied' ? '#1D64F2' : '#FFFFFF',
             color: activeSection === 'applied' ? '#FFFFFF' : '#1E293B',
             border: activeSection === 'applied' ? 'none' : '1px solid #E2E8F0',
-            borderRadius: '14px',
-            padding: '12px 4px',
+            borderRadius: '12px',
+            padding: '8px 2px',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '6px',
+            gap: '4px',
             cursor: 'pointer',
-            boxShadow: activeSection === 'applied' ? '0 4px 12px rgba(29, 100, 242, 0.28)' : '0 1px 3px rgba(15, 23, 42, 0.03)',
+            boxShadow: activeSection === 'applied' ? '0 3px 10px rgba(29, 100, 242, 0.25)' : 'none',
             transition: 'all 0.18s'
           }}
         >
-          <FileText size={20} color={activeSection === 'applied' ? '#FFFFFF' : '#2563EB'} />
-          <span style={{ fontSize: '11px', fontWeight: '700', textAlign: 'center', lineHeight: '1.2' }}>
+          <FileText size={18} color={activeSection === 'applied' ? '#FFFFFF' : '#2563EB'} />
+          <span style={{ fontSize: '10px', fontWeight: '700', textAlign: 'center', lineHeight: '1.2' }}>
             {isEn ? 'My Applications' : 'मेरे आवेदन'}
-            <span style={{ display: 'block', fontSize: '11px', fontWeight: '700' }}>({appliedJobs.length})</span>
+            <span style={{ display: 'block', fontSize: '10px', fontWeight: '700' }}>({appliedJobs.length})</span>
           </span>
         </button>
 
@@ -421,20 +513,20 @@ export default function ProfileTab({
             background: activeSection === 'vault' ? '#1D64F2' : '#FFFFFF',
             color: activeSection === 'vault' ? '#FFFFFF' : '#1E293B',
             border: activeSection === 'vault' ? 'none' : '1px solid #E2E8F0',
-            borderRadius: '14px',
-            padding: '12px 4px',
+            borderRadius: '12px',
+            padding: '8px 2px',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '6px',
+            gap: '4px',
             cursor: 'pointer',
-            boxShadow: activeSection === 'vault' ? '0 4px 12px rgba(29, 100, 242, 0.28)' : '0 1px 3px rgba(15, 23, 42, 0.03)',
+            boxShadow: activeSection === 'vault' ? '0 3px 10px rgba(29, 100, 242, 0.25)' : 'none',
             transition: 'all 0.18s'
           }}
         >
-          <span style={{ fontSize: '19px', lineHeight: '20px' }}>📁</span>
-          <span style={{ fontSize: '11px', fontWeight: '700', textAlign: 'center', lineHeight: '1.2' }}>
+          <span style={{ fontSize: '16px', lineHeight: '18px' }}>📁</span>
+          <span style={{ fontSize: '10px', fontWeight: '700', textAlign: 'center', lineHeight: '1.2' }}>
             CV & Vault
           </span>
         </button>
@@ -447,22 +539,22 @@ export default function ProfileTab({
             background: activeSection === 'saved' ? '#1D64F2' : '#FFFFFF',
             color: activeSection === 'saved' ? '#FFFFFF' : '#1E293B',
             border: activeSection === 'saved' ? 'none' : '1px solid #E2E8F0',
-            borderRadius: '14px',
-            padding: '12px 4px',
+            borderRadius: '12px',
+            padding: '8px 2px',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '6px',
+            gap: '4px',
             cursor: 'pointer',
-            boxShadow: activeSection === 'saved' ? '0 4px 12px rgba(29, 100, 242, 0.28)' : '0 1px 3px rgba(15, 23, 42, 0.03)',
+            boxShadow: activeSection === 'saved' ? '0 3px 10px rgba(29, 100, 242, 0.25)' : 'none',
             transition: 'all 0.18s'
           }}
         >
-          <Bookmark size={20} color={activeSection === 'saved' ? '#FFFFFF' : '#2563EB'} />
-          <span style={{ fontSize: '11px', fontWeight: '700', textAlign: 'center', lineHeight: '1.2' }}>
+          <Bookmark size={18} color={activeSection === 'saved' ? '#FFFFFF' : '#2563EB'} />
+          <span style={{ fontSize: '10px', fontWeight: '700', textAlign: 'center', lineHeight: '1.2' }}>
             {isEn ? 'Saved' : 'सेव्ड'}
-            <span style={{ display: 'block', fontSize: '11px', fontWeight: '700' }}>({savedJobsList.length})</span>
+            <span style={{ display: 'block', fontSize: '10px', fontWeight: '700' }}>({savedJobsList.length})</span>
           </span>
         </button>
 
@@ -474,20 +566,20 @@ export default function ProfileTab({
             background: activeSection === 'badges' ? '#1D64F2' : '#FFFFFF',
             color: activeSection === 'badges' ? '#FFFFFF' : '#1E293B',
             border: activeSection === 'badges' ? 'none' : '1px solid #E2E8F0',
-            borderRadius: '14px',
-            padding: '12px 4px',
+            borderRadius: '12px',
+            padding: '8px 2px',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '6px',
+            gap: '4px',
             cursor: 'pointer',
-            boxShadow: activeSection === 'badges' ? '0 4px 12px rgba(29, 100, 242, 0.28)' : '0 1px 3px rgba(15, 23, 42, 0.03)',
+            boxShadow: activeSection === 'badges' ? '0 3px 10px rgba(29, 100, 242, 0.25)' : 'none',
             transition: 'all 0.18s'
           }}
         >
-          <Award size={20} color={activeSection === 'badges' ? '#FFFFFF' : '#D97706'} />
-          <span style={{ fontSize: '11px', fontWeight: '700', textAlign: 'center', lineHeight: '1.2' }}>
+          <Award size={18} color={activeSection === 'badges' ? '#FFFFFF' : '#D97706'} />
+          <span style={{ fontSize: '10px', fontWeight: '700', textAlign: 'center', lineHeight: '1.2' }}>
             {isEn ? 'Badges & Level' : 'बैज व लेवल'}
           </span>
         </button>
@@ -884,20 +976,20 @@ export default function ProfileTab({
           SECTION 4: BADGES & LEVEL (ACTIVE ONLY WHEN TAB 4 CLICKED)
           =================================================================== */}
       {activeSection === 'badges' && (
-        <div style={{ background: '#FFFFFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '16px', marginBottom: '20px' }}>
-          <h4 style={{ fontSize: '14px', fontWeight: '800', color: '#0F172A', marginBottom: '12px' }}>
+        <div style={{ background: '#FFFFFF', borderRadius: '16px', border: '1px solid #E2E8F0', padding: '14px', marginBottom: '16px' }}>
+          <h4 style={{ fontSize: '13.5px', fontWeight: '800', color: '#0F172A', marginBottom: '10px' }}>
             🏆 {isEn ? 'Aspirant Badges & Rewards' : 'बैज और स्तर'}
           </h4>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-            <div style={{ padding: '12px', borderRadius: '12px', border: '1px solid #E2E8F0', textAlign: 'center' }}>
-              <span style={{ fontSize: '24px' }}>🎯</span>
-              <div style={{ fontSize: '12px', fontWeight: '700', marginTop: '4px' }}>First Apply</div>
-              <div style={{ fontSize: '10.5px', color: '#16A34A', fontWeight: '700' }}>Active ✅</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+            <div style={{ padding: '10px 8px', borderRadius: '12px', border: '1px solid #E2E8F0', textAlign: 'center', background: '#F8FAFC' }}>
+              <span style={{ fontSize: '20px' }}>🎯</span>
+              <div style={{ fontSize: '11px', fontWeight: '700', marginTop: '2px' }}>First Apply</div>
+              <div style={{ fontSize: '10px', color: '#16A34A', fontWeight: '700' }}>Active ✅</div>
             </div>
-            <div style={{ padding: '12px', borderRadius: '12px', border: '1px solid #E2E8F0', textAlign: 'center' }}>
-              <span style={{ fontSize: '24px' }}>🔥</span>
-              <div style={{ fontSize: '12px', fontWeight: '700', marginTop: '4px' }}>14-Day Streak</div>
-              <div style={{ fontSize: '10.5px', color: '#D97706', fontWeight: '700' }}>Gold Aspirant</div>
+            <div style={{ padding: '10px 8px', borderRadius: '12px', border: '1px solid #E2E8F0', textAlign: 'center', background: '#F8FAFC' }}>
+              <span style={{ fontSize: '20px' }}>🔥</span>
+              <div style={{ fontSize: '11px', fontWeight: '700', marginTop: '2px' }}>14-Day Streak</div>
+              <div style={{ fontSize: '10px', color: '#D97706', fontWeight: '700' }}>Gold Aspirant</div>
             </div>
           </div>
         </div>
@@ -1246,12 +1338,11 @@ export default function ProfileTab({
           <ChevronRight size={17} color="#94A3B8" />
         </div>
 
-        {/* Item 8: Copyright, Fair Use & DMCA (ZERO HINDI IN ENGLISH!) */}
+        {/* Item 8: Copyright, Fair Use & DMCA */}
         <div
           onClick={() => onOpenLegal && onOpenLegal('fairuse')}
           style={{
             padding: '12px 0',
-            borderBottom: '1px solid #F1F5F9',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -1279,44 +1370,6 @@ export default function ProfileTab({
               </div>
               <div style={{ fontSize: '11px', color: '#64748B', marginTop: '1px' }}>
                 Fair dealing & content takedown notice
-              </div>
-            </div>
-          </div>
-          <ChevronRight size={17} color="#94A3B8" />
-        </div>
-
-        {/* Item 9: Delete Data / Logout Options */}
-        <div
-          onClick={() => setIsLogoutModalOpen(true)}
-          style={{
-            padding: '12px 0',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            cursor: 'pointer'
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div
-              style={{
-                width: '38px',
-                height: '38px',
-                borderRadius: '10px',
-                background: '#FEE2E2',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0
-              }}
-            >
-              <Trash2 size={18} color="#DC2626" />
-            </div>
-            <div>
-              <div style={{ fontSize: '13.5px', fontWeight: '700', color: '#DC2626' }}>
-                {isEn ? 'Delete Data' : (isHi ? 'अकाउंट व डेटा हटाएं' : 'Delete Data')}
-              </div>
-              <div style={{ fontSize: '11px', color: '#64748B', marginTop: '1px' }}>
-                Purge profile, bookmarks & local history
               </div>
             </div>
           </div>
@@ -1614,6 +1667,118 @@ export default function ProfileTab({
                 }}
               >
                 {isEn ? 'Save to Tracker 🚀' : 'ट्रैकर में जोड़ें 🚀'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Profile Modal */}
+      {isEditModalOpen && (
+        <div className="modal-overlay" onClick={() => setIsEditModalOpen(false)}>
+          <div className="modal-content bottom-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="sheet-header flex-between">
+              <h3 className="sheet-title font-bold text-sm">
+                {isEn ? 'Update Aspirant Profile' : 'अपनी प्रोफाइल अपडेट करें'}
+              </h3>
+              <button className="icon-btn" onClick={() => setIsEditModalOpen(false)}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveProfile} className="sheet-body space-y-3">
+              {/* Photo Upload Section */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px', background: '#F8FAFC', borderRadius: '12px', border: '1px solid #E2E8F0' }}>
+                <img
+                  src={editAvatar || userProfile.avatar}
+                  alt="Avatar"
+                  style={{ width: '52px', height: '52px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #2563EB' }}
+                />
+                <div>
+                  <input
+                    type="file"
+                    id="edit-modal-avatar-input"
+                    accept="image/*"
+                    onChange={handleAvatarUpload}
+                    style={{ display: 'none' }}
+                  />
+                  <label
+                    htmlFor="edit-modal-avatar-input"
+                    style={{ background: '#1D64F2', color: '#FFFFFF', padding: '6px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: '700', cursor: 'pointer', display: 'inline-block' }}
+                  >
+                    📸 {isEn ? 'Change Photo' : 'फोटो बदलें'}
+                  </label>
+                  <p style={{ fontSize: '10.5px', color: '#64748B', margin: '4px 0 0' }}>JPG, PNG (Auto cropped)</p>
+                </div>
+              </div>
+
+              <div>
+                <label className="form-label text-xs font-bold mb-1 block">
+                  {isEn ? 'Full Name:' : 'पूरा नाम:'}
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="form-input"
+                />
+              </div>
+
+              <div>
+                <label className="form-label text-xs font-bold mb-1 block">
+                  {isEn ? 'Target Exam / Goal:' : 'लक्षित भर्ती परीक्षा:'}
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editGoal}
+                  onChange={(e) => setEditGoal(e.target.value)}
+                  className="form-input"
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div>
+                  <label className="form-label text-xs font-bold mb-1 block">
+                    {isEn ? 'Home State:' : 'गृह राज्य:'}
+                  </label>
+                  <input
+                    type="text"
+                    value={editState}
+                    onChange={(e) => setEditState(e.target.value)}
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label className="form-label text-xs font-bold mb-1 block">
+                    {isEn ? 'Qualification:' : 'योग्यता:'}
+                  </label>
+                  <input
+                    type="text"
+                    value={editQual}
+                    onChange={(e) => setEditQual(e.target.value)}
+                    className="form-input"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                style={{
+                  width: '100%',
+                  height: '48px',
+                  borderRadius: '12px',
+                  background: '#1D64F2',
+                  color: '#FFFFFF',
+                  fontWeight: '700',
+                  fontSize: '15px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  marginTop: '12px'
+                }}
+              >
+                {isEn ? 'Save Profile Changes 💾' : 'प्रोफाइल सेव करें 💾'}
               </button>
             </form>
           </div>
