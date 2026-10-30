@@ -129,6 +129,53 @@ export default function App() {
     return false;
   });
 
+  // PWA & Standalone Detection (Hides browser URL bar when installed)
+  const [isStandalone, setIsStandalone] = useState(() => {
+    return (
+      window.matchMedia('(display-mode: standalone)').matches ||
+      window.navigator.standalone === true ||
+      document.referrer.includes('android-app://')
+    );
+  });
+  const [deferredInstallPrompt, setDeferredInstallPrompt] = useState(null);
+  const [showInstallBanner, setShowInstallBanner] = useState(true);
+  const [showInstallGuideModal, setShowInstallGuideModal] = useState(false);
+
+  useEffect(() => {
+    const handleBeforeInstall = (e) => {
+      e.preventDefault();
+      setDeferredInstallPrompt(e);
+    };
+
+    const handleAppInstalled = () => {
+      setIsStandalone(true);
+      setShowInstallBanner(false);
+      setDeferredInstallPrompt(null);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
+
+  const handleTriggerInstall = async () => {
+    if (deferredInstallPrompt) {
+      deferredInstallPrompt.prompt();
+      const choice = await deferredInstallPrompt.userChoice;
+      if (choice && choice.outcome === 'accepted') {
+        setIsStandalone(true);
+        setShowInstallBanner(false);
+      }
+      setDeferredInstallPrompt(null);
+    } else {
+      setShowInstallGuideModal(true);
+    }
+  };
+
   // Authentication Handlers
   const handleLoginSuccess = (updatedUser) => {
     setUserProfile(updatedUser);
@@ -402,6 +449,74 @@ export default function App() {
           t={t}
         />
 
+        {/* PWA 1-Click Install Banner (Displayed only when opened in mobile browser with URL bar) */}
+        {!isStandalone && showInstallBanner && (
+          <div
+            className="install-app-banner flex-between items-center px-3 py-2"
+            style={{
+              background: 'linear-gradient(90deg, #1E1B4B 0%, #1E3A8A 50%, #2563EB 100%)',
+              color: '#FFFFFF',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
+              position: 'relative',
+              zIndex: 30,
+              borderBottom: '1px solid rgba(255,255,255,0.1)'
+            }}
+          >
+            <div className="flex-center gap-2">
+              <div
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '8px',
+                  background: 'linear-gradient(135deg, #2563EB, #1D4ED8)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: '900',
+                  fontSize: '13px',
+                  color: '#FACC15',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.25)',
+                  flexShrink: 0
+                }}
+              >
+                VEE
+              </div>
+              <div>
+                <p className="text-xs font-bold leading-none m-0 text-white">
+                  {currentLang === 'hi' ? '📲 VEE ऐप इनस्टॉल करें' : '📲 Install VEE Official App'}
+                </p>
+                <p className="text-3xs text-blue-200 leading-none m-0 mt-1">
+                  {currentLang === 'hi' ? 'URL बार हटाएं • असली ऐप की तरह चलाएं' : 'Remove browser URL bar • 100% Full Screen'}
+                </p>
+              </div>
+            </div>
+            <div className="flex-center gap-1.5 flex-shrink-0">
+              <button
+                type="button"
+                onClick={handleTriggerInstall}
+                className="btn-accent-sm font-bold text-3xs px-2.5 py-1.5 rounded-lg cursor-pointer"
+                style={{
+                  background: '#F59E0B',
+                  color: '#0F172A',
+                  border: 'none',
+                  boxShadow: '0 2px 6px rgba(245, 158, 11, 0.4)'
+                }}
+              >
+                {currentLang === 'hi' ? 'इनस्टॉल करें ⚡' : 'Install ⚡'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowInstallBanner(false)}
+                className="text-blue-200 hover:text-white p-1 cursor-pointer"
+                style={{ background: 'transparent', border: 'none', fontSize: '15px' }}
+                title="Dismiss"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Main Content Area */}
         <main className="main-viewport">
           {activeTab === 'jobs' && (
@@ -573,6 +688,152 @@ export default function App() {
           onClearUserData={handleClearAllUserData}
           t={t}
         />
+
+        {/* Fullscreen App Install Guide Modal (For mobile browsers showing top URL bar) */}
+        {showInstallGuideModal && (
+          <div
+            className="modal-overlay flex-center p-3"
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(15, 23, 42, 0.75)',
+              zIndex: 9999,
+              backdropFilter: 'blur(4px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            onClick={() => setShowInstallGuideModal(false)}
+          >
+            <div
+              className="p-4 rounded-2xl w-full max-w-sm text-center"
+              style={{
+                background: '#FFFFFF',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
+                position: 'relative',
+                animation: 'slideUp 0.25s ease-out'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div
+                style={{
+                  width: '56px',
+                  height: '56px',
+                  borderRadius: '16px',
+                  background: 'linear-gradient(135deg, #1E3A8A, #2563EB)',
+                  color: '#FACC15',
+                  fontSize: '22px',
+                  fontWeight: '900',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 12px auto',
+                  boxShadow: '0 8px 16px rgba(37, 99, 235, 0.3)'
+                }}
+              >
+                VEE
+              </div>
+              <h3 className="text-base font-extrabold text-slate-900 m-0 mb-1">
+                {currentLang === 'hi' ? 'VEE ऐप बिना URL बार के चलाएं' : 'Run VEE App Full-Screen'}
+              </h3>
+              <p className="text-2xs text-slate-600 m-0 mb-3.5 leading-relaxed">
+                {currentLang === 'hi'
+                  ? 'ऐप को अपने फ़ोन की होम स्क्रीन पर जोड़ें ताकि यह असली ऐप की तरह बिना किसी ब्राउज़र बार के खुले:'
+                  : 'Add the app to your Home Screen to remove the browser address bar:'}
+              </p>
+
+              <div
+                className="p-3 rounded-xl text-left flex-column gap-2.5 mb-4 text-xs font-medium text-slate-800"
+                style={{ background: '#F8FAFC', border: '1px solid #E2E8F0' }}
+              >
+                <div className="flex-center-start gap-2">
+                  <span
+                    style={{
+                      width: '20px',
+                      height: '20px',
+                      borderRadius: '50%',
+                      background: '#2563EB',
+                      color: '#FFF',
+                      fontSize: '11px',
+                      fontWeight: 'bold',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}
+                  >
+                    1
+                  </span>
+                  <span>
+                    {currentLang === 'hi'
+                      ? 'Chrome में ऊपर दाईं तरफ 3 डॉट्स (⋮) पर क्लिक करें'
+                      : 'Tap the 3 dots (⋮) in your Chrome browser'}
+                  </span>
+                </div>
+                <div className="flex-center-start gap-2">
+                  <span
+                    style={{
+                      width: '20px',
+                      height: '20px',
+                      borderRadius: '50%',
+                      background: '#2563EB',
+                      color: '#FFF',
+                      fontSize: '11px',
+                      fontWeight: 'bold',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}
+                  >
+                    2
+                  </span>
+                  <span>
+                    {currentLang === 'hi'
+                      ? '"Install app" या "Add to Home screen" चुनें'
+                      : 'Select "Install app" or "Add to Home screen"'}
+                  </span>
+                </div>
+                <div className="flex-center-start gap-2">
+                  <span
+                    style={{
+                      width: '20px',
+                      height: '20px',
+                      borderRadius: '50%',
+                      background: '#10B981',
+                      color: '#FFF',
+                      fontSize: '11px',
+                      fontWeight: 'bold',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}
+                  >
+                    3
+                  </span>
+                  <span>
+                    {currentLang === 'hi'
+                      ? 'होम स्क्रीन से VEE खोलें — URL बार हमेशा के लिए गायब!'
+                      : 'Open from Home Screen — Zero URL bar forever!'}
+                  </span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowInstallGuideModal(false)}
+                className="btn-primary w-full py-2.5 font-bold text-xs rounded-xl cursor-pointer"
+                style={{ background: '#1E3A8A', color: '#FFFFFF', border: 'none' }}
+              >
+                {currentLang === 'hi' ? 'समझ गया (Close) ✓' : 'Got it ✓'}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
