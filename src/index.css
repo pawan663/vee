@@ -4109,6 +4109,25 @@ iframe[title*="Netlify"],
   transform-origin: center;
 }
 
+/* Zepto / Flipkart / PW Grade Clean Auth Card */
+.auth-sheet-card {
+  background: #FFFFFF !important;
+  color: #0F172A !important;
+}
+
+.auth-sheet-card input {
+  color: #0F172A !important;
+}
+
+.auth-sheet-card input::placeholder {
+  color: #94A3B8 !important;
+}
+
+.auth-sheet-card select {
+  color: #0F172A !important;
+  background-color: #FFFFFF !important;
+}
+
 
 
 
