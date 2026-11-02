@@ -176,6 +176,43 @@ export default function App() {
     }
   };
 
+  // Fullscreen Immersive Mode (Hides browser URL bar immediately in Chrome)
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+      const el = document.documentElement;
+      if (el.requestFullscreen) {
+        el.requestFullscreen().catch(() => {});
+      } else if (el.webkitRequestFullscreen) {
+        el.webkitRequestFullscreen();
+      }
+      setIsFullscreen(true);
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      }
+      setIsFullscreen(false);
+    }
+  };
+
+  useEffect(() => {
+    const onFsChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement || document.webkitFullscreenElement));
+    };
+    document.addEventListener('fullscreenchange', onFsChange);
+    document.addEventListener('webkitfullscreenchange', onFsChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', onFsChange);
+      document.removeEventListener('webkitfullscreenchange', onFsChange);
+    };
+  }, []);
+
+  // WhatsApp / Social In-App Browser Detection
+  const isWhatsAppInApp = typeof navigator !== 'undefined' && /WhatsApp|FBAN|FBAV|Instagram/i.test(navigator.userAgent || '');
+
   // Authentication Handlers
   const handleLoginSuccess = (updatedUser) => {
     setUserProfile(updatedUser);
@@ -446,6 +483,8 @@ export default function App() {
           onOpenTools={() => setIsToolsOpen(true)}
           userProfile={userProfile}
           onOpenAuth={() => setIsAuthOpen(true)}
+          onToggleFullscreen={toggleFullscreen}
+          isFullscreen={isFullscreen}
           t={t}
         />
 
@@ -454,7 +493,9 @@ export default function App() {
           <div
             className="install-app-banner flex-between items-center px-3 py-2"
             style={{
-              background: 'linear-gradient(90deg, #1E1B4B 0%, #1E3A8A 50%, #2563EB 100%)',
+              background: isWhatsAppInApp 
+                ? 'linear-gradient(90deg, #065F46 0%, #047857 100%)' 
+                : 'linear-gradient(90deg, #1E1B4B 0%, #1E3A8A 50%, #2563EB 100%)',
               color: '#FFFFFF',
               boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
               position: 'relative',
@@ -483,10 +524,14 @@ export default function App() {
               </div>
               <div>
                 <p className="text-xs font-bold leading-none m-0 text-white">
-                  {currentLang === 'hi' ? '📲 VEE ऐप इनस्टॉल करें' : '📲 Install VEE Official App'}
+                  {isWhatsAppInApp
+                    ? (currentLang === 'hi' ? '⚡ WhatsApp से बाहर Chrome में खोलें' : '⚡ Open in Chrome Browser')
+                    : (currentLang === 'hi' ? '📲 VEE ऐप इनस्टॉल करें' : '📲 Install VEE Official App')}
                 </p>
                 <p className="text-3xs text-blue-200 leading-none m-0 mt-1">
-                  {currentLang === 'hi' ? 'URL बार हटाएं • असली ऐप की तरह चलाएं' : 'Remove browser URL bar • 100% Full Screen'}
+                  {isWhatsAppInApp
+                    ? (currentLang === 'hi' ? 'ऊपर 3 डॉट्स दबाकर Open in Chrome करें' : 'Tap 3 dots (⋮) -> Open in Chrome')
+                    : (currentLang === 'hi' ? 'URL बार हटाएं • 1-क्लिक में असली ऐप चलाएं' : 'Remove browser URL bar • 100% Full Screen')}
                 </p>
               </div>
             </div>
@@ -503,6 +548,19 @@ export default function App() {
                 }}
               >
                 {currentLang === 'hi' ? 'इनस्टॉल करें ⚡' : 'Install ⚡'}
+              </button>
+              <button
+                type="button"
+                onClick={toggleFullscreen}
+                className="btn-accent-sm font-bold text-3xs px-2 py-1.5 rounded-lg cursor-pointer"
+                style={{
+                  background: 'rgba(255,255,255,0.18)',
+                  color: '#FFFFFF',
+                  border: '1px solid rgba(255,255,255,0.3)'
+                }}
+                title="Toggle Fullscreen"
+              >
+                {isFullscreen ? '🗗 Exit' : '⛶ Full'}
               </button>
               <button
                 type="button"
@@ -523,12 +581,14 @@ export default function App() {
             <JobsTab
               jobs={jobs}
               liveNews={liveNews}
+              userProfile={userProfile}
               onOpenDetail={(job) => setSelectedDetailJob(job)}
               onOpenApply={(job) => setApplyBrowserJob(job)}
               onOpenNews={(item) => setReaderItem(item)}
               savedJobIds={savedJobIds}
               onToggleSave={handleToggleSave}
               onOpenTools={() => setIsToolsOpen(true)}
+              onOpenProfile={() => setActiveTab('profile')}
               lastSyncedTime={lastSyncedTime}
               isSyncing={isSyncing}
               onManualSync={syncLiveData}

@@ -139,12 +139,14 @@ function formatSyncTime(date, lang) {
 export default function JobsTab({
   jobs,
   liveNews,
+  userProfile,
   onOpenDetail,
   onOpenApply,
   onOpenNews,
   savedJobIds,
   onToggleSave,
   onOpenTools,
+  onOpenProfile,
   lastSyncedTime,
   isSyncing,
   onManualSync,
@@ -467,8 +469,34 @@ export default function JobsTab({
       if (!matchSearch) return false;
     }
 
-    // Category (Govt vs Private vs Apprentice)
-    if (activeCategory === 'APPRENTICE') {
+    // Category (Govt vs Private vs Apprentice vs FOR_YOU)
+    if (activeCategory === 'FOR_YOU') {
+      const userState = (userProfile?.state || '').toLowerCase().trim();
+      const userGoal = (userProfile?.goal || '').toLowerCase().trim();
+      const userQual = (userProfile?.qual || '').toLowerCase().trim();
+      const combined = `${job.title || ''} ${job.dept || ''} ${job.type || ''} ${job.qualification || ''} ${job.state || ''} ${job.location || ''}`.toLowerCase();
+
+      let isMatch = false;
+      if (userState && userState !== 'all india' && userState !== 'pan india' && combined.includes(userState)) {
+        isMatch = true;
+      }
+      if (userGoal) {
+        if (/police/i.test(userGoal) && /police|constable|daroga|si\b/i.test(combined)) isMatch = true;
+        if (/railway|alp/i.test(userGoal) && /railway|rrb|alp|technician|loco/i.test(combined)) isMatch = true;
+        if (/ssc|gd/i.test(userGoal) && /ssc|gd\b|cgl|chsl/i.test(combined)) isMatch = true;
+        if (/bank/i.test(userGoal) && /bank|ibps|sbi|po\b|clerk/i.test(combined)) isMatch = true;
+        if (/teacher|teaching/i.test(userGoal) && /teacher|tet|ctet|bed/i.test(combined)) isMatch = true;
+        if (/defence|army/i.test(userGoal) && /army|navy|air force|agniveer/i.test(combined)) isMatch = true;
+        if (/iti|apprentice/i.test(userGoal) && /iti\b|apprentice/i.test(combined)) isMatch = true;
+      }
+      if (userQual) {
+        if (/10th/i.test(userQual) && /10th|matric/i.test(combined)) isMatch = true;
+        if (/12th/i.test(userQual) && /12th|10\+2/i.test(combined)) isMatch = true;
+        if (/iti/i.test(userQual) && /iti\b|apprentice/i.test(combined)) isMatch = true;
+        if (/graduate/i.test(userQual) && /graduate|degree/i.test(combined)) isMatch = true;
+      }
+      if (!isMatch) return false;
+    } else if (activeCategory === 'APPRENTICE') {
       const isApp = /apprentice|अप्रेंटिस/i.test(`${job.title || ''} ${job.dept || ''} ${job.type || ''} ${job.qualification || ''}`);
       if (!isApp) return false;
     } else if (activeCategory !== 'ALL' && activeCategory !== 'NEWS' && activeCategory !== 'RESULTS' && activeCategory !== 'ADMIT' && job.category !== activeCategory) {
@@ -639,17 +667,71 @@ export default function JobsTab({
 
     return true;
     });
-  }, [jobs, todayStr, searchTerm, activeCategory, filterQual, filterDept, filterState, isMatcherOpen, matchQual]);
+  }, [jobs, todayStr, searchTerm, activeCategory, filterQual, filterDept, filterState, isMatcherOpen, matchQual, userProfile]);
 
-  // Smart Priority Scoring: Major flagship recruitments (Railway, SSC, Police, Army, Apprentice, PSUs, 100+ posts)
-  // appear at the top, while small 1-2 post watchman/gardener jobs appear lower down.
-  const getJobPriorityScore = (job) => {
+  // Smart Priority Scoring: Major flagship recruitments + Personalized Profile Boost
+  const getJobPriorityScore = (job, profile) => {
     let score = 0;
     const title = (job.title || '').toLowerCase();
     const dept = (job.dept || '').toLowerCase();
     const cat = (job.category || '').toLowerCase();
     const postsText = (job.posts || '').toLowerCase();
     const source = (job.source || '').toLowerCase();
+    const qual = (job.qualification || '').toLowerCase();
+    const state = (job.state || '').toLowerCase();
+    const loc = (job.location || '').toLowerCase();
+    const combined = `${title} ${dept} ${qual} ${state} ${loc}`;
+
+    // =========================================================================
+    // 1. PERSONALIZED PROFILE BOOST (Unique per user's phone & profile!)
+    // =========================================================================
+    if (profile) {
+      const userState = (profile.state || '').toLowerCase().trim();
+      const userGoal = (profile.goal || '').toLowerCase().trim();
+      const userQual = (profile.qual || '').toLowerCase().trim();
+
+      // State Personalization (+150 Points)
+      if (userState && userState !== 'all india' && userState !== 'pan india') {
+        if (combined.includes(userState)) {
+          score += 150;
+        }
+      }
+
+      // Target Goal / Category Personalization (+130 Points)
+      if (userGoal) {
+        if (/police|constable|si\b|daroga/i.test(userGoal) && /police|constable|daroga|sub[\s-]?inspector/i.test(combined)) {
+          score += 130;
+        }
+        if (/railway|alp|technician|loco|ntpc|group\s*d/i.test(userGoal) && /railway|rrb|rrc|alp|technician|loco|ntpc|trackman/i.test(combined)) {
+          score += 130;
+        }
+        if (/ssc|cgl|chsl|mts|gd/i.test(userGoal) && /\bssc\b|staff selection|cgl|chsl|mts|gd\b/i.test(combined)) {
+          score += 130;
+        }
+        if (/bank|po\b|clerk/i.test(userGoal) && /bank|ibps|sbi|rbi|clerk|po\b/i.test(combined)) {
+          score += 130;
+        }
+        if (/teacher|teaching|tet|ctet|reet|bed/i.test(userGoal) && /teacher|teaching|tet|ctet|reet|b\.?ed|prt|tgt|pgt/i.test(combined)) {
+          score += 130;
+        }
+        if (/army|defence|navy|air\s*force|agniveer/i.test(userGoal) && /army|navy|air\s*force|agniveer|defence|military/i.test(combined)) {
+          score += 130;
+        }
+        if (/iti|fitter|electrician|apprentice/i.test(userGoal) && /iti\b|apprentice|fitter|electrician|welder|technician/i.test(combined)) {
+          score += 130;
+        }
+      }
+
+      // Qualification Personalization (+90 Points)
+      if (userQual) {
+        if (/10th|matric/i.test(userQual) && /10th|matric/i.test(combined)) score += 90;
+        if (/12th|intermediate/i.test(userQual) && /12th|10\+2|intermediate/i.test(combined)) score += 90;
+        if (/iti\b/i.test(userQual) && /iti\b|ncvt|scvt|apprentice|trade/i.test(combined)) score += 100;
+        if (/diploma|polytechnic/i.test(userQual) && /diploma|polytechnic/i.test(combined)) score += 90;
+        if (/graduate|degree/i.test(userQual) && /graduate|degree|b\.?a|b\.?sc|b\.?com/i.test(combined)) score += 80;
+        if (/b\.?tech|engineering/i.test(userQual) && /b\.?tech|engineering|engineer/i.test(combined)) score += 80;
+      }
+    }
 
     // Flagship major government recruiters base weights
     if (/railway|rrb|rrc|irctc|metro/i.test(dept) || /railway|rrb|station master|alp|technician/i.test(title)) score += 60;
@@ -697,30 +779,34 @@ export default function JobsTab({
 
   // Sort displayJobs so major, high-impact recruitments appear at the top
   const displayJobs = useMemo(() => {
-    return [...filteredJobs].sort((a, b) => {
-      // 1. If state filter is active, prioritize that state
-      if (filterState !== 'ALL' && filterState !== 'All India') {
-        const stateWord = filterState.toLowerCase();
-        const aState = `${a.state || ''} ${a.title || ''} ${a.dept || ''} ${a.location || ''}`.toLowerCase().includes(stateWord);
-        const bState = `${b.state || ''} ${b.title || ''} ${b.dept || ''} ${b.location || ''}`.toLowerCase().includes(stateWord);
-        if (aState && !bState) return -1;
-        if (!aState && bState) return 1;
-      }
+    return [...filteredJobs]
+      .map((job) => {
+        const score = getJobPriorityScore(job, userProfile);
+        const hasPersonalizedBoost = score >= 140;
+        return { ...job, priorityScore: score, isPersonalizedMatch: hasPersonalizedBoost };
+      })
+      .sort((a, b) => {
+        // 1. If state filter is active, prioritize that state
+        if (filterState !== 'ALL' && filterState !== 'All India') {
+          const stateWord = filterState.toLowerCase();
+          const aState = `${a.state || ''} ${a.title || ''} ${a.dept || ''} ${a.location || ''}`.toLowerCase().includes(stateWord);
+          const bState = `${b.state || ''} ${b.title || ''} ${b.dept || ''} ${b.location || ''}`.toLowerCase().includes(stateWord);
+          if (aState && !bState) return -1;
+          if (!aState && bState) return 1;
+        }
 
-      // 2. High-impact Flagship Major Recruitments first (Railway, SSC, Defence, Apprentice, 100+ posts)
-      const scoreA = getJobPriorityScore(a);
-      const scoreB = getJobPriorityScore(b);
-      if (scoreA !== scoreB) {
-        return scoreB - scoreA;
-      }
+        // 2. High-impact Flagship & Personalized Recruitments first
+        if (a.priorityScore !== b.priorityScore) {
+          return b.priorityScore - a.priorityScore;
+        }
 
-      // 3. Newest / Active forms first
-      if (a.isNew && !b.isNew) return -1;
-      if (!a.isNew && b.isNew) return 1;
+        // 3. Newest / Active forms first
+        if (a.isNew && !b.isNew) return -1;
+        if (!a.isNew && b.isNew) return 1;
 
-      return 0;
-    });
-  }, [filteredJobs, filterState, currentHour, sessionCount]);
+        return 0;
+      });
+  }, [filteredJobs, filterState, currentHour, sessionCount, userProfile]);
 
   const formatHeadline = (title) => {
     if (!title) return '';
@@ -854,6 +940,42 @@ export default function JobsTab({
         </div>
       </div>
 
+      {/* Personalized Aspirant Feed Strip */}
+      {userProfile && (
+        <div
+          className="personalized-strip flex-between items-center px-3 py-2 rounded-xl mb-2.5"
+          style={{
+            background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)',
+            border: '1px solid #BFDBFE',
+            boxShadow: '0 2px 4px rgba(37, 99, 235, 0.06)'
+          }}
+        >
+          <div className="flex-center gap-2">
+            <span style={{ fontSize: '18px' }}>🎯</span>
+            <div>
+              <p className="text-xs font-bold text-blue-950 m-0">
+                {currentLang === 'hi' 
+                  ? `${userProfile.name || 'आपके'} लिए पसंदीदा भर्तियां` 
+                  : `Tailored Feed for ${userProfile.name || 'You'}`}
+              </p>
+              <p className="text-3xs text-blue-700 m-0 mt-0.5 font-medium">
+                📍 {userProfile.state || 'All India'} • {userProfile.goal || 'Govt Jobs'} • {userProfile.qual || 'All'}
+              </p>
+            </div>
+          </div>
+          {onOpenProfile && (
+            <button
+              type="button"
+              onClick={onOpenProfile}
+              className="text-3xs font-bold px-2 py-1 rounded-md cursor-pointer"
+              style={{ background: '#2563EB', color: '#FFFFFF', border: 'none' }}
+            >
+              {currentLang === 'hi' ? 'बदलें ⚙️' : 'Edit ⚙️'}
+            </button>
+          )}
+        </div>
+      )}
+
       {/* 3 Pillars Quick Switcher: Compact, Sleek & Colorful */}
       <div className="three-pillars-grid mb-2.5">
         <button
@@ -893,6 +1015,13 @@ export default function JobsTab({
       {/* Sub Sector Switcher (Only visible when Vacancies or News are active) */}
       {activeCategory !== 'RESULTS' && activeCategory !== 'ADMIT' && (
         <div className="sector-switcher-row mb-2">
+          <button
+            className={`sector-pill sector-all ${activeCategory === 'FOR_YOU' ? 'active' : ''}`}
+            onClick={() => setActiveCategory('FOR_YOU')}
+            style={activeCategory === 'FOR_YOU' ? { background: '#2563EB', color: '#FFF', fontWeight: 'bold' } : {}}
+          >
+            🎯 {currentLang === 'hi' ? 'आपके लिए' : 'For You'}
+          </button>
           <button
             className={`sector-pill sector-all ${activeCategory === 'ALL' ? 'active' : ''}`}
             onClick={() => setActiveCategory('ALL')}

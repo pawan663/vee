@@ -1,7 +1,7 @@
 import React from 'react';
 import { Bell, Search, Globe, Sparkles } from 'lucide-react';
 
-export default function Navbar({ currentLang, onChangeLang, onOpenTools, userProfile, onOpenAuth, t }) {
+export default function Navbar({ currentLang, onChangeLang, onOpenTools, userProfile, onOpenAuth, onToggleFullscreen, isFullscreen, t }) {
   return (
     <header className="app-navbar">
       <div className="navbar-top-row flex-between">
@@ -22,6 +22,17 @@ export default function Navbar({ currentLang, onChangeLang, onOpenTools, userPro
         {/* Right Action Icons: Login, Tools & Language */}
         <div className="nav-actions flex-center gap-1.5">
 
+
+          {/* Fullscreen / Hide URL bar button */}
+          <button
+            className="icon-btn-highlight"
+            onClick={onToggleFullscreen}
+            title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen (Hide URL Bar)'}
+            style={{ background: isFullscreen ? '#1E3A8A' : 'rgba(30, 58, 138, 0.08)', color: isFullscreen ? '#FFF' : '#1E3A8A' }}
+          >
+            <span style={{ fontSize: '13px', lineHeight: 1 }}>{isFullscreen ? '🗗' : '⛶'}</span>
+            <span className="text-3xs font-bold">{isFullscreen ? 'Exit' : 'Full'}</span>
+          </button>
 
           {/* Quick Tools Button */}
           <button

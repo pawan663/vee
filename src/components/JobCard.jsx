@@ -39,6 +39,21 @@ export default function JobCard({ job, onOpenDetail, onOpenApply, isSaved, onTog
             {isApprentice ? `🛠️ ${t.filterApprentice || 'Apprentice'}` : (job.category === 'Govt' ? `🏛️ ${t.filterGovt}` : `🏢 ${t.filterPrivate}`)}
           </span>
 
+          {job.isPersonalizedMatch && (
+            <span
+              className="badge-matched flex-center gap-0.5 text-3xs font-bold"
+              style={{
+                background: '#ECFDF5',
+                color: '#059669',
+                border: '1px solid #A7F3D0',
+                padding: '2px 6px',
+                borderRadius: '4px'
+              }}
+            >
+              🎯 {currentLang === 'hi' ? 'आपके अनुकूल' : 'For You'}
+            </span>
+          )}
+
           {hasVideo && (
             <span
               className="badge-video-guide flex-center gap-0.5 text-3xs font-bold"
