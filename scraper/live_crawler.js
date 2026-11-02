@@ -1,6 +1,7 @@
 import * as cheerio from 'cheerio';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { deduplicateJobs, deduplicateNews } from './deduplicate.js';
 
 const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
@@ -638,9 +639,9 @@ export async function fetchDetailPageLastDate(url) {
   return null;
 }
 
-// 1. Scrape FreeJobAlert (Live Table Master Registry + 3 Homepage Boxes + Feed)
+// 1. Scrape FreeJobAlert (Live Table Master Registry + All Homepage Live Articles + Feed)
 export async function scrapeFreeJobAlert() {
-  console.log("🌐 [1/12] Scraping FreeJobAlert (Live Table + 3 Boxes + Feed)...");
+  console.log("🌐 [1/12] Scraping FreeJobAlert (All 45 Tables + All Homepage Articles + RSS Feed)...");
   const [homeHtml, latestTableHtml, feedXml] = await Promise.all([
     fetchHtml('https://www.freejobalert.com/'),
     fetchHtml('https://www.freejobalert.com/latest-notifications/'),
@@ -655,11 +656,11 @@ export async function scrapeFreeJobAlert() {
     globalDateRegistry.init(latestTableHtml);
   }
 
-  // A. Parse structured Live Table FIRST: Extract top genuine jobs with 100% verified dates
+  // A. Parse structured Live Tables: Extract across all 45 tables (State, Police, Banking, Defence, Railway, Medical)
   if (latestTableHtml) {
     const $ = cheerio.load(latestTableHtml);
     $('table tr').each((i, tr) => {
-      if (jobs.length >= 135) return;
+      if (jobs.length >= 450) return;
       const tds = $(tr).find('td');
       if (tds.length >= 6) {
         const postDate = $(tds[0]).text().trim();
@@ -732,108 +733,72 @@ export async function scrapeFreeJobAlert() {
     });
   }
 
-  // B. Parse Homepage 3 Main Boxes directly (.nutitle)
+  // B. Parse ALL Homepage Live Article Links directly (captures all top headline recruitments, admit cards & results)
   if (homeHtml) {
     const $ = cheerio.load(homeHtml);
-    $('.nutitle').each((_, el) => {
-      const heading = $(el).text().trim();
-      const container = $(el).closest('.gb-container, .wp-block-group, div[class*="gb-container"]');
+    $('a[href*="/articles/"]').each((i, a) => {
+      const text = cleanTitle($(a).text());
+      const href = $(a).attr('href');
+      if (!text || text.length < 8 || !href || href.includes('#') || text === 'View All') return;
 
-      // 1. Box: Job Notifications (Latest hot postings shown in user's Photo 3)
-      if (heading === 'Job Notifications') {
-        container.find('a').each((i, a) => {
-          const text = cleanTitle($(a).text());
-          const href = $(a).attr('href');
-          if (text && href && !href.includes('#') && text !== heading && text !== 'View All') {
-            if (/admit\s*card|hall\s*ticket|call\s*letter|eligibility\s*result|final\s*result|\bresult\b|score\s*card|answer\s*key|merit\s*list|exam\s*date/i.test(text) && !/online\s*form|apply\s*online/i.test(text)) {
-              news.push({
-                id: `fja-box-news-${Date.now()}-${i}`,
-                title: text,
-                url: href,
-                source: "FreeJobAlert",
-                tag: /admit/i.test(text) ? "Admit Card" : (/result/i.test(text) ? "Result" : "Exam Alert"),
-                timeAgo: "Live Alert",
-                isAdmit: /admit/i.test(text),
-                isResult: /result/i.test(text)
-              });
-              return;
-            }
-            const q = detectFjaQual('', text);
-            const state = detectFjaState('', text);
-            const details = enrichJobDetails(text, q.type);
-
-            const tableMatch = globalDateRegistry.findMatch(text, href);
-            const realLastDate = tableMatch ? tableMatch.lastDate : null;
-            const finalLastDate = realLastDate || generateRealisticFallbackDate(text, 18);
-            const isClosing = isClosingWithinDays(finalLastDate, 7);
-
-            jobs.push({
-              id: `fja-box-${Date.now()}-${i}`,
-              title: text,
-              dept: details.dept,
-              posts: details.posts,
-              qualification: q.qual,
-              state: state,
-              category: "Govt",
-              type: q.type,
-              lastDate: finalLastDate,
-              isRealDate: Boolean(realLastDate),
-              ageLimit: details.ageLimit,
-              fee: details.fee,
-              pdfUrl: href,
-              applyUrl: href,
-              fallbackUrl: getOfficialPortalUrl(details.dept, text, href),
-              source: "FreeJobAlert",
-              isNew: true,
-              isClosingSoon: isClosing,
-              status: "ACTIVE",
-              viewsCount: Math.floor(35000 + Math.random() * 25000),
-              salary: details.salary,
-              selectionProcess: details.selectionProcess,
-              videoId: details.videoId,
-              videoUrl: details.videoUrl,
-              videoTitle: details.videoTitle
-            });
-          }
-        });
+      // Classify Admit Cards & Results
+      if (/admit\s*card|hall\s*ticket|call\s*letter|eligibility\s*result|final\s*result|\bresult\b|score\s*card|answer\s*key|merit\s*list|exam\s*date/i.test(text) && !/online\s*form|apply\s*online/i.test(text)) {
+        if (!news.some(n => n.url === href || n.title.toLowerCase() === text.toLowerCase())) {
+          news.push({
+            id: `fja-home-news-${Date.now()}-${i}`,
+            title: text,
+            url: href,
+            source: "FreeJobAlert",
+            tag: /admit/i.test(text) ? "Admit Card" : (/result/i.test(text) ? "Result" : "Exam Alert"),
+            timeAgo: "Live Alert",
+            isAdmit: /admit/i.test(text),
+            isResult: /result/i.test(text)
+          });
+        }
+        return;
       }
 
-      // 2. Box: Admit Card (Instant real-time hall tickets)
-      else if (heading === 'Admit Card') {
-        container.find('a').each((i, a) => {
-          const text = cleanTitle($(a).text());
-          const href = $(a).attr('href');
-          if (text && href && !href.includes('#') && text !== heading && text !== 'View All') {
-            news.push({
-              id: `fja-admit-${Date.now()}-${i}`,
-              title: text,
-              url: href,
-              source: "FreeJobAlert",
-              tag: "Admit Card",
-              timeAgo: "Today Out",
-              isAdmit: true
-            });
-          }
-        });
-      }
+      // Classify Live Recruitments & Vacancy Announcements
+      if (/recruitment|vacancy|posts|online form|offline form|bharti|officer|constable|apprentice|engineer|clerk|trainee|inspector|teacher|attendant/i.test(text)) {
+        const alreadyExists = jobs.some(j => (j.pdfUrl && j.pdfUrl === href) || j.title.toLowerCase() === text.toLowerCase());
+        if (!alreadyExists) {
+          const q = detectFjaQual('', text);
+          const state = detectFjaState('', text);
+          const details = enrichJobDetails(text, q.type);
 
-      // 3. Box: Results (Declared merit lists & results)
-      else if (heading === 'Results') {
-        container.find('a').each((i, a) => {
-          const text = cleanTitle($(a).text());
-          const href = $(a).attr('href');
-          if (text && href && !href.includes('#') && text !== heading && text !== 'View All') {
-            news.push({
-              id: `fja-result-${Date.now()}-${i}`,
-              title: text,
-              url: href,
-              source: "FreeJobAlert",
-              tag: "Result",
-              timeAgo: "Declared Today",
-              isResult: true
-            });
-          }
-        });
+          const tableMatch = globalDateRegistry.findMatch(text, href);
+          const realLastDate = tableMatch ? tableMatch.lastDate : null;
+          const finalLastDate = realLastDate || generateRealisticFallbackDate(text, 18);
+          const isClosing = isClosingWithinDays(finalLastDate, 7);
+
+          jobs.push({
+            id: `fja-home-job-${Date.now()}-${i}`,
+            title: text,
+            dept: details.dept,
+            posts: details.posts,
+            qualification: q.qual,
+            state: state,
+            category: /apprentice/i.test(text) ? "Apprentice" : "Govt",
+            type: q.type,
+            lastDate: finalLastDate,
+            isRealDate: Boolean(realLastDate),
+            ageLimit: details.ageLimit,
+            fee: details.fee,
+            pdfUrl: href,
+            applyUrl: href,
+            fallbackUrl: getOfficialPortalUrl(details.dept, text, href),
+            source: "FreeJobAlert",
+            isNew: true,
+            isClosingSoon: isClosing,
+            status: "ACTIVE",
+            viewsCount: Math.floor(35000 + Math.random() * 25000),
+            salary: details.salary,
+            selectionProcess: details.selectionProcess,
+            videoId: details.videoId,
+            videoUrl: details.videoUrl,
+            videoTitle: details.videoTitle
+          });
+        }
       }
     });
   }
@@ -842,7 +807,7 @@ export async function scrapeFreeJobAlert() {
   if (feedXml) {
     const $feed = cheerio.load(feedXml, { xmlMode: true });
     $feed('item').each((i, el) => {
-      if (jobs.length >= 110) return;
+      if (jobs.length >= 500) return;
       const title = cleanTitle($feed(el).find('title').text());
       const link = $feed(el).find('link').text() || $feed(el).find('guid').text();
       if (title && title.length > 12 && !jobs.some(j => j.title.toLowerCase() === title.toLowerCase())) {
@@ -2066,18 +2031,20 @@ export async function aggregateAllLiveData() {
     news: allLiveNews
   };
 
+  const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+
   // Write to src/data for Vite build
-  const srcPath = path.resolve('src/data/liveScrapedData.json');
+  const srcPath = path.resolve(projectRoot, 'src/data/liveScrapedData.json');
   fs.writeFileSync(srcPath, JSON.stringify(payload, null, 2), 'utf-8');
 
   // Also write to public/live_data.json for instant runtime mobile polling
-  const publicDir = path.resolve('public');
+  const publicDir = path.resolve(projectRoot, 'public');
   if (!fs.existsSync(publicDir)) fs.mkdirSync(publicDir, { recursive: true });
   const publicPath = path.join(publicDir, 'live_data.json');
   fs.writeFileSync(publicPath, JSON.stringify(payload, null, 2), 'utf-8');
 
   // Also sync to dist/live_data.json if dist exists
-  const distDir = path.resolve('dist');
+  const distDir = path.resolve(projectRoot, 'dist');
   if (fs.existsSync(distDir)) {
     fs.writeFileSync(path.join(distDir, 'live_data.json'), JSON.stringify(payload, null, 2), 'utf-8');
   }

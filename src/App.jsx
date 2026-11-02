@@ -40,12 +40,23 @@ export default function App() {
     if (saved) {
       try { return JSON.parse(saved); } catch (e) {}
     }
+    // Diverse aspirational presets so different phones & users get uniquely tailored feeds right from install!
+    const defaultSeeds = [
+      { state: 'Rajasthan', goal: 'ITI Fitter / Railway ALP', qual: 'ITI Pass' },
+      { state: 'Uttar Pradesh', goal: 'UP Police Constable & SI', qual: '12th Pass' },
+      { state: 'Madhya Pradesh', goal: 'MP Police & MPESB Vacancies', qual: '12th / Graduate' },
+      { state: 'Bihar', goal: 'Bihar Police & BSSC', qual: '12th / Graduate' },
+      { state: 'All India', goal: 'SSC GD & Central Forces', qual: '10th Pass' },
+      { state: 'Delhi', goal: 'DSSSB & Central Govt', qual: 'Graduate' }
+    ];
+    const chosen = defaultSeeds[Math.floor(Math.random() * defaultSeeds.length)];
+
     return {
       name: 'VEE Aspirant',
       avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
-      state: 'Rajasthan',
-      goal: 'ITI Fitter / Railway ALP',
-      qual: 'ITI Pass',
+      state: chosen.state,
+      goal: chosen.goal,
+      qual: chosen.qual,
       followers: '1,240',
       following: '48',
       karma: '642',
@@ -295,28 +306,34 @@ export default function App() {
 
   const syncLiveData = async (isManual = false) => {
     try {
-      if (isManual) setIsSyncing(true);
-
-      // Multi-Layer Cloud Live Sync:
-      // 1. First fetch real-time from local endpoint (guaranteed fastest, same origin, no CORS)
-      // 2. Fallback to GitHub raw CDN
-      let data = null;
-      try {
-        const localRes = await fetch(`/live_data.json?t=${Date.now()}`);
-        if (localRes.ok) {
-          data = await localRes.json();
-        }
-      } catch (err) {
-        // Fallback to GitHub CDN
+      if (isManual) {
+        setIsSyncing(true);
+        lastSyncHashRef.current = ''; // Force re-render on manual refresh
       }
 
-      if (!data) {
-        try {
-          const ghRes = await fetch(`https://raw.githubusercontent.com/pawan663/vee/main/public/live_data.json?t=${Date.now()}`);
-          if (ghRes.ok) {
-            data = await ghRes.json();
+      // Multi-Layer Parallel Cloud Live Sync:
+      // Fetches both local endpoint and GitHub Raw CDN in parallel with cache: 'no-store'
+      // Automatically picks whichever source is newer by lastUpdated timestamp (Zero lag!)
+      const [localData, ghData] = await Promise.all([
+        fetch(`/live_data.json?t=${Date.now()}`, { cache: 'no-store' })
+          .then((r) => (r.ok ? r.json() : null))
+          .catch(() => null),
+        fetch(`https://raw.githubusercontent.com/pawan663/vee/main/public/live_data.json?t=${Date.now()}`, { cache: 'no-store' })
+          .then((r) => (r.ok ? r.json() : null))
+          .catch(() => null)
+      ]);
+
+      let data = localData;
+      if (ghData) {
+        if (!data) {
+          data = ghData;
+        } else {
+          const localTime = new Date(data.lastUpdated || 0).getTime();
+          const ghTime = new Date(ghData.lastUpdated || 0).getTime();
+          if (ghTime > localTime) {
+            data = ghData;
           }
-        } catch (err) {}
+        }
       }
 
       if (data && data.jobs && Array.isArray(data.jobs)) {
