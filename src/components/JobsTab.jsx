@@ -960,90 +960,6 @@ export default function JobsTab({
         </div>
       </div>
 
-      {/* 24x7 Live Auto-Scanning Status Bar */}
-      <div
-        className="live-autoscanning-bar flex-between items-center px-3 py-2 rounded-xl mb-2.5"
-        style={{
-          background: 'linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%)',
-          border: '1px solid #86EFAC',
-          boxShadow: '0 2px 4px rgba(22, 163, 74, 0.08)'
-        }}
-      >
-        <div className="flex-center gap-2">
-          <span
-            style={{
-              width: '8px',
-              height: '8px',
-              borderRadius: '50%',
-              background: '#16A34A',
-              display: 'inline-block',
-              boxShadow: '0 0 0 3px rgba(22, 163, 74, 0.25)'
-            }}
-          />
-          <div>
-            <p className="text-xs font-bold text-green-950 m-0 flex-center-start gap-1">
-              <span>{currentLang === 'hi' ? '24x7 ऑटो-स्कैनिंग सक्रिय' : '24x7 Live Auto-Scanning Active'}</span>
-              <span className="text-3xs font-semibold px-1.5 py-0.2 rounded-full bg-green-200 text-green-800">LIVE</span>
-            </p>
-            <p className="text-3xs text-green-800 m-0 mt-0.5 font-medium">
-              {currentLang === 'hi' ? 'FreeJobAlert, SarkariResult व 18 पोर्टल्स' : '18 Portals Live Stream'}
-              {lastSyncedTime && ` • अंतिम स्कैन: ${formatSyncTime(lastSyncedTime)}`}
-            </p>
-          </div>
-        </div>
-        <button
-          type="button"
-          onClick={() => onManualSync && onManualSync(true)}
-          disabled={isSyncing}
-          className="text-3xs font-bold px-2 py-1.5 rounded-lg flex-center gap-1 cursor-pointer transition-all active:scale-95"
-          style={{
-            background: isSyncing ? '#E5E7EB' : '#16A34A',
-            color: '#FFFFFF',
-            border: 'none',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-          }}
-        >
-          <RefreshCw size={11} className={isSyncing ? 'animate-spin' : ''} />
-          <span>{isSyncing ? (currentLang === 'hi' ? 'स्कैन जारी...' : 'Syncing...') : (currentLang === 'hi' ? 'अभी स्कैन करें' : 'Scan Now')}</span>
-        </button>
-      </div>
-
-      {/* Personalized Aspirant Feed Strip */}
-      {userProfile && (
-        <div
-          className="personalized-strip flex-between items-center px-3 py-2 rounded-xl mb-2.5"
-          style={{
-            background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)',
-            border: '1px solid #BFDBFE',
-            boxShadow: '0 2px 4px rgba(37, 99, 235, 0.06)'
-          }}
-        >
-          <div className="flex-center gap-2">
-            <span style={{ fontSize: '18px' }}>🎯</span>
-            <div>
-              <p className="text-xs font-bold text-blue-950 m-0">
-                {currentLang === 'hi' 
-                  ? `${userProfile.name || 'आपके'} लिए पसंदीदा भर्तियां` 
-                  : `Tailored Feed for ${userProfile.name || 'You'}`}
-              </p>
-              <p className="text-3xs text-blue-700 m-0 mt-0.5 font-medium">
-                📍 {userProfile.state || 'All India'} • {userProfile.goal || 'Govt Jobs'} • {userProfile.qual || 'All'}
-              </p>
-            </div>
-          </div>
-          {onOpenProfile && (
-            <button
-              type="button"
-              onClick={onOpenProfile}
-              className="text-3xs font-bold px-2 py-1 rounded-md cursor-pointer"
-              style={{ background: '#2563EB', color: '#FFFFFF', border: 'none' }}
-            >
-              {currentLang === 'hi' ? 'बदलें ⚙️' : 'Edit ⚙️'}
-            </button>
-          )}
-        </div>
-      )}
-
       {/* 3 Pillars Quick Switcher: Compact, Sleek & Colorful */}
       <div className="three-pillars-grid mb-2.5">
         <button
@@ -1083,13 +999,6 @@ export default function JobsTab({
       {/* Sub Sector Switcher (Only visible when Vacancies or News are active) */}
       {activeCategory !== 'RESULTS' && activeCategory !== 'ADMIT' && (
         <div className="sector-switcher-row mb-2">
-          <button
-            className={`sector-pill sector-all ${activeCategory === 'FOR_YOU' ? 'active' : ''}`}
-            onClick={() => setActiveCategory('FOR_YOU')}
-            style={activeCategory === 'FOR_YOU' ? { background: '#2563EB', color: '#FFF', fontWeight: 'bold' } : {}}
-          >
-            🎯 {currentLang === 'hi' ? 'आपके लिए' : 'For You'}
-          </button>
           <button
             className={`sector-pill sector-all ${activeCategory === 'LATEST' ? 'active' : ''}`}
             onClick={() => setActiveCategory('LATEST')}

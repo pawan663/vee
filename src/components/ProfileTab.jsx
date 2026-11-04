@@ -29,7 +29,8 @@ import {
   Eye,
   Image as ImageIcon,
   Camera,
-  ExternalLink
+  ExternalLink,
+  RefreshCw
 } from 'lucide-react';
 
 export default function ProfileTab({
@@ -1021,6 +1022,71 @@ export default function ProfileTab({
           boxShadow: '0 2px 8px rgba(15, 23, 42, 0.04)'
         }}
       >
+        {/* Item 0: Cloud Auto-Sync & Portal Scanner (Owner / Admin Control) */}
+        <div
+          onClick={() => onManualSync && onManualSync(true)}
+          style={{
+            padding: '12px 0',
+            borderBottom: '1px solid #F1F5F9',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            cursor: 'pointer'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div
+              style={{
+                width: '38px',
+                height: '38px',
+                borderRadius: '10px',
+                background: '#DCFCE7',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}
+            >
+              <RefreshCw size={18} color="#16A34A" className={isSyncing ? 'animate-spin' : ''} />
+            </div>
+            <div>
+              <div style={{ fontSize: '13.5px', fontWeight: '700', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span>{isEn ? 'Live Data Auto-Sync' : (isHi ? 'लाइव डेटा ऑटो-स्कैन' : 'Live Data Auto-Sync')}</span>
+                <span style={{ fontSize: '9px', fontWeight: '800', background: '#DCFCE7', color: '#16A34A', padding: '1px 6px', borderRadius: '4px' }}>
+                  24x7 LIVE
+                </span>
+              </div>
+              <div style={{ fontSize: '11px', color: '#64748B', marginTop: '1px' }}>
+                {isSyncing 
+                  ? (isHi ? '18+ पोर्टल्स से स्कैन जारी...' : 'Syncing from 18+ portals...')
+                  : (isHi 
+                      ? `अंतिम स्कैन: ${lastSyncedTime ? new Date(lastSyncedTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'आज'} • टैप करके रिफ्रेश करें`
+                      : `Last scan: ${lastSyncedTime ? new Date(lastSyncedTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Today'} • Tap to scan`)}
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            disabled={isSyncing}
+            style={{
+              padding: '6px 10px',
+              fontSize: '11px',
+              fontWeight: '700',
+              borderRadius: '8px',
+              border: 'none',
+              background: isSyncing ? '#E2E8F0' : '#16A34A',
+              color: '#FFFFFF',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}
+          >
+            <RefreshCw size={12} className={isSyncing ? 'animate-spin' : ''} />
+            <span>{isSyncing ? (isHi ? 'स्कैन...' : 'Syncing...') : (isHi ? 'स्कैन करें' : 'Scan')}</span>
+          </button>
+        </div>
+
         {/* Item 1: Student Utilities */}
         <div
           onClick={onOpenTools}
