@@ -1102,12 +1102,6 @@ export default function JobsTab({
               📰 {t.filterLiveNews || 'News'}
             </span>
           </button>
-          <button
-            className={`sector-pill sector-apprentice ${activeCategory === 'APPRENTICE' ? 'active' : ''}`}
-            onClick={() => setActiveCategory('APPRENTICE')}
-          >
-            🛠️ {t.filterApprentice || 'Apprentice'}
-          </button>
         </div>
       )}
 
