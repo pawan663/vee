@@ -136,6 +136,19 @@ function formatSyncTime(date, lang) {
   return `${dateStr}, ${timeStr}`;
 }
 
+// Officially Prime Qualifications for 1-Tap Interactive Matching
+const PRIME_QUALIFICATIONS = [
+  { id: '10th', label: '10th Pass', icon: '🎓' },
+  { id: '12th', label: '12th Pass', icon: '🎓' },
+  { id: 'ITI', label: 'ITI Pass', icon: '⚡' },
+  { id: 'Diploma', label: 'Diploma', icon: '🛠️' },
+  { id: 'Law', label: 'BA LLB / Law', icon: '⚖️' },
+  { id: 'Bed', label: 'BA B.Ed / Teaching', icon: '📚' },
+  { id: 'Medical', label: 'MBBS / BDS', icon: '🩺' },
+  { id: 'Graduate', label: 'Graduates', icon: '🎓' },
+  { id: 'PG', label: 'Post Graduate', icon: '💼' }
+];
+
 export default function JobsTab({
   jobs,
   liveNews,
@@ -284,6 +297,7 @@ export default function JobsTab({
   const deptLabels = {
     en: {
       ALL: '🏛️ Department',
+      APPRENTICE: '🛠️ Apprentice / अप्रेंटिस (All India)',
       SSC: '📝 SSC (CGL / CHSL / MTS / GD)',
       RAILWAY: '🚆 Railway (RRB / ALP / Group D)',
       BANK: '🏦 Banking (IBPS / SBI / RBI)',
@@ -312,6 +326,7 @@ export default function JobsTab({
     },
     hi: {
       ALL: '🏛️ विभाग',
+      APPRENTICE: '🛠️ अप्रेंटिस भर्ती (Apprentice Special)',
       SSC: '📝 एसएससी (CGL / CHSL / MTS / GD)',
       RAILWAY: '🚆 रेलवे (RRB / ALP / ग्रुप डी / NTPC)',
       BANK: '🏦 बैंकिंग (IBPS / SBI / RBI)',
@@ -340,6 +355,7 @@ export default function JobsTab({
     },
     hinglish: {
       ALL: '🏛️ Department',
+      APPRENTICE: '🛠️ Apprentice (All India Direct Merit)',
       SSC: '📝 SSC (CGL / CHSL / GD / MTS)',
       RAILWAY: '🚆 Railway (RRB / ALP / Group D)',
       BANK: '🏦 Banking (IBPS / SBI / RBI)',
@@ -582,6 +598,9 @@ export default function JobsTab({
       const dText = `${job.dept || ''} ${job.title || ''}`.toLowerCase();
       let matchD = false;
       switch (filterDept) {
+        case 'APPRENTICE':
+          matchD = /apprentice|अप्रेंटिस|apprenticeship|act apprentice/i.test(`${dText} ${job.qualification || ''} ${job.category || ''} ${job.type || ''}`);
+          break;
         case 'SSC':
           matchD = /\bssc\b|staff selection|\bcgl\b|\bchsl\b|\bmts\b|havaldar|\bgd\b/i.test(dText);
           break;
@@ -1483,52 +1502,62 @@ export default function JobsTab({
 
             {isMatcherOpen && (
               <div className="matcher-controls mt-2.5 pt-2.5 border-top">
-                <div className="flex-row gap-2.5">
-                  <div className="flex-1">
-                    <label className="text-3xs font-bold text-slate-700 dark:text-slate-200">
-                      {t.yourQualification || 'Your Qualification'}:
-                    </label>
-                    <select
-                      className="smart-matcher-select mt-1"
-                      value={matchQual}
-                      onChange={(e) => setMatchQual(e.target.value)}
-                    >
-                      <option value="10th">{t.filter10th || '10th Pass (Matric)'}</option>
-                      <option value="12th">{t.filter12th || '12th Pass (10+2)'}</option>
-                      <option value="ITI">{t.filterITI || '⚡ ITI Pass (NCVT / SCVT)'}</option>
-                      <option value="Diploma">{t.filterDiploma || '🛠️ Diploma (Polytechnic / Engg)'}</option>
-                      <option value="Law">{t.filterLaw || '⚖️ Law (BA LLB / B.Com LLB / B.Sc LLB)'}</option>
-                      <option value="Bed">{t.filterBed || '📚 Teaching (BA B.Ed / B.Sc B.Ed)'}</option>
-                      <option value="Medical">{t.filterMedical || '🩺 Medical (MBBS, BDS)'}</option>
-                      <option value="Graduate">{t.filterGraduate || '🎓 Graduates (BA / B.Sc / B.Com / B.Tech)'}</option>
-                      <option value="PG">{t.filterPG || "💼 Post Graduate (Master's / MBA)"}</option>
-                    </select>
+                <div className="prime-tags-container">
+                  <div className="flex-between mb-1.5">
+                    <span className="prime-tags-label m-0">
+                      👑 {currentLang === 'hi' ? 'प्राइम योग्यता चुनें (क्लिक करें):' : 'Select Prime Qualification:'}
+                    </span>
+                    <div className="flex-center-start gap-1">
+                      <span className="text-3xs font-bold text-slate-500">{t.yourAge || 'Age'}:</span>
+                      <input
+                        type="number"
+                        min="15"
+                        max="55"
+                        value={matchAge}
+                        onChange={(e) => setMatchAge(Number(e.target.value))}
+                        className="smart-matcher-input font-bold text-center"
+                        style={{ width: '55px', padding: '2.5px 6px', height: '24px', fontSize: '11px', borderRadius: '6px' }}
+                      />
+                    </div>
                   </div>
-                  <div style={{ width: '90px' }}>
-                    <label className="text-3xs font-bold text-slate-700 dark:text-slate-200">
-                      {t.yourAge || 'Your Age'}:
-                    </label>
-                    <input
-                      type="number"
-                      min="15"
-                      max="55"
-                      value={matchAge}
-                      onChange={(e) => setMatchAge(Number(e.target.value))}
-                      className="smart-matcher-input mt-1 text-center font-bold"
-                    />
+
+                  <div className="prime-tags-grid">
+                    {PRIME_QUALIFICATIONS.map((q) => {
+                      const isSelected = matchQual === q.id;
+                      return (
+                        <button
+                          type="button"
+                          key={q.id}
+                          className={`prime-style-tag ${isSelected ? 'active' : ''}`}
+                          onClick={() => setMatchQual(q.id)}
+                        >
+                          <span className="prime-tag-icon">{q.icon}</span>
+                          <span className="prime-tag-label">{q.label}</span>
+                          {isSelected && (
+                            <span className="prime-tag-badge">👑 PRIME</span>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
-                <div className="flex-between mt-2 pt-1.5 border-top" style={{ borderColor: 'rgba(139, 92, 246, 0.2)' }}>
-                  <p className="text-3xs text-success font-bold m-0 flex-center-start gap-1">
-                    ✅ {filteredJobs.length} {t.matchedVacancies || 'Matching Vacancies Found'}
-                  </p>
+
+                <div className="prime-matched-strip flex-between">
+                  <div className="flex-center-start gap-2">
+                    <span className="prime-crown-pill">
+                      👑 OFFICIAL PRIME
+                    </span>
+                    <span className="text-2xs font-extrabold text-amber-300">
+                      {filteredJobs.length} {t.matchedVacancies || 'Verified Jobs Live'}
+                    </span>
+                  </div>
                   <button
                     type="button"
                     onClick={() => {
                       setMatchQual('10th');
                       setMatchAge(22);
                     }}
-                    className="text-3xs text-muted hover:text-accent font-semibold bg-transparent border-0 cursor-pointer p-0"
+                    className="prime-reset-btn"
                   >
                     Reset ↻
                   </button>
@@ -1536,65 +1565,6 @@ export default function JobsTab({
               </div>
             )}
           </div>
-
-          {/* Apprentice Direct Merit Slider: Clean Horizontal Carousel (Never Clips Boxes) */}
-          {apprenticeJobsList.length > 0 && (
-            <div className="apprentice-carousel-section mb-3.5 p-2.5 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(254, 243, 199, 0.45) 0%, rgba(253, 230, 138, 0.25) 100%)', borderColor: '#FDE68A' }}>
-              <div className="flex-between mb-1.5 px-0.5">
-                <div className="flex-center-start gap-1.5">
-                  <span className="text-xs font-bold text-amber-950 dark:text-amber-200 flex-center-start gap-1">
-                    🛠️ {currentLang === 'hi' ? 'अप्रेंटिस स्पेशल भर्ती (सीधी मेरिट)' : 'Apprentice Special (Direct Merit)'}
-                  </span>
-                  <span className="badge-pill bg-amber-500 text-white text-3xs font-extrabold px-1.5 py-0.2 rounded-full">
-                    NO EXAM
-                  </span>
-                </div>
-                <button
-                  className="text-3xs text-amber-800 dark:text-amber-300 font-bold hover:underline bg-transparent border-0 cursor-pointer p-0"
-                  onClick={() => setActiveCategory(activeCategory === 'APPRENTICE' ? 'ALL' : 'APPRENTICE')}
-                >
-                  {activeCategory === 'APPRENTICE' 
-                    ? (currentLang === 'hi' ? 'सभी देखें ✕' : 'View All ✕')
-                    : (currentLang === 'hi' ? `पूरा देखें (${apprenticeJobsList.length}) ➔` : `View All (${apprenticeJobsList.length}) ➔`)}
-                </button>
-              </div>
-
-              <div className="apprentice-scroll-track">
-                {apprenticeJobsList.slice(0, 10).map((appJob) => (
-                  <div
-                    key={appJob.id}
-                    onClick={() => onOpenDetail(appJob)}
-                    className="apprentice-mini-card p-2.5 rounded-xl border cursor-pointer"
-                    style={{
-                      background: '#FFFFFF',
-                      borderColor: '#FDE68A',
-                      boxShadow: '0 2px 6px rgba(245, 158, 11, 0.1)'
-                    }}
-                  >
-                    <div className="flex-between mb-1">
-                      <span className="text-3xs font-bold px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        Direct Merit
-                      </span>
-                      <span className="text-3xs font-bold text-slate-500">
-                        {appJob.posts || '1+ Posts'}
-                      </span>
-                    </div>
-                    <h5 className="font-bold text-xs text-slate-900 dark:text-slate-100 leading-snug m-0 line-clamp-2" style={{ minHeight: '32px' }}>
-                      {appJob.dept || appJob.title}
-                    </h5>
-                    <div className="flex-between mt-2 pt-1.5 border-top text-3xs" style={{ borderColor: 'rgba(253, 230, 138, 0.6)' }}>
-                      <span className="text-amber-800 font-bold">
-                        💰 ₹7k-12.5k
-                      </span>
-                      <span className="text-primary font-bold">
-                        Apply ➔
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
 
 
           {/* Jobs List */}

@@ -45,8 +45,8 @@ export default function JobCard({ job, onOpenDetail, onOpenApply, isSaved, onTog
           </span>
 
           {job.isPersonalizedMatch && (
-            <span className="badge-pill badge-matched flex-center gap-1">
-              🎯 {currentLang === 'hi' ? 'आपके अनुकूल' : 'For You'}
+            <span className="badge-pill badge-official-prime flex-center gap-1">
+              👑 PRIME VERIFIED
             </span>
           )}
 
