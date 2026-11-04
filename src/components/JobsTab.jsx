@@ -181,6 +181,17 @@ export default function JobsTab({
   // Auto-Expiry check: Filter out any job where lastDate < today
   const todayStr = new Date().toISOString().split('T')[0];
 
+  const formatSyncTime = (dateObj) => {
+    if (!dateObj) return '';
+    try {
+      const d = new Date(dateObj);
+      if (isNaN(d.getTime())) return '';
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch (e) {
+      return '';
+    }
+  };
+
   // Localized Dropdown Option Dictionaries for 5 Languages
   const qualLabels = {
     en: {
@@ -499,6 +510,8 @@ export default function JobsTab({
     } else if (activeCategory === 'APPRENTICE') {
       const isApp = /apprentice|अप्रेंटिस/i.test(`${job.title || ''} ${job.dept || ''} ${job.type || ''} ${job.qualification || ''}`);
       if (!isApp) return false;
+    } else if (activeCategory === 'LATEST') {
+      // In LATEST mode, show all active recruitments sorted newest first
     } else if (activeCategory !== 'ALL' && activeCategory !== 'NEWS' && activeCategory !== 'RESULTS' && activeCategory !== 'ADMIT' && job.category !== activeCategory) {
       return false;
     }
@@ -744,10 +757,10 @@ export default function JobsTab({
     if (/bank|sbi|ibps|rbi|pnb/i.test(dept) || /sbi|ibps|po\b|clerk/i.test(title)) score += 38;
 
     // FreeJobAlert & SarkariResult live verified bonus
-    if (/freejobalert|sarkari\s*result/i.test(source)) score += 30;
+    if (/freejobalert|sarkari\s*result/i.test(source)) score += 35;
 
-    // Fresh announcement bonus
-    if (job.isNew) score += 30;
+    // Fresh announcement bonus: Newly posted recruitments from FreeJobAlert / today get high priority
+    if (job.isNew) score += 120;
 
     // High Vacancy Post Count Bonus: Aspirants love massive recruitments
     const postNumMatch = postsText.match(/(\d+[\d,]*)/);
@@ -786,6 +799,13 @@ export default function JobsTab({
         return { ...job, priorityScore: score, isPersonalizedMatch: hasPersonalizedBoost };
       })
       .sort((a, b) => {
+        // Mode A: If LATEST category is selected, sort strictly by freshest announcement first
+        if (activeCategory === 'LATEST') {
+          if (a.isNew && !b.isNew) return -1;
+          if (!a.isNew && b.isNew) return 1;
+          return (b.id || '').localeCompare(a.id || '');
+        }
+
         // 1. If state filter is active, prioritize that state
         if (filterState !== 'ALL' && filterState !== 'All India') {
           const stateWord = filterState.toLowerCase();
@@ -806,7 +826,7 @@ export default function JobsTab({
 
         return 0;
       });
-  }, [filteredJobs, filterState, currentHour, sessionCount, userProfile]);
+  }, [filteredJobs, filterState, currentHour, sessionCount, userProfile, activeCategory]);
 
   const formatHeadline = (title) => {
     if (!title) return '';
@@ -940,6 +960,54 @@ export default function JobsTab({
         </div>
       </div>
 
+      {/* 24x7 Live Auto-Scanning Status Bar */}
+      <div
+        className="live-autoscanning-bar flex-between items-center px-3 py-2 rounded-xl mb-2.5"
+        style={{
+          background: 'linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%)',
+          border: '1px solid #86EFAC',
+          boxShadow: '0 2px 4px rgba(22, 163, 74, 0.08)'
+        }}
+      >
+        <div className="flex-center gap-2">
+          <span
+            style={{
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              background: '#16A34A',
+              display: 'inline-block',
+              boxShadow: '0 0 0 3px rgba(22, 163, 74, 0.25)'
+            }}
+          />
+          <div>
+            <p className="text-xs font-bold text-green-950 m-0 flex-center-start gap-1">
+              <span>{currentLang === 'hi' ? '24x7 ऑटो-स्कैनिंग सक्रिय' : '24x7 Live Auto-Scanning Active'}</span>
+              <span className="text-3xs font-semibold px-1.5 py-0.2 rounded-full bg-green-200 text-green-800">LIVE</span>
+            </p>
+            <p className="text-3xs text-green-800 m-0 mt-0.5 font-medium">
+              {currentLang === 'hi' ? 'FreeJobAlert, SarkariResult व 18 पोर्टल्स' : '18 Portals Live Stream'}
+              {lastSyncedTime && ` • अंतिम स्कैन: ${formatSyncTime(lastSyncedTime)}`}
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => onManualSync && onManualSync(true)}
+          disabled={isSyncing}
+          className="text-3xs font-bold px-2 py-1.5 rounded-lg flex-center gap-1 cursor-pointer transition-all active:scale-95"
+          style={{
+            background: isSyncing ? '#E5E7EB' : '#16A34A',
+            color: '#FFFFFF',
+            border: 'none',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+          }}
+        >
+          <RefreshCw size={11} className={isSyncing ? 'animate-spin' : ''} />
+          <span>{isSyncing ? (currentLang === 'hi' ? 'स्कैन जारी...' : 'Syncing...') : (currentLang === 'hi' ? 'अभी स्कैन करें' : 'Scan Now')}</span>
+        </button>
+      </div>
+
       {/* Personalized Aspirant Feed Strip */}
       {userProfile && (
         <div
@@ -1021,6 +1089,13 @@ export default function JobsTab({
             style={activeCategory === 'FOR_YOU' ? { background: '#2563EB', color: '#FFF', fontWeight: 'bold' } : {}}
           >
             🎯 {currentLang === 'hi' ? 'आपके लिए' : 'For You'}
+          </button>
+          <button
+            className={`sector-pill sector-all ${activeCategory === 'LATEST' ? 'active' : ''}`}
+            onClick={() => setActiveCategory('LATEST')}
+            style={activeCategory === 'LATEST' ? { background: '#DC2626', color: '#FFF', fontWeight: 'bold' } : {}}
+          >
+            ⚡ {currentLang === 'hi' ? 'ताज़ा आज की' : 'Latest'}
           </button>
           <button
             className={`sector-pill sector-all ${activeCategory === 'ALL' ? 'active' : ''}`}
