@@ -38,6 +38,9 @@ export function cleanJobTitle(rawTitle) {
 export function formatSafeQualification(qual, jobTitle = '', qualType = '') {
   if (!qual || /\b\d+\s*posts?\b/i.test(qual) || qual === 'Not Mentioned') {
     const t = `${jobTitle} ${qualType}`.toLowerCase();
+    if (/\b(mbbs|bds|medical\s*officer|ayush|doctor)\b/i.test(t)) return 'MBBS / BDS / Medical Qualification';
+    if (/\b(b\.?a\.?\s*ll\.?b|b\.?com\.?\s*ll\.?b|b\.?sc\.?\s*ll\.?b|ll\.?b|ll\.?m|law|advocate|judiciary)\b/i.test(t)) return 'BA LLB / B.Com LLB / B.Sc LLB / LLM';
+    if (/\b(b\.?a\.?\s*b\.?ed|b\.?sc\.?\s*b\.?ed|b\.?ed|d\.?el\.?ed|b\.?tc|teacher|teaching|tet|ctet)\b/i.test(t)) return 'BA B.Ed / B.Sc B.Ed / D.El.Ed (Teaching)';
     if (/apprentice|iti/i.test(t)) return '10th Pass with ITI in relevant trade (NCVT / SCVT)';
     if (/10th|matric|peon|group d|safai/i.test(t)) return '10th Pass (Matriculation)';
     if (/12th|inter|intermediate|10\+2|constable/i.test(t)) return '12th Pass (Intermediate / 10+2)';

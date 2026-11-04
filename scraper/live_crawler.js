@@ -94,10 +94,19 @@ export function cleanJobTitle(rawTitle) {
 
 function detectQualification(text) {
   const t = (text || '').toLowerCase();
+  if (/\b(mbbs|bds|medical\s*officer|ayush|bams|bhms|doctor|nursing|dental)\b/i.test(t)) {
+    return { type: 'Medical', qual: 'MBBS / BDS / Medical Qualification' };
+  }
+  if (/\b(b\.?a\.?\s*ll\.?b|b\.?com\.?\s*ll\.?b|b\.?sc\.?\s*ll\.?b|ll\.?b|ll\.?m|law|advocate|judiciary|legal)\b/i.test(t)) {
+    return { type: 'Law', qual: 'BA LLB / B.Com LLB / B.Sc LLB / LLM' };
+  }
+  if (/\b(b\.?a\.?\s*b\.?ed|b\.?sc\.?\s*b\.?ed|b\.?ed|d\.?el\.?ed|b\.?tc|teacher|teaching|tet|ctet|shikshak|prt|tgt|pgt)\b/i.test(t)) {
+    return { type: 'Bed', qual: 'BA B.Ed / B.Sc B.Ed / D.El.Ed (Teaching)' };
+  }
   if (/b\.tech|b\.e|mca|bca|m\.tech|engineering/i.test(t)) return { type: 'B.Tech', qual: 'B.Tech / B.E / Engineering' };
   if (/mba|pgdm|post graduate|m\.sc|m\.com|m\.a|ph\.d|masters/i.test(t)) return { type: 'Graduate', qual: 'Post Graduate (MBA / M.Sc / Masters)' };
   if (/diploma|polytechnic|d\.pharm/i.test(t)) return { type: 'Diploma', qual: 'Polytechnic Diploma in relevant Branch' };
-  if (/iti/i.test(t)) return { type: 'ITI', qual: 'ITI Pass in relevant Trade (NCVT/SCVT)' };
+  if (/\biti\b|apprentice/i.test(t)) return { type: 'ITI', qual: 'ITI Pass in relevant Trade (NCVT/SCVT)' };
   if (/12th|12वीं|इंटर|inter|10\+2|constable|कॉन्स्टेबल|clerk|लिपिक/i.test(t)) return { type: '12th', qual: '12th Pass (Intermediate / 10+2)' };
   if (/10th|10वीं|मैट्रिक|matric|group d|mts|peon/i.test(t)) return { type: '10th', qual: '10th Pass (Matriculation)' };
   return { type: 'Graduate', qual: 'Graduation / Any Degree' };
@@ -399,6 +408,9 @@ function formatQualText(rawQual, fallbackType) {
     if (fallbackType === 'ITI') return 'ITI Pass in relevant Trade (NCVT/SCVT)';
     if (fallbackType === 'Diploma') return 'Polytechnic Diploma in relevant Branch';
     if (fallbackType === 'B.Tech') return 'B.Tech / B.E / Engineering Degree in relevant discipline';
+    if (fallbackType === 'Law') return 'BA LLB / B.Com LLB / B.Sc LLB / LLM from recognized University';
+    if (fallbackType === 'Bed') return 'BA B.Ed / B.Sc B.Ed / D.El.Ed (Teaching Eligibility)';
+    if (fallbackType === 'Medical') return 'MBBS / BDS / Medical Qualification from recognized Institute';
     return 'Graduation / Relevant Educational Qualification as per Notification';
   }
   if (/^10th$/i.test(q)) return '10th Pass (Matriculation) from recognized Board';
@@ -415,7 +427,16 @@ function detectFjaQual(qualText, postText) {
   let type = 'Graduate';
   let qual = qualText;
 
-  if (/b\.tech|b\.e|mca|bca|m\.tech|engineering/i.test(text)) {
+  if (/\b(mbbs|bds|medical\s*officer|ayush|bams|bhms|doctor|dental)\b/i.test(text)) {
+    type = 'Medical';
+    qual = qualText || 'MBBS / BDS / Medical Degree';
+  } else if (/\b(b\.?a\.?\s*ll\.?b|b\.?com\.?\s*ll\.?b|b\.?sc\.?\s*ll\.?b|ll\.?b|ll\.?m|law|advocate|judiciary|legal)\b/i.test(text)) {
+    type = 'Law';
+    qual = qualText || 'BA LLB / B.Com LLB / B.Sc LLB / LLM';
+  } else if (/\b(b\.?a\.?\s*b\.?ed|b\.?sc\.?\s*b\.?ed|b\.?ed|d\.?el\.?ed|b\.?tc|teacher|teaching|tet|ctet|shikshak)\b/i.test(text)) {
+    type = 'Bed';
+    qual = qualText || 'BA B.Ed / B.Sc B.Ed / D.El.Ed';
+  } else if (/b\.tech|b\.e|mca|bca|m\.tech|engineering/i.test(text)) {
     type = 'B.Tech';
     qual = qualText || 'B.Tech / B.E / Engineering Degree';
   } else if (/mba|pgdm|post graduate|m\.sc|m\.com|m\.a|ph\.d|masters/i.test(text)) {
@@ -424,7 +445,7 @@ function detectFjaQual(qualText, postText) {
   } else if (/diploma|polytechnic|d\.pharm/i.test(text)) {
     type = 'Diploma';
     qual = qualText || 'Polytechnic Diploma in relevant Branch';
-  } else if (/iti/i.test(text)) {
+  } else if (/\biti\b|apprentice/i.test(text)) {
     type = 'ITI';
     qual = qualText || 'ITI Pass in relevant Trade (NCVT/SCVT)';
   } else if (/12th|12वीं|inter|intermediate|10\+2/i.test(text)) {

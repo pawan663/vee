@@ -453,13 +453,21 @@ export default function JobsTab({
   const activeDeptMap = deptLabels[currentLang] || deptLabels.hi || deptLabels.en;
   const activeStateMap = stateLabels[currentLang] || stateLabels.hi || stateLabels.en;
 
-  // Real-time Apprentice Vacancies Count
+  // Real-time Apprentice Vacancies Count & List
   const apprenticeCount = useMemo(() => {
     return (jobs || []).filter((j) => {
       if (isJobExpired(j.lastDate, todayStr)) return false;
       const combined = `${j.title || ''} ${j.dept || ''} ${j.type || ''} ${j.qualification || ''}`.toLowerCase();
       return /apprentice|अप्रेंटिस/i.test(combined);
     }).length;
+  }, [jobs, todayStr]);
+
+  const apprenticeJobsList = useMemo(() => {
+    return (jobs || []).filter((j) => {
+      if (isJobExpired(j.lastDate, todayStr)) return false;
+      const combined = `${j.title || ''} ${j.dept || ''} ${j.type || ''} ${j.qualification || ''} ${j.category || ''}`.toLowerCase();
+      return /apprentice|अप्रेंटिस/i.test(combined);
+    });
   }, [jobs, todayStr]);
 
   const filteredJobs = useMemo(() => {
@@ -552,16 +560,16 @@ export default function JobsTab({
           matchQ = /\bmba\b|\bpgdm\b|management/i.test(qText);
           break;
         case 'MBBS/Medical':
-          matchQ = /\bmbbs\b|medical|doctor|चिकित्सा/i.test(qText);
+          matchQ = /\bmbbs\b|\bbds\b|medical|doctor|चिकित्सा/i.test(qText);
           break;
         case 'Nursing':
           matchQ = /nursing|\bgnm\b|\banm\b|pharmacist|pharma|d\.?pharm|b\.?pharm/i.test(qText);
           break;
         case 'Teaching':
-          matchQ = /\bb\.?ed\b|d\.?el\.?ed|\btet\b|\bctet\b|teacher|शिक्षक|\bprt\b|\btgt\b|\bpgt\b/i.test(qText);
+          matchQ = /\bb\.?ed\b|d\.?el\.?ed|\btet\b|\bctet\b|teacher|शिक्षक|\bprt\b|\btgt\b|\bpgt\b|b\.?a\.?\s*b\.?ed|b\.?sc\.?\s*b\.?ed/i.test(qText);
           break;
         case 'Law':
-          matchQ = /\bllb\b|\bllm\b|\blaw\b|विधि|advocate/i.test(qText);
+          matchQ = /\bllb\b|\bllm\b|\blaw\b|विधि|advocate|judiciary|b\.?a\.?\s*ll\.?b|b\.?com\.?\s*ll\.?b|b\.?sc\.?\s*ll\.?b/i.test(qText);
           break;
         default:
           matchQ = true;
@@ -673,14 +681,56 @@ export default function JobsTab({
       }
     }
 
-    // Smart Matcher Filter
-    if (isMatcherOpen) {
-      if (job.type !== matchQual && matchQual !== 'ALL') return false;
+    // Smart Matcher Filter (Accurately matches 10th, 12th, ITI, Diploma, Law, Teaching/B.Ed, Medical, Graduate, PG)
+    if (isMatcherOpen && matchQual && matchQual !== 'ALL') {
+      const combined = `${job.qualification || ''} ${job.title || ''} ${job.dept || ''} ${job.type || ''}`.toLowerCase();
+      let isQualMatched = false;
+
+      if (matchQual === '10th') {
+        isQualMatched = /\b(10th|matric|high\s*school|secondary|tenth)\b/i.test(combined);
+      } else if (matchQual === '12th') {
+        isQualMatched = /\b(12th|intermediate|10\+2|inter|higher\s*secondary|twelfth)\b/i.test(combined);
+      } else if (matchQual === 'ITI') {
+        isQualMatched = /\b(iti|tradesman|fitter|electrician|welder|turner|ncvt|scvt|apprentice)\b/i.test(combined);
+      } else if (matchQual === 'Diploma') {
+        isQualMatched = /\b(diploma|polytechnic)\b/i.test(combined);
+      } else if (matchQual === 'Law') {
+        isQualMatched = /\b(ll\.?b|ll\.?m|law|advocate|judiciary|legal|b\.?a\.?\s*ll\.?b|b\.?com\.?\s*ll\.?b|b\.?sc\.?\s*ll\.?b)\b/i.test(combined);
+      } else if (matchQual === 'Bed') {
+        isQualMatched = /\b(b\.?ed|d\.?el\.?ed|b\.?tc|b\.?a\.?\s*b\.?ed|b\.?sc\.?\s*b\.?ed|tet|ctet|teacher|teaching|prt|tgt|pgt|shikshak)\b/i.test(combined);
+      } else if (matchQual === 'Medical') {
+        isQualMatched = /\b(mbbs|bds|medical\s*officer|ayush|bams|bhms|doctor|nursing|gnm|anm|paramedical|dental|pharm|pharmacist)\b/i.test(combined);
+      } else if (matchQual === 'Graduate') {
+        isQualMatched = /\b(graduate|graduation|degree|b\.?a\b|b\.?sc\b|b\.?com\b|b\.?tech\b|b\.?e\b|bca\b|bba\b)/i.test(combined);
+      } else if (matchQual === 'PG') {
+        isQualMatched = /\b(post\s*graduate|pg|master|m\.?a\b|m\.?sc\b|m\.?com\b|m\.?tech\b|mba|mca|md\b|ms\b)/i.test(combined);
+      }
+
+      if (!isQualMatched) return false;
+
+      // Age eligibility filtering
+      if (matchAge && job.ageLimit) {
+        const userAge = Number(matchAge);
+        if (!isNaN(userAge) && userAge > 0) {
+          const rangeMatch = job.ageLimit.match(/(\d{2})\s*[-–to]\s*(\d{2})/i);
+          if (rangeMatch) {
+            const min = parseInt(rangeMatch[1], 10);
+            const max = parseInt(rangeMatch[2], 10);
+            if (userAge < (min - 1) || userAge > (max + 5)) return false;
+          } else {
+            const upToMatch = job.ageLimit.match(/(?:up\s*to|max(?:imum)?)\s*(\d{2})/i);
+            if (upToMatch) {
+              const max = parseInt(upToMatch[1], 10);
+              if (userAge > (max + 5)) return false;
+            }
+          }
+        }
+      }
     }
 
     return true;
     });
-  }, [jobs, todayStr, searchTerm, activeCategory, filterQual, filterDept, filterState, isMatcherOpen, matchQual, userProfile]);
+  }, [jobs, todayStr, searchTerm, activeCategory, filterQual, filterDept, filterState, isMatcherOpen, matchQual, matchAge, userProfile]);
 
   // Smart Priority Scoring: Major flagship recruitments + Personalized Profile Boost
   const getJobPriorityScore = (job, profile) => {
@@ -1433,57 +1483,116 @@ export default function JobsTab({
 
             {isMatcherOpen && (
               <div className="matcher-controls mt-2.5 pt-2.5 border-top">
-                <div className="flex-row gap-2">
+                <div className="flex-row gap-2.5">
                   <div className="flex-1">
-                    <label className="text-3xs font-semibold text-muted">{t.yourQualification}</label>
+                    <label className="text-3xs font-bold text-slate-700 dark:text-slate-200">
+                      {t.yourQualification || 'Your Qualification'}:
+                    </label>
                     <select
-                      className="form-select-sm w-full text-xs mt-0.5"
+                      className="smart-matcher-select mt-1"
                       value={matchQual}
                       onChange={(e) => setMatchQual(e.target.value)}
                     >
-                      <option value="10th">{t.filter10th}</option>
-                      <option value="12th">{t.filter12th}</option>
-                      <option value="ITI">{t.filterITI}</option>
-                      <option value="Graduate">{t.filterGraduate}</option>
+                      <option value="10th">{t.filter10th || '10th Pass (Matric)'}</option>
+                      <option value="12th">{t.filter12th || '12th Pass (10+2)'}</option>
+                      <option value="ITI">{t.filterITI || '⚡ ITI Pass (NCVT / SCVT)'}</option>
+                      <option value="Diploma">{t.filterDiploma || '🛠️ Diploma (Polytechnic / Engg)'}</option>
+                      <option value="Law">{t.filterLaw || '⚖️ Law (BA LLB / B.Com LLB / B.Sc LLB)'}</option>
+                      <option value="Bed">{t.filterBed || '📚 Teaching (BA B.Ed / B.Sc B.Ed)'}</option>
+                      <option value="Medical">{t.filterMedical || '🩺 Medical (MBBS, BDS)'}</option>
+                      <option value="Graduate">{t.filterGraduate || '🎓 Graduates (BA / B.Sc / B.Com / B.Tech)'}</option>
+                      <option value="PG">{t.filterPG || "💼 Post Graduate (Master's / MBA)"}</option>
                     </select>
                   </div>
-                  <div className="flex-1">
-                    <label className="text-3xs font-semibold text-muted">{t.yourAge}</label>
+                  <div style={{ width: '90px' }}>
+                    <label className="text-3xs font-bold text-slate-700 dark:text-slate-200">
+                      {t.yourAge || 'Your Age'}:
+                    </label>
                     <input
                       type="number"
-                      min="18"
-                      max="45"
+                      min="15"
+                      max="55"
                       value={matchAge}
                       onChange={(e) => setMatchAge(Number(e.target.value))}
-                      className="form-input text-xs mt-0.5"
+                      className="smart-matcher-input mt-1 text-center font-bold"
                     />
                   </div>
                 </div>
-                <p className="text-3xs text-success font-semibold mt-1.5 m-0">
-                  ✅ {filteredJobs.length} {t.matchedVacancies}
-                </p>
+                <div className="flex-between mt-2 pt-1.5 border-top" style={{ borderColor: 'rgba(139, 92, 246, 0.2)' }}>
+                  <p className="text-3xs text-success font-bold m-0 flex-center-start gap-1">
+                    ✅ {filteredJobs.length} {t.matchedVacancies || 'Matching Vacancies Found'}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMatchQual('10th');
+                      setMatchAge(22);
+                    }}
+                    className="text-3xs text-muted hover:text-accent font-semibold bg-transparent border-0 cursor-pointer p-0"
+                  >
+                    Reset ↻
+                  </button>
+                </div>
               </div>
             )}
           </div>
 
-          {/* Apprentice Special Highlight Banner */}
-          {activeCategory === 'APPRENTICE' && (
-            <div className="apprentice-banner p-3 mb-3 rounded-xl border flex-between" style={{ background: 'linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)', borderColor: '#F59E0B' }}>
-              <div>
-                <h4 className="text-xs font-bold text-amber-900 flex-center-start gap-1" style={{ margin: 0 }}>
-                  {currentLang === 'en'
-                    ? '🛠️ All India Apprentice Recruitment Special'
-                    : '🛠️ ऑल इंडिया अप्रेंटिसशिप स्पेशल भर्ती'}
-                </h4>
-                <p className="text-3xs text-amber-800 m-0 mt-0.5">
-                  {currentLang === 'en'
-                    ? 'Railway, Bank, IOCL & PSU Apprentices — Direct Merit (No Exam) + Stipend (₹7,000 - ₹12,500/mo)'
-                    : 'रेलवे, बैंक, IOCL, ONGC, SAIL & PSU अप्रेंटिस — सीधी मेरिट भर्ती (बिना परीक्षा) + मासिक स्टाइपेंड (₹7,000 - ₹12,500/माह)'}
-                </p>
+          {/* Apprentice Direct Merit Slider: Clean Horizontal Carousel (Never Clips Boxes) */}
+          {apprenticeJobsList.length > 0 && (
+            <div className="apprentice-carousel-section mb-3.5 p-2.5 rounded-xl border" style={{ background: 'linear-gradient(135deg, rgba(254, 243, 199, 0.45) 0%, rgba(253, 230, 138, 0.25) 100%)', borderColor: '#FDE68A' }}>
+              <div className="flex-between mb-1.5 px-0.5">
+                <div className="flex-center-start gap-1.5">
+                  <span className="text-xs font-bold text-amber-950 dark:text-amber-200 flex-center-start gap-1">
+                    🛠️ {currentLang === 'hi' ? 'अप्रेंटिस स्पेशल भर्ती (सीधी मेरिट)' : 'Apprentice Special (Direct Merit)'}
+                  </span>
+                  <span className="badge-pill bg-amber-500 text-white text-3xs font-extrabold px-1.5 py-0.2 rounded-full">
+                    NO EXAM
+                  </span>
+                </div>
+                <button
+                  className="text-3xs text-amber-800 dark:text-amber-300 font-bold hover:underline bg-transparent border-0 cursor-pointer p-0"
+                  onClick={() => setActiveCategory(activeCategory === 'APPRENTICE' ? 'ALL' : 'APPRENTICE')}
+                >
+                  {activeCategory === 'APPRENTICE' 
+                    ? (currentLang === 'hi' ? 'सभी देखें ✕' : 'View All ✕')
+                    : (currentLang === 'hi' ? `पूरा देखें (${apprenticeJobsList.length}) ➔` : `View All (${apprenticeJobsList.length}) ➔`)}
+                </button>
               </div>
-              <span className="badge-live-sm bg-amber-600 text-white text-3xs font-bold px-2 py-0.5 rounded-full">
-                {displayJobs.length} Live
-              </span>
+
+              <div className="apprentice-scroll-track">
+                {apprenticeJobsList.slice(0, 10).map((appJob) => (
+                  <div
+                    key={appJob.id}
+                    onClick={() => onOpenDetail(appJob)}
+                    className="apprentice-mini-card p-2.5 rounded-xl border cursor-pointer"
+                    style={{
+                      background: '#FFFFFF',
+                      borderColor: '#FDE68A',
+                      boxShadow: '0 2px 6px rgba(245, 158, 11, 0.1)'
+                    }}
+                  >
+                    <div className="flex-between mb-1">
+                      <span className="text-3xs font-bold px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        Direct Merit
+                      </span>
+                      <span className="text-3xs font-bold text-slate-500">
+                        {appJob.posts || '1+ Posts'}
+                      </span>
+                    </div>
+                    <h5 className="font-bold text-xs text-slate-900 dark:text-slate-100 leading-snug m-0 line-clamp-2" style={{ minHeight: '32px' }}>
+                      {appJob.dept || appJob.title}
+                    </h5>
+                    <div className="flex-between mt-2 pt-1.5 border-top text-3xs" style={{ borderColor: 'rgba(253, 230, 138, 0.6)' }}>
+                      <span className="text-amber-800 font-bold">
+                        💰 ₹7k-12.5k
+                      </span>
+                      <span className="text-primary font-bold">
+                        Apply ➔
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 

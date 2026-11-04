@@ -7,13 +7,18 @@ import { cleanJobTitle, formatSafeQualification } from '../utils/textUtils';
 function formatQualificationShort(q, title = '', type = '') {
   const safe = formatSafeQualification(q, title, type);
   const clean = String(safe).trim();
-  if (/^12th/i.test(clean)) return '12th Pass';
-  if (/^10th/i.test(clean)) return '10th Pass';
-  if (/^iti/i.test(clean)) return 'ITI Pass';
-  if (/^diploma/i.test(clean)) return 'Diploma';
-  if (/^graduate/i.test(clean) || /graduation/i.test(clean)) return 'Any Graduate';
-  if (/^b\.?tech/i.test(clean)) return 'B.Tech / B.E';
-  if (/any\s*degree/i.test(clean)) return 'Any Degree';
+  const lower = `${clean} ${title} ${type}`.toLowerCase();
+
+  if (/\b(mbbs|bds|medical\s*officer|ayush)\b/i.test(lower)) return '🩺 MBBS / BDS';
+  if (/\b(b\.?a\.?\s*ll\.?b|b\.?com\.?\s*ll\.?b|b\.?sc\.?\s*ll\.?b|ll\.?b|ll\.?m|law|advocate|judiciary)\b/i.test(lower)) return '⚖️ Law (LLB)';
+  if (/\b(b\.?a\.?\s*b\.?ed|b\.?sc\.?\s*b\.?ed|b\.?ed|d\.?el\.?ed|b\.?tc|teacher|teaching)\b/i.test(lower)) return '📚 B.Ed / Teaching';
+  if (/\b(iti|fitter|electrician|welder|turner|ncvt|scvt)\b/i.test(lower)) return '⚡ ITI Pass';
+  if (/\b(diploma|polytechnic)\b/i.test(lower)) return '🛠️ Diploma';
+  if (/\b10th\b|matric|high\s*school/i.test(lower)) return '🎓 10th Pass';
+  if (/\b12th\b|intermediate|10\+2/i.test(lower)) return '🎓 12th Pass';
+  if (/b\.?tech|engineering/i.test(lower)) return '💻 B.Tech / Engg';
+  if (/post\s*graduate|mba|masters|m\.sc|m\.com|m\.tech/i.test(lower)) return '💼 Post Graduate';
+  if (/graduate|graduation|any\s*degree/i.test(lower)) return '🎓 Any Graduate';
   if (clean.length > 20) {
     return clean.slice(0, 18) + '...';
   }
@@ -33,55 +38,37 @@ export default function JobCard({ job, onOpenDetail, onOpenApply, isSaved, onTog
   return (
     <div className={`job-card ${sectorBorderClass} mb-3 cursor-pointer`} onClick={() => onOpenDetail(job)}>
       {/* Top Meta Bar */}
-      <div className="job-card-header flex-between mb-1.5">
+      <div className="job-card-header flex-between mb-2">
         <div className="flex-center gap-1.5 flex-wrap">
           <span className={`badge-pill ${isApprentice ? 'badge-apprentice' : (job.category === 'Govt' ? 'badge-govt' : 'badge-private')}`}>
             {isApprentice ? `🛠️ ${t.filterApprentice || 'Apprentice'}` : (job.category === 'Govt' ? `🏛️ ${t.filterGovt}` : `🏢 ${t.filterPrivate}`)}
           </span>
 
           {job.isPersonalizedMatch && (
-            <span
-              className="badge-matched flex-center gap-0.5 text-3xs font-bold"
-              style={{
-                background: '#ECFDF5',
-                color: '#059669',
-                border: '1px solid #A7F3D0',
-                padding: '2px 6px',
-                borderRadius: '4px'
-              }}
-            >
+            <span className="badge-pill badge-matched flex-center gap-1">
               🎯 {currentLang === 'hi' ? 'आपके अनुकूल' : 'For You'}
             </span>
           )}
 
           {hasVideo && (
-            <span
-              className="badge-video-guide flex-center gap-0.5 text-3xs font-bold"
-              style={{
-                background: '#FEE2E2',
-                color: '#DC2626',
-                border: '1px solid #FECACA',
-                padding: '2px 6px',
-                borderRadius: '4px'
-              }}
-            >
-              <PlayCircle size={10} /> Video Guide
+            <span className="badge-pill badge-video-guide flex-center gap-1">
+              <PlayCircle size={11} /> Guide
             </span>
           )}
 
           {job.isComingSoon ? (
-            <span className="badge-coming-soon flex-center gap-0.5">
+            <span className="badge-pill badge-coming-soon flex-center gap-1">
               ⏳ {t.comingSoon || 'Coming Soon'}
             </span>
           ) : (
-            <span className="badge-active-form flex-center gap-0.5">
-              🟢 {t.activeForm || 'Apply Live'}
+            <span className="badge-pill badge-active-form flex-center gap-1">
+              <span className="live-pulse-dot"></span> {t.activeForm || 'Apply Live'}
             </span>
           )}
 
-          {job.isNew && <span className="badge-new-pulse">{t.newBadge}</span>}
+          {job.isNew && <span className="badge-pill badge-new-pulse">🔥 {t.newBadge}</span>}
           {job.isClosingSoon && (
-            <span className="badge-closing-pulse flex-center gap-0.5">
+            <span className="badge-pill badge-closing-pulse flex-center gap-1">
               <Flame size={11} /> {t.closingSoon}
             </span>
           )}
@@ -111,7 +98,7 @@ export default function JobCard({ job, onOpenDetail, onOpenApply, isSaved, onTog
           <Users size={11} /> {job.posts || '1+ Posts'}
         </span>
         <span className="job-pill job-pill-qual text-3xs font-bold">
-          🎓 {formatQualificationShort(job.qualification, job.title, job.type)}
+          {formatQualificationShort(job.qualification, job.title, job.type)}
         </span>
         <span className="job-pill job-pill-state text-3xs font-bold">
           📍 {job.state || 'All India'}
