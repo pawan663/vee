@@ -301,7 +301,9 @@ export default function App() {
 
   // Real-time Multi-Portal Live Sync State (Zero-lag with content hash check)
   const [lastSyncedTime, setLastSyncedTime] = useState(new Date());
+  const [cloudUpdatedTime, setCloudUpdatedTime] = useState(null);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [syncSuccessToast, setSyncSuccessToast] = useState(false);
   const lastSyncHashRef = useRef('');
 
   const syncLiveData = async (isManual = false) => {
@@ -337,9 +339,16 @@ export default function App() {
       }
 
       if (data && data.jobs && Array.isArray(data.jobs)) {
+        if (data.lastUpdated) {
+          setCloudUpdatedTime(new Date(data.lastUpdated));
+        }
+
         const currentHash = `${data.lastUpdated || ''}_${data.jobs?.length || 0}_${data.news?.length || 0}`;
 
-        // Skip heavy deduplication & state updates if data has not changed
+        // Update last synced device time
+        setLastSyncedTime(new Date());
+
+        // Skip heavy deduplication & state updates if data has not changed and not manual
         if (currentHash === lastSyncHashRef.current && !isManual) {
           return;
         }
@@ -359,7 +368,12 @@ export default function App() {
           setLiveNews((prevNews) => deduplicateNews([...data.news, ...prevNews]));
         }
 
-        setLastSyncedTime(new Date(data.lastUpdated || Date.now()));
+        if (isManual) {
+          setSyncSuccessToast(true);
+          setTimeout(() => setSyncSuccessToast(false), 3500);
+        }
+      } else {
+        setLastSyncedTime(new Date());
       }
     } catch (e) {
       console.warn("Live sync error", e);
@@ -676,8 +690,10 @@ export default function App() {
               darkMode={darkMode}
               onToggleDarkMode={() => setDarkMode(!darkMode)}
               lastSyncedTime={lastSyncedTime}
+              cloudUpdatedTime={cloudUpdatedTime}
               onManualSync={() => syncLiveData(true)}
               isSyncing={isSyncing}
+              syncSuccessToast={syncSuccessToast}
               t={t}
             />
           )}
